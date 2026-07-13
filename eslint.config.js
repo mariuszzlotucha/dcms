@@ -1,9 +1,16 @@
 import boundaries from 'eslint-plugin-boundaries';
+import tseslint from 'typescript-eslint';
 
 export default [
+    ...tseslint.configs.recommended,
     {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: ['**/dist/**', '**/node_modules/**'],
+        languageOptions: {
+            parserOptions: {
+                ecmaFeatures: { jsx: true },
+            },
+        },
         plugins: { boundaries },
         settings: {
             'boundaries/elements': [
