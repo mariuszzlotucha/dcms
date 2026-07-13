@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'shared/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig.base.json'
+            web:
+              - 'apps/web/**'
+              - 'shared/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig.base.json'
+
+  api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        working-directory: .
+      - run: npm run lint --workspace=apps/api
+        working-directory: .
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run test
+
+  web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        working-directory: .
+      - run: npm run lint --workspace=apps/web
+        working-directory: .
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run test

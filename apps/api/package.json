@@ -7,7 +7,8 @@
         "build": "nest build",
         "start:prod": "node dist/apps/api/src/app/main.js",
         "test": "jest",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint ."
     },
     "dependencies": {
         "@nestjs/common": "^10.4.0",
