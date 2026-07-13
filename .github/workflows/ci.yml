@@ -27,6 +27,7 @@ jobs:
               - 'package-lock.json'
               - 'tsconfig.base.json'
               - 'eslint.config.js'
+              - '.github/workflows/ci.yml'
             web:
               - 'apps/web/**'
               - 'shared/**'
@@ -34,6 +35,7 @@ jobs:
               - 'package-lock.json'
               - 'tsconfig.base.json'
               - 'eslint.config.js'
+              - '.github/workflows/ci.yml'
 
   api:
     needs: changes
