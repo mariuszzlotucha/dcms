@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "nest start --watch",
         "build": "nest build",
-        "start:prod": "node dist/apps/api/src/main.js",
+        "start:prod": "node dist/apps/api/src/app/main.js",
         "test": "jest",
         "typecheck": "tsc --noEmit"
     },
