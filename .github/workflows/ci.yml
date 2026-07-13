@@ -26,12 +26,14 @@ jobs:
               - 'package.json'
               - 'package-lock.json'
               - 'tsconfig.base.json'
+              - 'eslint.config.js'
             web:
               - 'apps/web/**'
               - 'shared/**'
               - 'package.json'
               - 'package-lock.json'
               - 'tsconfig.base.json'
+              - 'eslint.config.js'
 
   api:
     needs: changes
