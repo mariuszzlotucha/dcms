@@ -2,6 +2,8 @@ import boundaries from 'eslint-plugin-boundaries';
 
 export default [
     {
+        files: ['**/*.ts', '**/*.tsx'],
+        ignores: ['**/dist/**', '**/node_modules/**'],
         plugins: { boundaries },
         settings: {
             'boundaries/elements': [
