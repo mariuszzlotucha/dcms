@@ -33,4 +33,4 @@ description: "DCMS frontend platform/ conventions and component catalog"
 
 `billing`, `sessions`, `api-keys`, `consent`, `legal-acceptance`, `file-storage`, `feature-flags`, `entitlements`, `invitations`, `in-app-notifications`, `data-export`, `audit` — each exports `useX`/`useXMutation`, typed from `shared/contracts/`, never duplicated locally.
 
-Full description: `dcms-frontend-platform-dokumentacja.md`.
+Full description: `docs/dcms-frontend-platform-documentation.md`.

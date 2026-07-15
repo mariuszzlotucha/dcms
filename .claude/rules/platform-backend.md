@@ -53,4 +53,4 @@ description: "DCMS backend platform/ conventions and module catalog"
 | `analytics-ingestion` | product metrics (v2+, build on signal) | — | — |
 | `backup-dr` | backup/DR, encrypted (v2+, build on signal) | — | `backup.completed` |
 
-Full event payloads: `apps/api/src/platform/events.ts`. Full "does NOT do" description per module: `dcms-platform-dokumentacja.md`.
+Full event payloads: `apps/api/src/platform/events.ts`. Full "does NOT do" description per module: `docs/dcms-platform-documentation.md`.

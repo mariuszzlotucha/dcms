@@ -37,4 +37,4 @@ description: "DCMS frontend domain/ conventions and module catalog"
 5. Realtime? → mapping in `domain/<module>/realtime/`.
 6. Test via `platform/client/testing/render-with-providers`.
 
-Full description: `dcms-frontend-domain-dokumentacja.md`.
+Full description: `docs/dcms-frontend-domain-documentation.md`.

@@ -6,12 +6,13 @@ Monorepo: `apps/api` (NestJS backend) + `apps/web` (React/Vite frontend) + `shar
 
 | Task type | Auto-loaded rule | Full reference (read on request) |
 |---|---|---|
-| `apps/api/src/platform/**` | `.claude/rules/platform-backend.md` | `dcms-platform-dokumentacja.md` |
-| `apps/api/src/domain/**` | `.claude/rules/domain-backend.md` | `dcms-architektura-domenowa.md` |
-| `apps/web/src/platform/**` | `.claude/rules/platform-frontend.md` | `dcms-frontend-platform-dokumentacja.md` |
-| `apps/web/src/domain/**` | `.claude/rules/domain-frontend.md` | `dcms-frontend-domain-dokumentacja.md` |
-| Build order / what's next | — | `dcms-platform-plan-i-dokumentacja.md`, `dcms-domain-plan-developmentu.md`, `dcms-frontend-plan-developmentu.md` |
-| Security posture | — | `dcms-platform-security-i-hardening.md` |
+| `apps/api/src/platform/**` | `.claude/rules/platform-backend.md` | `docs/dcms-platform-documentation.md` |
+| `apps/api/src/domain/**` | `.claude/rules/domain-backend.md` | `docs/dcms-domain-architecture.md` |
+| `apps/web/src/platform/**` | `.claude/rules/platform-frontend.md` | `docs/dcms-frontend-platform-documentation.md` |
+| `apps/web/src/domain/**` | `.claude/rules/domain-frontend.md` | `docs/dcms-frontend-domain-documentation.md` |
+| Frontend working rules (platform vs domain criteria, state, testing) | — | `docs/dcms-frontend-development-guidelines.md` |
+| Build order / what's next | — | `docs/dcms-platform-development-plan.md`, `docs/dcms-domain-development-plan.md`, `docs/dcms-frontend-development-plan.md` |
+| Security posture | — | `docs/dcms-security-hardening.md` |
 
 Plans and phasing docs are intentionally NOT auto-loaded — read them explicitly when asked "what's next" or "build the next module." They change too often to live in memory.
 

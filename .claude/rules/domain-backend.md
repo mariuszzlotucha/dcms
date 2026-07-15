@@ -26,4 +26,4 @@ description: "DCMS backend domain/ conventions and module catalog"
 | `notifications-reminders` | reminder logic (when/what) | `contracts`, `esignature` | `reminder.scheduled` |
 | `integrations` | CRM, Google Drive, MS365 | `contracts` | `integration.syncCompleted` |
 
-Full payloads: `apps/api/src/domain/events.ts`. Full architecture (what each module does/doesn't do): `dcms-architektura-domenowa.md`.
+Full payloads: `apps/api/src/domain/events.ts`. Full architecture (what each module does/doesn't do): `docs/dcms-domain-architecture.md`.

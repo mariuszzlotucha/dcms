@@ -21,7 +21,7 @@ dcms/
 │   └── web/     → React frontend (Vite, TanStack Query, Zustand)
 ├── shared/
 │   └── contracts/  → single source of truth for DTOs (zod), used by both apps
-└── ...
+└── docs/        → full architecture, module catalogs, and development conventions
 ```
 
 **Core pattern — `platform/` vs `domain/`, mirrored in both apps:**
@@ -59,6 +59,10 @@ npm run dev:web       # apps/web  — Vite dev server
 ```
 
 See `apps/api/.env.example` for required environment variables.
+
+## Documentation
+
+Full architecture, module catalogs, and development conventions for both the backend (`platform`/`domain`) and the frontend live in [`docs/`](./docs).
 
 ## Security
 
