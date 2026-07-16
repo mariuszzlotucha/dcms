@@ -11,7 +11,8 @@
     "paths": {
       "@app/*": ["src/app/*"],
       "@platform/*": ["src/platform/*"],
-      "@domain/*": ["src/domain/*"]
+      "@domain/*": ["src/domain/*"],
+      "@": ["src/events"]
     },
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

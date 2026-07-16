@@ -1,0 +1,43 @@
+export const DOMAIN_EVENTS = {
+    CONTRACT_CREATED: 'contract.created',
+    CONTRACT_UPDATED: 'contract.updated',
+    CONTRACT_VERSION_CREATED: 'contract.versionCreated',
+    CONTRACT_STATUS_CHANGED: 'contract.statusChanged',
+    CONTRACT_SUBMITTED_FOR_APPROVAL: 'contract.submittedForApproval',
+    CONTRACT_ARCHIVED: 'contract.archived',
+    CONTRACT_DELETED: 'contract.deleted',
+    TEMPLATE_CREATED: 'template.created',
+    TEMPLATE_UPDATED: 'template.updated',
+    TEMPLATE_PUBLISHED: 'template.published',
+    TEMPLATE_CLAUSE_LIBRARY_UPDATED: 'template.clauseLibraryUpdated',
+    APPROVAL_REQUESTED: 'approval.requested',
+    APPROVAL_GRANTED: 'approval.granted',
+    APPROVAL_REJECTED: 'approval.rejected',
+    NEGOTIATION_REVISION_REQUESTED: 'negotiation.revisionRequested',
+    NEGOTIATION_ROLE_ASSIGNED: 'negotiation.roleAssigned',
+    ESIGNATURE_REQUESTED: 'esignature.requested',
+    ESIGNATURE_SENT: 'esignature.sent',
+    ESIGNATURE_COMPLETED: 'esignature.completed',
+    ESIGNATURE_DECLINED: 'esignature.declined',
+    ESIGNATURE_EXPIRED: 'esignature.expired',
+    ACCESS_GRANTED: 'access.granted',
+    ACCESS_REVOKED: 'access.revoked',
+    COLLABORATION_PARTICIPANT_INVITED: 'collaboration.participantInvited',
+    COLLABORATION_COMMENT_ADDED: 'collaboration.commentAdded',
+    COLLABORATION_SESSION_STARTED: 'collaboration.sessionStarted',
+    COMPLIANCE_REPORT_GENERATED: 'complianceReport.generated',
+    COMPLIANCE_REPORT_EXPORTED: 'complianceReport.exported',
+    ANALYTICS_METRIC_UPDATED: 'analytics.metricUpdated',
+    ANALYTICS_REPORT_GENERATED: 'analytics.reportGenerated',
+    REMINDER_SCHEDULED: 'reminder.scheduled',
+    REMINDER_SENT: 'reminder.sent',
+    NOTIFICATION_DISPATCHED: 'notification.dispatched',
+    INTEGRATION_SYNC_REQUESTED: 'integration.syncRequested',
+    INTEGRATION_SYNC_COMPLETED: 'integration.syncCompleted',
+    INTEGRATION_SYNC_FAILED: 'integration.syncFailed',
+} as const;
+
+export interface DomainEventPayloadMap {
+
+}
+
