@@ -4,6 +4,12 @@ import tseslint from 'typescript-eslint';
 export default [
     ...tseslint.configs.recommended,
     {
+        files: ['apps/api/src/platform/**/*.config.ts'],
+        rules: {
+            '@typescript-eslint/no-explicit-any': 'off',
+        },
+    },
+    {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: ['**/dist/**', '**/node_modules/**'],
         languageOptions: {

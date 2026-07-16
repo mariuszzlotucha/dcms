@@ -18,7 +18,6 @@ async function bootstrap() {
     ],
   });
 
-  app.enableCors({ origin: configService.get('CORS_ORIGIN', { infer: true }) });
   app.enableShutdownHooks();
 
   const port = configService.get('PORT', { infer: true });

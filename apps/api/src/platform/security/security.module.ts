@@ -11,15 +11,12 @@ import {
   SecurityModuleAsyncOptions,
   SecurityModuleConfig,
 } from './security.config';
-import { HelmetMiddleware } from './middleware/helmet.middleware';
-import { CsrfGuard } from './guards/csrf.guard';
-import { StrictValidationPipe } from './pipes/strict-validation.pipe';
-import { ValidationRejectionFilter } from './filters/validation-rejection.filter';
-import { FieldEncryptionService } from './encryption/field-encryption.service';
+import { CsrfGuard } from './guards/';
+import { StrictValidationPipe } from './pipes/';
+import { ValidationRejectionFilter } from './filters';
+import { FieldEncryptionService } from './encryption';
+import { CorsMiddleware, HelmetMiddleware } from './middleware';
 
-// APP_PIPE / APP_GUARD / APP_FILTER register globally even though they're
-// declared inside this module — that's how Nest global providers work,
-// so consumers don't have to add the pipe/guard per controller.
 const coreProviders: Provider[] = [
   HelmetMiddleware,
   FieldEncryptionService,
@@ -31,8 +28,9 @@ const coreProviders: Provider[] = [
 @Module({})
 export class SecurityModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Nest 11 / Express 5: replace '*' with '{*splat}' if '*' stops matching.
     consumer.apply(HelmetMiddleware).forRoutes('*');
+    consumer.apply(CorsMiddleware, HelmetMiddleware).forRoutes('*');
+
   }
 
   static forRoot(config: SecurityModuleConfig): DynamicModule {

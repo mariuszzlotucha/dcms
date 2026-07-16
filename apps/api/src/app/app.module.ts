@@ -28,10 +28,10 @@ import { SecurityModule } from '@platform/security';
     HealthModule.forRoot(),
     SecurityModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        cors: { allowedOrigins: config.get<string>('CORS_ORIGINS', '').split(',').filter(Boolean) },
-        csrf: { enabled: false }, // włącz + podaj secret, gdy dojdą sesje ciasteczkowe
-        encryption: { masterKey: config.getOrThrow('FIELD_ENCRYPTION_KEY') },
+      useFactory: (configService: ConfigService<AppConfig, true>) => ({
+        cors: { allowedOrigins: [configService.get('CORS_ORIGIN', { infer: true })] },
+        csrf: { enabled: false },
+        encryption: { masterKey: configService.get('JWT_SECRET', { infer: true }) },
       }),
     }),
 

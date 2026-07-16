@@ -7,7 +7,7 @@ export const configSchema = z.object({
 
 //   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
 
-//   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
 
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),

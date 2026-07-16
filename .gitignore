@@ -25,3 +25,6 @@ coverage/
 # Vite
 apps/web/dist/
 apps/web/.vite/
+
+**/copyfiles.js
+**/output.txt
