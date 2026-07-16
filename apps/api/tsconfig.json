@@ -7,12 +7,21 @@
     "target": "ES2022",
     "rootDir": "../..",
     "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@platform/*": ["src/platform/*"],
+      "@domain/*": ["src/domain/*"]
+    },
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "declaration": true,
     "sourceMap": true,
     "incremental": true
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   },
   "include": ["src/**/*.ts", "../../shared/**/*.ts"],
   "exclude": ["node_modules", "dist", "test"]
