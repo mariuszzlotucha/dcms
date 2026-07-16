@@ -6,6 +6,7 @@ import type { AppConfig } from './config/config.schema';
 import { HealthModule } from '@platform/health/health.module';
 import { LoggingModule } from '@platform/logging/logging.module';
 import { SecurityModule } from '@platform/security';
+import { SecretsModule } from '@platform/secrets';
 
 @Module({
   imports: [
@@ -26,6 +27,16 @@ import { SecurityModule } from '@platform/security';
       },
     }),
     HealthModule.forRoot(),
+    SecretsModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<AppConfig, true>) => ({
+        jwtSigningKey: configService.get('JWT_SECRET', { infer: true }),
+        encryptionMasterKey: configService.get('JWT_SECRET', { infer: true }),
+        providers: {
+          stripe: configService.get('STRIPE_SECRET_KEY', { infer: true }) ?? '',
+        },
+      }),
+    }),
     SecurityModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService<AppConfig, true>) => ({

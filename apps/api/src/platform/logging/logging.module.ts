@@ -45,7 +45,7 @@ export class LoggingModule {
         LoggerModule.forRootAsync({
           imports: options.imports,
           inject: options.inject ?? [],
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: unknown[]) => {
             const config = await options.useFactory(...args);
             return { pinoHttp: buildPinoHttpOptions(config) };
           },
