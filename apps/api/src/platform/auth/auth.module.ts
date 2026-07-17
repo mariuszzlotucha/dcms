@@ -9,14 +9,16 @@ import {
 } from './auth.config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { User } from './entities';
-import { GoogleStrategy , JwtStrategy, LinkedInStrategy} from './strategies';
+import { User } from './entities/user.entity';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { LinkedInStrategy } from './strategies/linkedin.strategy';
 
 // JwtModule deliberately registered without options — the signing key comes
 // from SecretsService and is passed explicitly at sign/verify time.
 const coreImports = [
   TypeOrmModule.forFeature([User]),
-  PassportModule,
+  PassportModule.register({ session: false }),
   JwtModule.register({}),
 ];
 

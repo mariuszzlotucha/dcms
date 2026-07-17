@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -18,6 +19,7 @@ export class User {
   passwordHash!: string | null;
 
   // Nullable until the tenants module exists.
+  @Index()
   @Column({ type: 'uuid', nullable: true })
   tenantId!: string | null;
 

@@ -8,6 +8,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as argon2 from 'argon2';
+import { randomBytes } from 'crypto';
 import { QueryFailedError, Repository } from 'typeorm';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
 import { SecretsService } from '../secrets/secrets.service';
@@ -79,6 +80,16 @@ export class AuthService {
     return tokens;
   }
 
+  // Deliberately a Promise, not a resolved string: class fields can't
+  // top-level await, and resolving it in onModuleInit would add lifecycle
+  // coupling for zero gain. Always consumed via `await this.dummyHashPromise`.
+  // Verified against when the user does not exist, so /auth/login takes
+  // the same time either way — otherwise response timing reveals which
+  // emails have accounts (user enumeration).
+  private readonly dummyHashPromise = argon2.hash(
+    randomBytes(32).toString('hex'),
+  );
+
   async login(
     rawEmail: string,
     password: string,
@@ -86,9 +97,13 @@ export class AuthService {
   ): Promise<AuthTokens> {
     const email = normalizeEmail(rawEmail);
     const user = await this.users.findOne({ where: { email } });
-    const valid =
-      user?.passwordHash != null &&
-      (await argon2.verify(user.passwordHash, password));
+
+    let valid = false;
+    if (user?.passwordHash != null) {
+      valid = await argon2.verify(user.passwordHash, password);
+    } else {
+      await argon2.verify(await this.dummyHashPromise, password);
+    }
 
     if (!user || !valid) {
       this.eventEmitter.emit(PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED, {

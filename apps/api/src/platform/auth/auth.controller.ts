@@ -9,19 +9,23 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { Request } from 'express';
 import { AuthService, OauthProfile } from './auth.service';
-import { JwtAuthGuard, OauthGuard } from './guards'
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { OauthGuard } from './guards/oauth.guard';
 import { AuthenticatedUser } from './strategies/jwt.strategy';
 
 export class RegisterDto {
   @IsEmail()
   email!: string;
 
-  // No strength rules on purpose — that's password-policy (Phase 4).
+  // MaxLength is a DoS cap (argon2 cost scales with input size), NOT a
+  // strength policy — minimum length/complexity stays with password-policy
+  // (Phase 4).
   @IsString()
   @IsNotEmpty()
+  @MaxLength(128)
   password!: string;
 }
 
@@ -31,6 +35,7 @@ export class LoginDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(128)
   password!: string;
 }
 

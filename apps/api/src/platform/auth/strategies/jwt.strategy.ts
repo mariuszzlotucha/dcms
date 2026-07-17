@@ -14,7 +14,18 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(secrets: SecretsService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: secrets.getJwtSigningKey(),
+      // secretOrKeyProvider (evaluated per request), not secretOrKey
+      // (evaluated once at bootstrap): when secrets implements live
+      // rotation, verification picks up the new key without a restart —
+      // same property the signing side already has (AuthService calls
+      // getJwtSigningKey() on every sign).
+      secretOrKeyProvider: (
+        _request: unknown,
+        _rawJwtToken: unknown,
+        done: (err: Error | null, secret?: string) => void,
+      ) => {
+        done(null, secrets.getJwtSigningKey());
+      },
     });
   }
 
