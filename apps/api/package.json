@@ -5,9 +5,10 @@
     "scripts": {
         "dev": "nest start --watch",
         "build": "nest build && tsc-alias -p tsconfig.json",
-        "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/data-source.ts",
-        "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
-        "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
+        "typeorm": "typeorm-ts-node-commonjs -d src/data-source.ts",
+        "migration:generate": "npm run typeorm -- migration:generate",
+        "migration:run": "npm run typeorm -- migration:run",
+        "migration:revert": "npm run typeorm -- migration:revert",
         "start:prod": "node dist/apps/api/src/app/main.js",
         "test": "jest --passWithNoTests",
         "typecheck": "tsc --noEmit",
