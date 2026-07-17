@@ -5,6 +5,9 @@
     "scripts": {
         "dev": "nest start --watch",
         "build": "nest build && tsc-alias -p tsconfig.json",
+        "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/data-source.ts",
+        "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
+        "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
         "start:prod": "node dist/apps/api/src/app/main.js",
         "test": "jest --passWithNoTests",
         "typecheck": "tsc --noEmit",
@@ -26,6 +29,7 @@
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.6",
         "csrf-csrf": "^3.2.2",
+        "dotenv": "^16.4.0",
         "eslint-plugin-boundaries": "7.0.2",
         "helmet": "^8.3.0",
         "nestjs-pino": "^4.6.1",
@@ -56,6 +60,8 @@
         "ts-jest": "^29.2.0",
         "tsc-alias": "^1.8.10",
         "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.5.0"
+        "typescript": "^5.5.0",
+        "ts-node": "^10.9.2"
+
     }
 }
