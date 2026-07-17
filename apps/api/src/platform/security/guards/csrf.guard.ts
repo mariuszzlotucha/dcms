@@ -21,7 +21,17 @@ import {
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-
+/**
+ * Double-submit-cookie CSRF protection (csrf-csrf). Only relevant for
+ * cookie-based sessions — when csrf.enabled is false (e.g. pure Bearer
+ * token API) the guard is a no-op pass-through, so it can safely be
+ * registered globally via APP_GUARD regardless of config.
+ *
+ * RUNTIME PREREQUISITE when enabled: cookie-parser must be registered in
+ * main.ts (`app.use(cookieParser())`) BEFORE the app starts handling
+ * requests — csrf-csrf reads its token from req.cookies, which does not
+ * exist without it, and every state-changing request would be rejected.
+ */
 @Injectable()
 export class CsrfGuard implements CanActivate {
   private readonly logger = new Logger(CsrfGuard.name);
@@ -61,9 +71,9 @@ export class CsrfGuard implements CanActivate {
       reason: 'csrf',
       path: req.path,
       ip: req.ip ?? '',
-    };
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED];
     this.logger.warn({ msg: 'Request rejected by CSRF guard', ...event });
-    this.eventEmitter.emit(PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED, event satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED]);
+    this.eventEmitter.emit(PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED, event);
 
     throw new ForbiddenException('Invalid CSRF token');
   }

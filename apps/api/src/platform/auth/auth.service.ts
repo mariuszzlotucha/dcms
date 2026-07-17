@@ -8,7 +8,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as argon2 from 'argon2';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
 import { SecretsService } from '../secrets/secrets.service';
 import {
@@ -31,6 +31,23 @@ export interface OauthProfile {
   email: string | null;
 }
 
+const PG_UNIQUE_VIOLATION = '23505';
+
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    error instanceof QueryFailedError &&
+    (error.driverError as { code?: string } | undefined)?.code ===
+      PG_UNIQUE_VIOLATION
+  );
+}
+
+// Emails are normalized on every write and lookup so 'User@X.pl' and
+// 'user@x.pl' cannot become two accounts (varchar unique is case-sensitive
+// in Postgres).
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -41,25 +58,33 @@ export class AuthService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async register(email: string, password: string): Promise<AuthTokens> {
-    const existing = await this.users.findOne({ where: { email } });
-    if (existing) {
-      throw new ConflictException('Email is already registered');
+  async register(rawEmail: string, password: string): Promise<AuthTokens> {
+    const email = normalizeEmail(rawEmail);
+    const passwordHash = await argon2.hash(password);
+
+    let user: User;
+    try {
+      user = await this.users.save(this.users.create({ email, passwordHash }));
+    } catch (error) {
+      // No pre-check findOne: two concurrent registrations would both pass
+      // it anyway, so the unique index is the only reliable arbiter.
+      if (isUniqueViolation(error)) {
+        throw new ConflictException('Email is already registered');
+      }
+      throw error;
     }
 
-    const user = await this.users.save(
-      this.users.create({ email, passwordHash: await argon2.hash(password) }),
-    );
-
+    const tokens = this.issueTokens(user);
     this.emitRegistered(user);
-    return this.issueTokens(user);
+    return tokens;
   }
 
   async login(
-    email: string,
+    rawEmail: string,
     password: string,
     ip: string,
   ): Promise<AuthTokens> {
+    const email = normalizeEmail(rawEmail);
     const user = await this.users.findOne({ where: { email } });
     const valid =
       user?.passwordHash != null &&
@@ -74,8 +99,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    const tokens = this.issueTokens(user);
     this.emitLoggedIn(user, 'password');
-    return this.issueTokens(user);
+    return tokens;
   }
 
   async oauthLogin(
@@ -94,16 +120,32 @@ export class AuthService {
       );
     }
 
-    let user = await this.users.findOne({ where: { email: profile.email } });
+    const email = normalizeEmail(profile.email);
+    let user = await this.users.findOne({ where: { email } });
+    let created = false;
+
     if (!user) {
-      user = await this.users.save(
-        this.users.create({ email: profile.email, passwordHash: null }),
-      );
-      this.emitRegistered(user);
+      try {
+        user = await this.users.save(
+          this.users.create({ email, passwordHash: null }),
+        );
+        created = true;
+      } catch (error) {
+        // Two concurrent callbacks for a brand-new user: the loser of the
+        // insert race recovers by loading the row the winner just created.
+        if (!isUniqueViolation(error)) {
+          throw error;
+        }
+        user = await this.users.findOneOrFail({ where: { email } });
+      }
     }
 
+    const tokens = this.issueTokens(user);
+    if (created) {
+      this.emitRegistered(user);
+    }
     this.emitLoggedIn(user, method);
-    return this.issueTokens(user);
+    return tokens;
   }
 
   // tenantId contract in PlatformEventPayloadMap is a non-null string

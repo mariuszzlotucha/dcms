@@ -28,7 +28,6 @@ const coreProviders: Provider[] = [
 @Module({})
 export class SecurityModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HelmetMiddleware).forRoutes('*');
     consumer.apply(CorsMiddleware, HelmetMiddleware).forRoutes('*');
 
   }

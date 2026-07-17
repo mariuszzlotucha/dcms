@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   createCipheriv,
   createDecipheriv,
-  createHash,
+  hkdfSync,
   randomBytes,
 } from 'crypto';
 import {
@@ -15,17 +15,35 @@ const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12; // recommended IV size for GCM
 const VERSION = 'v1';
 
-
+/**
+ * Field-level encryption for particularly sensitive entity fields.
+ * AES-256-GCM (authenticated encryption) via built-in Node crypto.
+ *
+ * Payload format: "v1.<iv b64>.<authTag b64>.<ciphertext b64>".
+ * The version prefix exists so a future key rotation / algorithm change
+ * (owned by `secrets`, not this module) can decrypt old payloads.
+ */
 @Injectable()
 export class FieldEncryptionService {
   private readonly key?: Buffer;
 
   constructor(@Inject(SECURITY_MODULE_CONFIG) config: SecurityModuleConfig) {
     if (config.encryption?.masterKey) {
-
-      this.key = createHash('sha256')
-        .update(config.encryption.masterKey)
-        .digest();
+      // HKDF, not a bare hash: proper KDF with domain separation (the same
+      // master key can safely derive other keys later with different info).
+      // NOTE: HKDF does not stretch low-entropy inputs — masterKey MUST be
+      // a high-entropy random value (e.g. 32+ bytes from a CSPRNG), which
+      // config.schema.ts should enforce (min length). Rotation/key-ring is
+      // still `secrets`' future job; the v1 payload prefix is the hook for it.
+      this.key = Buffer.from(
+        hkdfSync(
+          'sha256',
+          config.encryption.masterKey,
+          'platform-field-encryption',
+          'aes-256-gcm-v1',
+          32,
+        ),
+      );
     }
   }
 
