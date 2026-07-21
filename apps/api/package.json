@@ -52,7 +52,7 @@
         "@nestjs/testing": "^11.1.28",
         "@types/cookie-parser": "^1.4.10",
         "@types/cors": "^2.8.19",
-        "@types/node": "^22.0.0",
+        "@types/node": "^26.1.1",
         "@types/passport-google-oauth20": "^2.0.17",
         "@types/passport-jwt": "^4.0.1",
         "@types/passport-linkedin-oauth2": "^1.5.6",
