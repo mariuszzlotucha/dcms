@@ -15,6 +15,7 @@ import { RbacModule } from '@platform/rbac';
 import { TenantsModule } from '@platform/tenants';
 import { ApiKeysModule } from '@platform/api-keys';
 import { RateLimitingModule } from '@platform/rate-limiting';
+import { IdempotencyModule } from '@platform/idempotency';
 
 @Module({
   imports: [
@@ -105,6 +106,7 @@ import { RateLimitingModule } from '@platform/rate-limiting';
       ttlMs: 60_000,
       limit: 100,
     }),
+    IdempotencyModule.forRoot({ recordTtlHours: 24 })
   ],
 })
 export class AppModule { }
