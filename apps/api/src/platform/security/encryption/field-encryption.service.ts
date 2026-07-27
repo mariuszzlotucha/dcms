@@ -86,11 +86,20 @@ export class FieldEncryptionService {
     ]).toString('utf8');
   }
 
-  /** Encrypts (in place) every property marked with @EncryptedField(). */
+  /**
+   * Encrypts (in place) every property marked with @EncryptedField().
+   * Idempotent: values already carrying the version prefix are skipped,
+   * so calling this twice (e.g. create flow + update flow touching the
+   * same entity instance) cannot double-encrypt and brick decryption.
+   */
   encryptFields<T extends object>(entity: T): T {
     for (const field of getEncryptedFields(entity)) {
       const value = (entity as Record<string | symbol, unknown>)[field];
-      if (typeof value === 'string' && value.length > 0) {
+      if (
+        typeof value === 'string' &&
+        value.length > 0 &&
+        !value.startsWith(`${VERSION}.`)
+      ) {
         (entity as Record<string | symbol, unknown>)[field] =
           this.encrypt(value);
       }

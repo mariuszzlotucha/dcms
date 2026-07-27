@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Logger, RequestMethod } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger as PinoLogger } from 'nestjs-pino';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import type { AppConfig } from './config/config.schema';
 import {
@@ -24,6 +25,11 @@ async function bootstrap() {
   // true — trusting arbitrary hops would let clients spoof their IP via
   // X-Forwarded-For.
   app.set('trust proxy', 1);
+
+  // Registered now, while CSRF is still disabled: flipping csrf.enabled in
+  // config must be the ONLY step needed to activate protection — not a
+  // scavenger hunt for a missing middleware.
+  app.use(cookieParser());
 
   app.enableCors(
     createCorsOptions(app.get<SecurityModuleConfig>(SECURITY_MODULE_CONFIG)),

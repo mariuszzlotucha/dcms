@@ -21,11 +21,10 @@ import { AuthModule } from '@platform/auth/auth.module';
       useFactory: (configService: ConfigService<AppConfig, true>) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL', { infer: true }),
-        // ssl: true verifies the server certificate (Neon presents valid
-        // certs). rejectUnauthorized: false would leave the connection
-        // open to MITM — never disable verification to "fix" SSL errors;
-        // fix the connection string / CA instead.
-        ssl: true,
+        // Verified SSL by default; DATABASE_SSL=false only for local
+        // Postgres without SSL. Never rejectUnauthorized: false — that
+        // leaves the connection open to MITM.
+        ssl: configService.get('DATABASE_SSL', { infer: true }),
         autoLoadEntities: true,
         synchronize: false,
       }),
@@ -68,10 +67,10 @@ import { AuthModule } from '@platform/auth/auth.module';
         secretsService: SecretsService,
         configService: ConfigService<AppConfig, true>,
       ) => ({
-        // CORS_ORIGIN comes through the zod-validated config (single source
-        // of the default + .url() validation) — never raw process.env.
+        // CORS_ORIGIN is a zod-validated, comma-separated list — already a
+        // string[] after the schema transform.
         cors: {
-          allowedOrigins: [configService.get('CORS_ORIGIN', { infer: true })],
+          allowedOrigins: configService.get('CORS_ORIGIN', { infer: true }),
         },
         csrf: { enabled: false },
         encryption: { masterKey: secretsService.getEncryptionMasterKey() },
