@@ -22,6 +22,7 @@ import { ConsentModule } from '@platform/consent';
 import { WebhooksInboundModule } from '@platform/webhooks-inbound';
 import { BillingModule } from '@platform/billing';
 import { UsageMeteringModule } from '@platform/usage-metering';
+import { FeatureFlagsModule } from '@platform/feature-flags';
 
 @Module({
   imports: [
@@ -164,6 +165,11 @@ import { UsageMeteringModule } from '@platform/usage-metering';
       limitsByPlan: {
         starter: { 'contracts.create': 10 },
         pro: { 'contracts.create': 200 },
+      },
+    }),
+    FeatureFlagsModule.forRoot({
+      defaultFlags: {
+        beta_dashboard: false,
       },
     }),
   ],
