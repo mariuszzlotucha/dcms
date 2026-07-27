@@ -18,6 +18,7 @@ import { RateLimitingModule } from '@platform/rate-limiting';
 import { IdempotencyModule } from '@platform/idempotency';
 import { FileStorageModule } from '@platform/file-storage';
 import { NotificationsModule } from '@platform/notifications';
+import { ConsentModule } from '@platform/consent';
 
 @Module({
   imports: [
@@ -47,7 +48,7 @@ import { NotificationsModule } from '@platform/notifications';
       },
     }),
     HealthModule.forRoot(),
-   SecretsModule.forRootAsync({
+    SecretsModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService<AppConfig, true>) => {
         const stripeKey = configService.get('STRIPE_SECRET_KEY', {
@@ -132,6 +133,13 @@ import { NotificationsModule } from '@platform/notifications';
     }),
     NotificationsModule.forRoot({
       fromAddress: 'DCMS <noreply@dcms.app>',
+    }),
+    ConsentModule.forRoot({
+      currentVersions: {
+        terms_of_service: '2026-01-15',
+        marketing_emails: '2026-01-15',
+        data_processing: '2026-01-15',
+      },
     }),
   ],
 })
