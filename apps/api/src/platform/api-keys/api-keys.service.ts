@@ -29,7 +29,7 @@ export class ApiKeysService {
 
     this.eventEmitter.emit(
       PLATFORM_EVENTS.API_KEY_CREATED,
-      { id: apiKey.id, tenantId } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.API_KEY_CREATED],
+      { tenantId, keyId: apiKey.id, scopes: apiKey.scopes } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.API_KEY_CREATED],
     );
 
     return { id: apiKey.id, rawKey };
@@ -52,7 +52,7 @@ export class ApiKeysService {
 
     this.eventEmitter.emit(
       PLATFORM_EVENTS.API_KEY_REVOKED,
-      { id: apiKey.id, tenantId } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.API_KEY_REVOKED],
+      { tenantId, keyId: apiKey.id } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.API_KEY_REVOKED],
     );
   }
 }

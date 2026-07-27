@@ -69,7 +69,12 @@ export class FileStorageService {
 
     this.eventEmitter.emit(
       PLATFORM_EVENTS.FILE_UPLOADED,
-      { id: fileRecord.id, tenantId } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FILE_UPLOADED],
+      {
+        tenantId,
+        fileId: fileRecord.id,
+        sizeBytes: fileRecord.sizeBytes,
+        mimeType: fileRecord.mimeType,
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FILE_UPLOADED],
     );
 
     return fileRecord;
@@ -93,7 +98,7 @@ export class FileStorageService {
 
     this.eventEmitter.emit(
       PLATFORM_EVENTS.FILE_DELETED,
-      { id: fileId, tenantId } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FILE_DELETED],
+      { tenantId, fileId } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FILE_DELETED],
     );
   }
 

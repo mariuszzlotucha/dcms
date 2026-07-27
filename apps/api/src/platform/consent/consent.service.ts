@@ -64,7 +64,7 @@ export class ConsentService {
 
     this.eventEmitter.emit(
       PLATFORM_EVENTS.CONSENT_REVOKED,
-      { userId, tenantId, consentType, version } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CONSENT_REVOKED],
+      { tenantId, userId, consentType } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CONSENT_REVOKED],
     );
 
     return record;

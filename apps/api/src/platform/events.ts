@@ -57,7 +57,7 @@ export interface PlatformEventPayloadMap {
     [PLATFORM_EVENTS.NOTIFICATION_FAILED]: { tenantId: string; reason: string };
     [PLATFORM_EVENTS.CONSENT_GRANTED]: { tenantId: string; userId: string; consentType: string; version: string };
     [PLATFORM_EVENTS.CONSENT_REVOKED]: { tenantId: string; userId: string; consentType: string };
-    [PLATFORM_EVENTS.WEBHOOK_RECEIVED]: { provider: string; eventType: string; verified: boolean };
+    [PLATFORM_EVENTS.WEBHOOK_RECEIVED]: { provider: string; eventType: string; verified: boolean; payload: unknown };
     [PLATFORM_EVENTS.BILLING_SUBSCRIPTION_UPDATED]: { tenantId: string; plan: string; status: string };
     [PLATFORM_EVENTS.USAGE_LIMIT_EXCEEDED]: { tenantId: string; metric: string; limit: number; current: number };
     [PLATFORM_EVENTS.FEATURE_FLAG_TOGGLED]: { tenantId: string; flagKey: string; enabled: boolean };
@@ -79,4 +79,3 @@ export interface PlatformEventPayloadMap {
     [PLATFORM_EVENTS.BACKUP_COMPLETED]: { backupId: string; sizeBytes: number; encrypted: boolean };
     [PLATFORM_EVENTS.BACKUP_FAILED]: { reason: string };
 }
-

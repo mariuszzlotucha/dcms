@@ -19,6 +19,8 @@ import { IdempotencyModule } from '@platform/idempotency';
 import { FileStorageModule } from '@platform/file-storage';
 import { NotificationsModule } from '@platform/notifications';
 import { ConsentModule } from '@platform/consent';
+import { WebhooksInboundModule } from '@platform/webhooks-inbound';
+import { BillingModule } from '@platform/billing';
 
 @Module({
   imports: [
@@ -63,6 +65,8 @@ import { ConsentModule } from '@platform/consent';
         const resendKey = configService.get('RESEND_API_KEY', {
           infer: true,
         });
+        const stripeWebhookSecret = configService.get('STRIPE_WEBHOOK_SECRET', { infer: true });
+
         return {
           jwtSigningKey: configService.get('JWT_SECRET', { infer: true }),
           // Separate env vars on purpose: rotating JWT_SECRET is cheap
@@ -78,6 +82,7 @@ import { ConsentModule } from '@platform/consent';
             ...(s3AccessKeyId ? { s3AccessKeyId } : {}),
             ...(s3SecretAccessKey ? { s3SecretAccessKey } : {}),
             ...(resendKey ? { resend: resendKey } : {}),
+              ...(stripeWebhookSecret ? { stripeWebhookSecret } : {}),
           },
         };
       },
@@ -140,6 +145,18 @@ import { ConsentModule } from '@platform/consent';
         marketing_emails: '2026-01-15',
         data_processing: '2026-01-15',
       },
+    }),
+    WebhooksInboundModule,
+    BillingModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<AppConfig, true>) => ({
+        plans: {
+          starter: { stripePriceId: configService.get('STRIPE_PRICE_STARTER', { infer: true }), name: 'Starter' },
+          pro: { stripePriceId: configService.get('STRIPE_PRICE_PRO', { infer: true }), name: 'Pro' },
+        },
+        successUrl: configService.get('BILLING_SUCCESS_URL', { infer: true }),
+        cancelUrl: configService.get('BILLING_CANCEL_URL', { infer: true }),
+      }),
     }),
   ],
 })

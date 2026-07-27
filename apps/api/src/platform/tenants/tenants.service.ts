@@ -27,7 +27,7 @@ export class TenantsService {
 
     this.eventEmitter.emit(
       PLATFORM_EVENTS.TENANT_CREATED,
-      { tenantId: tenant.id, name: tenant.name, creatorUserId } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.TENANT_CREATED],
+      { tenantId: tenant.id, name: tenant.name, plan: tenant.plan } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.TENANT_CREATED],
     );
 
     return tenant;

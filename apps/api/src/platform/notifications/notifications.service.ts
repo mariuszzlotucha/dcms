@@ -49,9 +49,6 @@ export class NotificationsService {
         PLATFORM_EVENTS.NOTIFICATION_FAILED,
         {
           tenantId,
-          recipient,
-          template,
-          channel: 'email',
           reason: error instanceof Error ? error.message : 'Unknown error',
         } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.NOTIFICATION_FAILED],
       );

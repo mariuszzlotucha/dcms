@@ -1,7 +1,7 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency } from '@nestjs/common';
+import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
-import { RateLimitingModuleConfig } from './rate-limiting.config';
+import { RATE_LIMIT_CONFIG, RateLimitingModuleConfig } from './rate-limiting.config';
 import { TenantThrottlerGuard } from './guards/tenant-throttler.guard';
 
 interface RateLimitingModuleAsyncOptions {
@@ -19,11 +19,23 @@ export class RateLimitingModule {
           throttlers: [{ ttl: config.ttlMs, limit: config.limit }],
         }),
       ],
-      providers: [{ provide: APP_GUARD, useClass: TenantThrottlerGuard }],
+      providers: [
+        { provide: RATE_LIMIT_CONFIG, useValue: { limit: config.limit } },
+        { provide: APP_GUARD, useClass: TenantThrottlerGuard },
+      ],
     };
   }
 
   static forRootAsync(options: RateLimitingModuleAsyncOptions): DynamicModule {
+    const rateLimitConfigProvider: Provider = {
+      provide: RATE_LIMIT_CONFIG,
+      useFactory: async (...args: unknown[]) => {
+        const config = await options.useFactory(...args);
+        return { limit: config.limit };
+      },
+      inject: options.inject ?? [],
+    };
+
     return {
       module: RateLimitingModule,
       imports: [
@@ -35,7 +47,7 @@ export class RateLimitingModule {
           },
         }),
       ],
-      providers: [{ provide: APP_GUARD, useClass: TenantThrottlerGuard }],
+      providers: [rateLimitConfigProvider, { provide: APP_GUARD, useClass: TenantThrottlerGuard }],
     };
   }
 }
