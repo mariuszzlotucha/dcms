@@ -2,6 +2,7 @@ import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provi
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { IdempotencyRecord } from './entities/idempotency-record.entity';
 import { IDEMPOTENCY_MODULE_CONFIG, IdempotencyModuleConfig } from './idempotency.config';
+import { IdempotencyService } from './idempotency.service';
 import { IdempotencyInterceptor } from './interceptors/idempotency.interceptor';
 
 interface IdempotencyModuleAsyncOptions {
@@ -16,8 +17,12 @@ export class IdempotencyModule {
       module: IdempotencyModule,
       global: true,
       imports: [TypeOrmModule.forFeature([IdempotencyRecord])],
-      providers: [{ provide: IDEMPOTENCY_MODULE_CONFIG, useValue: config }, IdempotencyInterceptor],
-      exports: [IdempotencyInterceptor],
+      providers: [
+        { provide: IDEMPOTENCY_MODULE_CONFIG, useValue: config },
+        IdempotencyService,
+        IdempotencyInterceptor,
+      ],
+      exports: [IdempotencyService, IdempotencyInterceptor],
     };
   }
 
@@ -32,8 +37,8 @@ export class IdempotencyModule {
       module: IdempotencyModule,
       global: true,
       imports: [TypeOrmModule.forFeature([IdempotencyRecord])],
-      providers: [configProvider, IdempotencyInterceptor],
-      exports: [IdempotencyInterceptor],
+      providers: [configProvider, IdempotencyService, IdempotencyInterceptor],
+      exports: [IdempotencyService, IdempotencyInterceptor],
     };
   }
 }

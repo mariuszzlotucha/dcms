@@ -27,6 +27,8 @@ import { CircuitBreakerModule } from '@platform/circuit-breaker';
 import { DeadLetterQueueModule } from '@platform/dead-letter-queue';
 import { WebhooksModule } from '@platform/webhooks';
 import { ObservabilityModule } from '@platform/observability';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SchedulerModule } from '@platform/scheduler';
 
 @Module({
   imports: [
@@ -188,7 +190,12 @@ import { ObservabilityModule } from '@platform/observability';
     }),
     DeadLetterQueueModule,
     WebhooksModule,
-    ObservabilityModule
+    ObservabilityModule,
+    ScheduleModule.forRoot(),  
+    SchedulerModule.forRoot({
+      idempotencyCleanupCron: '0 3 * * *',
+      secretsRotationCron: '0 4 1 * *',
+    }),
   ],
 })
 export class AppModule { }
