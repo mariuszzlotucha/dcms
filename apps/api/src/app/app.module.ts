@@ -10,6 +10,7 @@ import { SecretsModule } from '@platform/secrets/secrets.module';
 import { SecretsService } from '@platform/secrets/secrets.service';
 import { SecurityModule } from '@platform/security/security.module';
 import { AuthModule } from '@platform/auth/auth.module';
+import { SessionsModule } from '@platform/sessions';
 
 @Module({
   imports: [
@@ -83,6 +84,10 @@ import { AuthModule } from '@platform/auth/auth.module';
     AuthModule.forRoot({
       jwtExpiresIn: '15m',
     }),
+    SessionsModule.forRoot({
+      refreshTokenExpiresIn: '30d',
+      accessTokenExpiresIn: '15m', // keep in sync with AuthModule's jwtExpiresIn
+    }),
   ],
 })
-export class AppModule {}
+export class AppModule { }
