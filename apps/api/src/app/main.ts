@@ -11,8 +11,9 @@ import {
   SECURITY_MODULE_CONFIG,
   SecurityModuleConfig,
 } from '@platform/security';
+import { setupSwagger } from '@platform/swagger';
 
-import { initializeObservability } from './platform/observability/observability.module';
+import { initializeObservability } from '@platform/observability';
 
 initializeObservability({
   serviceName: process.env.OTEL_SERVICE_NAME ?? 'dcms-api',
@@ -53,6 +54,14 @@ async function bootstrap() {
   });
 
   app.enableShutdownHooks();
+
+  setupSwagger(app, {
+  path: 'docs',
+  title: 'DCMS API',
+  description: 'Digital Contract Management System — public API',
+  version: '1.0',
+  enabled: process.env.NODE_ENV !== 'production',
+});
 
   const port = configService.get('PORT', { infer: true });
   await app.listen(port);
