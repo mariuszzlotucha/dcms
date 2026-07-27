@@ -24,6 +24,7 @@ import { BillingModule } from '@platform/billing';
 import { UsageMeteringModule } from '@platform/usage-metering';
 import { FeatureFlagsModule } from '@platform/feature-flags';
 import { CircuitBreakerModule } from '@platform/circuit-breaker';
+import { DeadLetterQueueModule } from '@platform/dead-letter-queue';
 
 @Module({
   imports: [
@@ -183,6 +184,7 @@ import { CircuitBreakerModule } from '@platform/circuit-breaker';
         stripe: { timeoutMs: 15_000 },
       },
     }),
+    DeadLetterQueueModule,
   ],
 })
 export class AppModule { }
