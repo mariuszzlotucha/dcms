@@ -14,6 +14,7 @@ import { SessionsModule } from '@platform/sessions';
 import { RbacModule } from '@platform/rbac';
 import { TenantsModule } from '@platform/tenants';
 import { ApiKeysModule } from '@platform/api-keys';
+import { RateLimitingModule } from '@platform/rate-limiting';
 
 @Module({
   imports: [
@@ -99,6 +100,10 @@ import { ApiKeysModule } from '@platform/api-keys';
     }),
     ApiKeysModule.forRoot({
       keyPrefix: 'dcms_live_',
+    }),
+    RateLimitingModule.forRoot({
+      ttlMs: 60_000,
+      limit: 100,
     }),
   ],
 })
