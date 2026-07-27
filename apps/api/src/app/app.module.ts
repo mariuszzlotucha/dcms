@@ -21,6 +21,7 @@ import { NotificationsModule } from '@platform/notifications';
 import { ConsentModule } from '@platform/consent';
 import { WebhooksInboundModule } from '@platform/webhooks-inbound';
 import { BillingModule } from '@platform/billing';
+import { UsageMeteringModule } from '@platform/usage-metering';
 
 @Module({
   imports: [
@@ -82,7 +83,7 @@ import { BillingModule } from '@platform/billing';
             ...(s3AccessKeyId ? { s3AccessKeyId } : {}),
             ...(s3SecretAccessKey ? { s3SecretAccessKey } : {}),
             ...(resendKey ? { resend: resendKey } : {}),
-              ...(stripeWebhookSecret ? { stripeWebhookSecret } : {}),
+            ...(stripeWebhookSecret ? { stripeWebhookSecret } : {}),
           },
         };
       },
@@ -157,6 +158,13 @@ import { BillingModule } from '@platform/billing';
         successUrl: configService.get('BILLING_SUCCESS_URL', { infer: true }),
         cancelUrl: configService.get('BILLING_CANCEL_URL', { infer: true }),
       }),
+    }),
+
+    UsageMeteringModule.forRoot({
+      limitsByPlan: {
+        starter: { 'contracts.create': 10 },
+        pro: { 'contracts.create': 200 },
+      },
     }),
   ],
 })

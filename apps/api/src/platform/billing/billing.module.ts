@@ -26,6 +26,7 @@ export class BillingModule {
   static forRoot(config: BillingModuleConfig): DynamicModule {
     return {
       module: BillingModule,
+      global: true,
       imports: [TypeOrmModule.forFeature([Subscription])],
       controllers: [BillingController],
       providers: [
@@ -47,6 +48,7 @@ export class BillingModule {
 
     return {
       module: BillingModule,
+      global: true,
       imports: [TypeOrmModule.forFeature([Subscription])],
       controllers: [BillingController],
       providers: [configProvider, stripeClientProvider, BillingService, BillingListener],
