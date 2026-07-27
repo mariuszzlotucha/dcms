@@ -16,6 +16,7 @@ import { TenantsModule } from '@platform/tenants';
 import { ApiKeysModule } from '@platform/api-keys';
 import { RateLimitingModule } from '@platform/rate-limiting';
 import { IdempotencyModule } from '@platform/idempotency';
+import { FileStorageModule } from '@platform/file-storage';
 
 @Module({
   imports: [
@@ -106,7 +107,16 @@ import { IdempotencyModule } from '@platform/idempotency';
       ttlMs: 60_000,
       limit: 100,
     }),
-    IdempotencyModule.forRoot({ recordTtlHours: 24 })
+    IdempotencyModule.forRoot({ recordTtlHours: 24 }),
+    FileStorageModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<AppConfig, true>) => ({
+        bucket: configService.get('S3_BUCKET', { infer: true }),
+        region: configService.get('S3_REGION', { infer: true }),
+        endpoint: configService.get('S3_ENDPOINT', { infer: true }),
+        maxSizeBytes: 25 * 1024 * 1024,
+      }),
+    }),
   ],
 })
 export class AppModule { }

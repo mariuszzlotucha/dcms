@@ -1,0 +1,8 @@
+export interface FileStorageModuleConfig {
+  bucket: string;
+  region: string;
+  endpoint?: string;
+  maxSizeBytes: number;
+}
+
+export const FILE_STORAGE_MODULE_CONFIG = 'FILE_STORAGE_MODULE_CONFIG';
