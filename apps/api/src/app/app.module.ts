@@ -17,6 +17,7 @@ import { ApiKeysModule } from '@platform/api-keys';
 import { RateLimitingModule } from '@platform/rate-limiting';
 import { IdempotencyModule } from '@platform/idempotency';
 import { FileStorageModule } from '@platform/file-storage';
+import { NotificationsModule } from '@platform/notifications';
 
 @Module({
   imports: [
@@ -46,10 +47,19 @@ import { FileStorageModule } from '@platform/file-storage';
       },
     }),
     HealthModule.forRoot(),
-    SecretsModule.forRootAsync({
+   SecretsModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService<AppConfig, true>) => {
         const stripeKey = configService.get('STRIPE_SECRET_KEY', {
+          infer: true,
+        });
+        const s3AccessKeyId = configService.get('S3_ACCESS_KEY_ID', {
+          infer: true,
+        });
+        const s3SecretAccessKey = configService.get('S3_SECRET_ACCESS_KEY', {
+          infer: true,
+        });
+        const resendKey = configService.get('RESEND_API_KEY', {
           infer: true,
         });
         return {
@@ -64,6 +74,9 @@ import { FileStorageModule } from '@platform/file-storage';
           // fails with "not configured" by design, not via an empty string.
           providers: {
             ...(stripeKey ? { stripe: stripeKey } : {}),
+            ...(s3AccessKeyId ? { s3AccessKeyId } : {}),
+            ...(s3SecretAccessKey ? { s3SecretAccessKey } : {}),
+            ...(resendKey ? { resend: resendKey } : {}),
           },
         };
       },
@@ -116,6 +129,9 @@ import { FileStorageModule } from '@platform/file-storage';
         endpoint: configService.get('S3_ENDPOINT', { infer: true }),
         maxSizeBytes: 25 * 1024 * 1024,
       }),
+    }),
+    NotificationsModule.forRoot({
+      fromAddress: 'DCMS <noreply@dcms.app>',
     }),
   ],
 })
