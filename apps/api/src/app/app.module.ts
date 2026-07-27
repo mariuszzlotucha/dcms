@@ -23,6 +23,7 @@ import { WebhooksInboundModule } from '@platform/webhooks-inbound';
 import { BillingModule } from '@platform/billing';
 import { UsageMeteringModule } from '@platform/usage-metering';
 import { FeatureFlagsModule } from '@platform/feature-flags';
+import { CircuitBreakerModule } from '@platform/circuit-breaker';
 
 @Module({
   imports: [
@@ -170,6 +171,16 @@ import { FeatureFlagsModule } from '@platform/feature-flags';
     FeatureFlagsModule.forRoot({
       defaultFlags: {
         beta_dashboard: false,
+      },
+    }),
+    CircuitBreakerModule.forRoot({
+      defaults: {
+        timeoutMs: 10_000,
+        errorThresholdPercentage: 50,
+        resetTimeoutMs: 30_000,
+      },
+      overrides: {
+        stripe: { timeoutMs: 15_000 },
       },
     }),
   ],
