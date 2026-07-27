@@ -12,6 +12,7 @@ import { SecurityModule } from '@platform/security/security.module';
 import { AuthModule } from '@platform/auth/auth.module';
 import { SessionsModule } from '@platform/sessions';
 import { RbacModule } from '@platform/rbac';
+import { TenantsModule } from '@platform/tenants';
 
 @Module({
   imports: [
@@ -91,6 +92,9 @@ import { RbacModule } from '@platform/rbac';
     }),
     RbacModule.forRoot({
       defaultRole: 'member',
+    }),
+    TenantsModule.forRoot({
+      defaultPlan: 'free',
     }),
   ],
 })

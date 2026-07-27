@@ -14,6 +14,7 @@ export class RbacModule {
   static forRoot(config: RbacModuleConfig): DynamicModule {
     return {
       module: RbacModule,
+      global: true,
       imports: [TypeOrmModule.forFeature([RoleAssignment])],
       providers: [{ provide: RBAC_MODULE_CONFIG, useValue: config }, RbacService],
       exports: [RbacService],
@@ -29,6 +30,7 @@ export class RbacModule {
 
     return {
       module: RbacModule,
+      global: true,
       imports: [TypeOrmModule.forFeature([RoleAssignment])],
       providers: [configProvider, RbacService],
       exports: [RbacService],
