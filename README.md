@@ -36,8 +36,6 @@ This boundary is not just documentation — it's **enforced by ESLint (`eslint-p
 
 **Event-driven core:** the backend uses `@nestjs/event-emitter` for in-process pub/sub between platform and domain modules. Modules don't call each other directly — they emit and listen to well-defined, typed events, keeping each module independently understandable and testable.
 
-**One repo, no fake packages:** `platform/` and `domain/` are plain folders, not internally-published npm packages requiring a sync/versioning workflow. The only genuinely shared artifact — `shared/contracts/` (zod schemas + platform event contracts) — lives at the repo root and is imported by relative path from both `apps/api` and `apps/web`, so a DTO change and its corresponding frontend type update travel in a single commit.
-
 ## Tech stack
 
 | Layer | Choice |
