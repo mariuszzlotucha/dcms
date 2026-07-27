@@ -11,6 +11,7 @@ import { SecretsService } from '@platform/secrets/secrets.service';
 import { SecurityModule } from '@platform/security/security.module';
 import { AuthModule } from '@platform/auth/auth.module';
 import { SessionsModule } from '@platform/sessions';
+import { RbacModule } from '@platform/rbac';
 
 @Module({
   imports: [
@@ -87,6 +88,9 @@ import { SessionsModule } from '@platform/sessions';
     SessionsModule.forRoot({
       refreshTokenExpiresIn: '30d',
       accessTokenExpiresIn: '15m', // keep in sync with AuthModule's jwtExpiresIn
+    }),
+    RbacModule.forRoot({
+      defaultRole: 'member',
     }),
   ],
 })
