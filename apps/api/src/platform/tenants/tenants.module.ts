@@ -16,6 +16,7 @@ export class TenantsModule {
   static forRoot(config: TenantsModuleConfig): DynamicModule {
     return {
       module: TenantsModule,
+      global: true,
       imports: [TypeOrmModule.forFeature([Tenant])],
       controllers: [TenantsController],
       providers: [{ provide: TENANTS_MODULE_CONFIG, useValue: config }, TenantsService, TenantContextService],
@@ -32,6 +33,7 @@ export class TenantsModule {
 
     return {
       module: TenantsModule,
+      global: true,
       imports: [TypeOrmModule.forFeature([Tenant])],
       controllers: [TenantsController],
       providers: [configProvider, TenantsService, TenantContextService],

@@ -13,6 +13,7 @@ import { AuthModule } from '@platform/auth/auth.module';
 import { SessionsModule } from '@platform/sessions';
 import { RbacModule } from '@platform/rbac';
 import { TenantsModule } from '@platform/tenants';
+import { ApiKeysModule } from '@platform/api-keys';
 
 @Module({
   imports: [
@@ -95,6 +96,9 @@ import { TenantsModule } from '@platform/tenants';
     }),
     TenantsModule.forRoot({
       defaultPlan: 'free',
+    }),
+    ApiKeysModule.forRoot({
+      keyPrefix: 'dcms_live_',
     }),
   ],
 })
