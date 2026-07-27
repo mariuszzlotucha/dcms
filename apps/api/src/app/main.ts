@@ -12,6 +12,15 @@ import {
   SecurityModuleConfig,
 } from '@platform/security';
 
+import { initializeObservability } from './platform/observability/observability.module';
+
+initializeObservability({
+  serviceName: process.env.OTEL_SERVICE_NAME ?? 'dcms-api',
+  otlpEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  enabled: process.env.OTEL_ENABLED === 'true',
+});
+
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,

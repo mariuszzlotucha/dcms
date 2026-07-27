@@ -26,6 +26,7 @@ import { FeatureFlagsModule } from '@platform/feature-flags';
 import { CircuitBreakerModule } from '@platform/circuit-breaker';
 import { DeadLetterQueueModule } from '@platform/dead-letter-queue';
 import { WebhooksModule } from '@platform/webhooks';
+import { ObservabilityModule } from '@platform/observability';
 
 @Module({
   imports: [
@@ -187,6 +188,7 @@ import { WebhooksModule } from '@platform/webhooks';
     }),
     DeadLetterQueueModule,
     WebhooksModule,
+    ObservabilityModule
   ],
 })
 export class AppModule { }
