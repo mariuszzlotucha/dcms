@@ -30,6 +30,7 @@ import { ObservabilityModule } from '@platform/observability';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from '@platform/scheduler';
 import { AuditModule } from '@platform/audit';
+import { PiiRedactionModule } from '@platform/pii-redaction';
 
 @Module({
   imports: [
@@ -199,6 +200,9 @@ import { AuditModule } from '@platform/audit';
     }),
     AuditModule.forRoot({
       excludedEvents: [],
+    }),
+    PiiRedactionModule.forRoot({
+      extraPatterns: [],
     }),
   ],
 })
