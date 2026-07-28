@@ -29,6 +29,7 @@ import { WebhooksModule } from '@platform/webhooks';
 import { ObservabilityModule } from '@platform/observability';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from '@platform/scheduler';
+import { AuditModule } from '@platform/audit';
 
 @Module({
   imports: [
@@ -191,10 +192,13 @@ import { SchedulerModule } from '@platform/scheduler';
     DeadLetterQueueModule,
     WebhooksModule,
     ObservabilityModule,
-    ScheduleModule.forRoot(),  
+    ScheduleModule.forRoot(),
     SchedulerModule.forRoot({
       idempotencyCleanupCron: '0 3 * * *',
       secretsRotationCron: '0 4 1 * *',
+    }),
+    AuditModule.forRoot({
+      excludedEvents: [],
     }),
   ],
 })
