@@ -102,6 +102,14 @@ export class FileStorageService {
     );
   }
 
+  async listFiles(tenantId?: string): Promise<FileRecord[]> {
+    return this.files.find(tenantId ? { where: { tenantId } } : {});
+  }
+
+  async listFilesByUploader(uploadedBy: string): Promise<FileRecord[]> {
+    return this.files.find({ where: { uploadedBy } });
+  }
+
   private async findOwnedFile(tenantId: string, fileId: string): Promise<FileRecord> {
     const fileRecord = await this.files.findOne({ where: { id: fileId } });
 

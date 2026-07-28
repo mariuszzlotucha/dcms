@@ -41,6 +41,25 @@ export const configSchema = z.object({
 
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+
+  // Added for file-storage's S3-compatible object storage.
+  S3_BUCKET: z.string().optional(),
+  S3_REGION: z.string().optional(),
+  S3_ENDPOINT: z.string().url().optional(),
+  S3_ACCESS_KEY_ID: z.string().optional(),
+  S3_SECRET_ACCESS_KEY: z.string().optional(),
+
+  // Added for notifications' Resend email provider.
+  RESEND_API_KEY: z.string().optional(),
+
+  // Added for billing's Stripe Checkout plan wiring.
+  STRIPE_PRICE_STARTER: z.string().optional(),
+  STRIPE_PRICE_PRO: z.string().optional(),
+  BILLING_SUCCESS_URL: z.string().url().optional(),
+  BILLING_CANCEL_URL: z.string().url().optional(),
+
+  // Added for pii-redaction's HMAC tokenization key.
+  PII_REDACTION_KEY: z.string().optional(),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

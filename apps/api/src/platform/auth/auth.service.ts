@@ -12,6 +12,7 @@ import { randomBytes } from 'crypto';
 import { QueryFailedError, Repository } from 'typeorm';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
 import { SecretsService } from '../secrets/secrets.service';
+import { PasswordPolicyService } from '../password-policy/password-policy.service';
 import {
   AUTH_MODULE_CONFIG,
   AuthModuleConfig,
@@ -56,10 +57,13 @@ export class AuthService {
     @Inject(AUTH_MODULE_CONFIG) private readonly config: AuthModuleConfig,
     private readonly jwtService: JwtService,
     private readonly secrets: SecretsService,
+    private readonly passwordPolicy: PasswordPolicyService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async register(rawEmail: string, password: string): Promise<AuthTokens> {
+    this.passwordPolicy.validateStrength(password);
+
     const email = normalizeEmail(rawEmail);
     const passwordHash = await argon2.hash(password);
 
@@ -98,6 +102,20 @@ export class AuthService {
     const email = normalizeEmail(rawEmail);
     const user = await this.users.findOne({ where: { email } });
 
+    // Checked before verify, and before the dummy-hash timing-parity branch:
+    // a locked-out account should fail fast without spending an argon2 call
+    // either way. This does mean a locked-out response is now measurably
+    // faster than both the valid- and invalid-credentials paths below — an
+    // accepted trade-off, not an oversight.
+    if (user && (await this.passwordPolicy.isLockedOut(user.id))) {
+      this.eventEmitter.emit(PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED, {
+        email,
+        reason: 'account_locked',
+        ip,
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED]);
+      throw new UnauthorizedException('Account is temporarily locked');
+    }
+
     let valid = false;
     if (user?.passwordHash != null) {
       valid = await argon2.verify(user.passwordHash, password);
@@ -106,6 +124,11 @@ export class AuthService {
     }
 
     if (!user || !valid) {
+      // Only a real user can be attributed a failed attempt — a guess
+      // against a nonexistent email has no account to lock.
+      if (user) {
+        await this.passwordPolicy.recordFailedAttempt(user.id);
+      }
       this.eventEmitter.emit(PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED, {
         email,
         reason: 'invalid_credentials',
@@ -113,6 +136,8 @@ export class AuthService {
       } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED]);
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    await this.passwordPolicy.clearFailedAttempts(user.id);
 
     const tokens = this.issueTokens(user);
     this.emitLoggedIn(user, 'password');

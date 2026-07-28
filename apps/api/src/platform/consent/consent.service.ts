@@ -108,4 +108,39 @@ export class ConsentService {
       Object.keys(this.config.currentVersions).map((consentType) => this.getStatus(userId, tenantId, consentType)),
     );
   }
+
+  async findRevokedBefore(cutoff: Date, tenantId?: string): Promise<ConsentRecord[]> {
+    const qb = this.consentRecords
+      .createQueryBuilder('record')
+      .where('record.revokedAt IS NOT NULL')
+      .andWhere('record.revokedAt < :cutoff', { cutoff });
+
+    if (tenantId) {
+      qb.andWhere('record.tenantId = :tenantId', { tenantId });
+    }
+
+    return qb.getMany();
+  }
+
+  async deleteRecords(userId: string, tenantId: string, consentType: string): Promise<ConsentRecord[]> {
+    const records = await this.consentRecords.find({ where: { userId, tenantId, consentType } });
+
+    if (records.length === 0) {
+      return [];
+    }
+
+    await this.consentRecords.remove(records);
+    return records;
+  }
+
+  async deleteAllForUser(userId: string): Promise<ConsentRecord[]> {
+    const records = await this.consentRecords.find({ where: { userId } });
+
+    if (records.length === 0) {
+      return [];
+    }
+
+    await this.consentRecords.remove(records);
+    return records;
+  }
 }

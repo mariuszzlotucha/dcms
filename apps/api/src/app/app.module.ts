@@ -31,6 +31,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from '@platform/scheduler';
 import { AuditModule } from '@platform/audit';
 import { PiiRedactionModule } from '@platform/pii-redaction';
+import { DataRetentionModule, USER_ACCOUNT_QUERIES } from '@platform/data-retention';
+import { PasswordPolicyModule } from '@platform/password-policy';
 
 @Module({
   imports: [
@@ -76,6 +78,8 @@ import { PiiRedactionModule } from '@platform/pii-redaction';
           infer: true,
         });
         const stripeWebhookSecret = configService.get('STRIPE_WEBHOOK_SECRET', { infer: true });
+        const piiRedactionKey = configService.get('PII_REDACTION_KEY', { infer: true });  // ← add
+
 
         return {
           jwtSigningKey: configService.get('JWT_SECRET', { infer: true }),
@@ -93,6 +97,7 @@ import { PiiRedactionModule } from '@platform/pii-redaction';
             ...(s3SecretAccessKey ? { s3SecretAccessKey } : {}),
             ...(resendKey ? { resend: resendKey } : {}),
             ...(stripeWebhookSecret ? { stripeWebhookSecret } : {}),
+            ...(piiRedactionKey ? { piiRedactionKey } : {}),
           },
         };
       },
@@ -203,6 +208,23 @@ import { PiiRedactionModule } from '@platform/pii-redaction';
     }),
     PiiRedactionModule.forRoot({
       extraPatterns: [],
+    }),
+    DataRetentionModule.forRoot(
+      {
+        inactiveAccountDeletionDays: 365,
+        revokedConsentPurgeDays: 90,
+      },
+      {
+        provide: USER_ACCOUNT_QUERIES,
+        useClass: AuthUserAccountQueries,
+      },
+    ),
+    PasswordPolicyModule.forRoot({
+      minLength: 10,
+      requireNumber: true,
+      requireLetter: true,
+      maxFailedAttempts: 5,
+      lockoutDurationMinutes: 15,
     }),
   ],
 })
