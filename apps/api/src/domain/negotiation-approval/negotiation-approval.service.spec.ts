@@ -63,6 +63,26 @@ describe('NegotiationApprovalService', () => {
     });
   });
 
+  describe('listRoles', () => {
+    it('lists role assignments scoped to the tenant and contract', async () => {
+      roleAssignments.find.mockResolvedValue([]);
+
+      await service.listRoles('t1', 'c1');
+
+      expect(roleAssignments.find).toHaveBeenCalledWith({ where: { tenantId: 't1', contractId: 'c1' } });
+    });
+  });
+
+  describe('listApprovalRequests', () => {
+    it('lists approval requests scoped to the tenant and contract', async () => {
+      approvalRequests.find.mockResolvedValue([]);
+
+      await service.listApprovalRequests('t1', 'c1');
+
+      expect(approvalRequests.find).toHaveBeenCalledWith({ where: { tenantId: 't1', contractId: 'c1' } });
+    });
+  });
+
   describe('requestRevision', () => {
     it('emits negotiation.revisionRequested when the requester has a role on the contract', async () => {
       roleAssignments.findOne.mockResolvedValue({ id: 'role-1', role: 'reviewer' });

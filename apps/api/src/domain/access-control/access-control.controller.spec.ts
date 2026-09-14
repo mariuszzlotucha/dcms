@@ -43,6 +43,14 @@ describe('AccessControlController', () => {
     expect(service.revokeAccess).toHaveBeenCalledWith('t1', 'c1', 'u1');
   });
 
+  it('lists access grants scoped to the resolved tenant', async () => {
+    service.listAccess.mockResolvedValue([]);
+
+    await controller.listAccess('c1');
+
+    expect(service.listAccess).toHaveBeenCalledWith('t1', 'c1');
+  });
+
   it('invites a participant scoped to the resolved tenant and authenticated inviter', async () => {
     service.inviteParticipant.mockResolvedValue({ id: 'invite-1' });
 

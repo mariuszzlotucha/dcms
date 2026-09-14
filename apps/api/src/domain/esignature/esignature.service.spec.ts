@@ -86,6 +86,19 @@ describe('EsignatureService', () => {
     });
   });
 
+  describe('listEnvelopes', () => {
+    it('lists envelopes scoped to the tenant and contract, newest first', async () => {
+      envelopes.find.mockResolvedValue([]);
+
+      await service.listEnvelopes('t1', 'c1');
+
+      expect(envelopes.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1', contractId: 'c1' },
+        order: { requestedAt: 'DESC' },
+      });
+    });
+  });
+
   describe('markCompleted', () => {
     it('marks a sent envelope completed and emits esignature.completed', async () => {
       envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'sent' });
@@ -133,6 +146,15 @@ describe('EsignatureService', () => {
         }),
       );
     });
+
+    it('ignores a redelivered webhook for an already-terminal envelope', async () => {
+      envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'declined' });
+
+      await service.markDeclined('ds-envelope-1', 'missing signature block');
+
+      expect(envelopes.save).not.toHaveBeenCalled();
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
+    });
   });
 
   describe('markExpired', () => {
@@ -145,6 +167,15 @@ describe('EsignatureService', () => {
         'esignature.expired',
         expect.objectContaining({ contractId: 'c1', tenantId: 't1', envelopeId: 'ds-envelope-1' }),
       );
+    });
+
+    it('ignores a redelivered webhook for an already-terminal envelope', async () => {
+      envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'expired' });
+
+      await service.markExpired('ds-envelope-1');
+
+      expect(envelopes.save).not.toHaveBeenCalled();
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
   });
 });

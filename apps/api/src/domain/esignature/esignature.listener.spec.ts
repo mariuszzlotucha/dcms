@@ -65,6 +65,28 @@ describe('EsignatureListener', () => {
     expect(service.markCompleted).not.toHaveBeenCalled();
   });
 
+  it('falls back to a default decline reason when the payload omits one', async () => {
+    await listener.handleWebhookReceived({
+      provider: 'docusign',
+      verified: true,
+      eventType: 'envelope-declined',
+      payload: { data: { envelopeId: 'ds-1' } },
+    });
+
+    expect(service.markDeclined).toHaveBeenCalledWith('ds-1', 'Declined by signer');
+  });
+
+  it('ignores a callback whose payload carries no envelopeId', async () => {
+    await listener.handleWebhookReceived({
+      provider: 'docusign',
+      verified: true,
+      eventType: 'envelope-completed',
+      payload: { data: {} },
+    });
+
+    expect(service.markCompleted).not.toHaveBeenCalled();
+  });
+
   it('ignores an event type it does not handle', async () => {
     await listener.handleWebhookReceived({
       provider: 'docusign',

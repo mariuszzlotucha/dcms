@@ -97,6 +97,16 @@ describe('AccessControlService', () => {
     });
   });
 
+  describe('listAccess', () => {
+    it('lists access grants scoped to the tenant and contract', async () => {
+      accessGrants.find.mockResolvedValue([]);
+
+      await service.listAccess('t1', 'c1');
+
+      expect(accessGrants.find).toHaveBeenCalledWith({ where: { tenantId: 't1', contractId: 'c1' } });
+    });
+  });
+
   describe('inviteParticipant', () => {
     it('creates a pending invite and emits collaboration.participantInvited', async () => {
       const result = await service.inviteParticipant('t1', 'c1', 'stranger@example.com', 'comment', 'admin-1');
@@ -121,6 +131,19 @@ describe('AccessControlService', () => {
         'collaboration.commentAdded',
         expect.objectContaining({ contractId: 'c1', tenantId: 't1', commentId: 'comment-1', authorId: 'u1' }),
       );
+    });
+  });
+
+  describe('listComments', () => {
+    it('lists comments scoped to the tenant and contract in chronological order', async () => {
+      comments.find.mockResolvedValue([]);
+
+      await service.listComments('t1', 'c1');
+
+      expect(comments.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1', contractId: 'c1' },
+        order: { createdAt: 'ASC' },
+      });
     });
   });
 

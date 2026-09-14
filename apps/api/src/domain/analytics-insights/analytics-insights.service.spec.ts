@@ -154,6 +154,16 @@ describe('AnalyticsInsightsService', () => {
     });
   });
 
+  describe('listReports', () => {
+    it('lists reports scoped to the tenant, newest first', async () => {
+      analyticsReports.find.mockResolvedValue([]);
+
+      await service.listReports('t1');
+
+      expect(analyticsReports.find).toHaveBeenCalledWith({ where: { tenantId: 't1' }, order: { generatedAt: 'DESC' } });
+    });
+  });
+
   describe('getDashboard', () => {
     it('excludes advanced-only metrics from the basic dashboard', async () => {
       await service.recordEsignatureCompleted('t1');

@@ -27,6 +27,14 @@ describe('CollaborationController', () => {
     expect(service.addComment).toHaveBeenCalledWith('t1', 'c1', 'u1', 'looks good');
   });
 
+  it('lists comments scoped to the resolved tenant', async () => {
+    service.listComments.mockResolvedValue([]);
+
+    await controller.listComments('c1');
+
+    expect(service.listComments).toHaveBeenCalledWith('t1', 'c1');
+  });
+
   it('starts a collaboration session scoped to the resolved tenant', async () => {
     service.startSession.mockResolvedValue({ id: 'session-1' });
 

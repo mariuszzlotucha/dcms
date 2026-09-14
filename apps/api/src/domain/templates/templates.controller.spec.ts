@@ -10,6 +10,10 @@ describe('TemplatesController', () => {
     getTemplate: jest.Mock;
     updateTemplate: jest.Mock;
     publishTemplate: jest.Mock;
+    listClauses: jest.Mock;
+    addClause: jest.Mock;
+    updateClause: jest.Mock;
+    removeClause: jest.Mock;
   };
   let tenantContext: { getTenantId: jest.Mock };
   let controller: TemplatesController;
@@ -23,6 +27,10 @@ describe('TemplatesController', () => {
       getTemplate: jest.fn(),
       updateTemplate: jest.fn(),
       publishTemplate: jest.fn(),
+      listClauses: jest.fn(),
+      addClause: jest.fn(),
+      updateClause: jest.fn(),
+      removeClause: jest.fn(),
     };
     tenantContext = { getTenantId: jest.fn().mockResolvedValue('t1') };
     controller = new TemplatesController(
@@ -62,5 +70,44 @@ describe('TemplatesController', () => {
     await controller.publishTemplate('tmpl-1');
 
     expect(templatesService.publishTemplate).toHaveBeenCalledWith('t1', 'tmpl-1');
+  });
+
+  it('updates a template scoped to the resolved tenant and authenticated user', async () => {
+    templatesService.updateTemplate.mockResolvedValue({ id: 'tmpl-1' });
+
+    await controller.updateTemplate('tmpl-1', { name: 'New Name' }, requestAs('u1'));
+
+    expect(templatesService.updateTemplate).toHaveBeenCalledWith('t1', 'tmpl-1', 'u1', { name: 'New Name' });
+  });
+
+  it('lists clauses scoped to the resolved tenant', async () => {
+    templatesService.listClauses.mockResolvedValue([]);
+
+    await controller.listClauses('tmpl-1');
+
+    expect(templatesService.listClauses).toHaveBeenCalledWith('t1', 'tmpl-1');
+  });
+
+  it('adds a clause scoped to the resolved tenant', async () => {
+    templatesService.addClause.mockResolvedValue({ id: 'clause-1' });
+
+    const dto = { title: 'Confidentiality', body: 'text' };
+    await controller.addClause('tmpl-1', dto);
+
+    expect(templatesService.addClause).toHaveBeenCalledWith('t1', 'tmpl-1', dto);
+  });
+
+  it('updates a clause scoped to the resolved tenant', async () => {
+    templatesService.updateClause.mockResolvedValue({ id: 'clause-1' });
+
+    await controller.updateClause('tmpl-1', 'clause-1', { title: 'New' });
+
+    expect(templatesService.updateClause).toHaveBeenCalledWith('t1', 'tmpl-1', 'clause-1', { title: 'New' });
+  });
+
+  it('removes a clause scoped to the resolved tenant', async () => {
+    await controller.removeClause('tmpl-1', 'clause-1');
+
+    expect(templatesService.removeClause).toHaveBeenCalledWith('t1', 'tmpl-1', 'clause-1');
   });
 });

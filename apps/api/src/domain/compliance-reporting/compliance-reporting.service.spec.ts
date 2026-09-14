@@ -55,6 +55,22 @@ describe('ComplianceReportingService', () => {
     });
   });
 
+  describe('getReport', () => {
+    it('returns the report when it belongs to the tenant', async () => {
+      const report = { id: 'report-1', tenantId: 't1' } as ComplianceReport;
+      reports.findOne.mockResolvedValue(report);
+
+      await expect(service.getReport('t1', 'report-1')).resolves.toBe(report);
+      expect(reports.findOne).toHaveBeenCalledWith({ where: { id: 'report-1', tenantId: 't1' } });
+    });
+
+    it('throws NotFound when the report does not belong to the tenant', async () => {
+      reports.findOne.mockResolvedValue(null);
+
+      await expect(service.getReport('t1', 'other-tenant-report')).rejects.toThrow(NotFoundException);
+    });
+  });
+
   describe('exportReport', () => {
     it('throws when the report does not exist for the tenant', async () => {
       await expect(service.exportReport('t1', 'missing', 'csv')).rejects.toThrow(NotFoundException);
@@ -83,6 +99,38 @@ describe('ComplianceReportingService', () => {
         'complianceReport.exported',
         expect.objectContaining({ reportId: 'report-1', tenantId: 't1', format: 'csv' }),
       );
+    });
+
+    it('escapes embedded double quotes in CSV field values so the row stays parseable', async () => {
+      const payload = { name: 'Acme "Big Deal" Corp' };
+      reports.findOne.mockResolvedValue({
+        id: 'report-1',
+        tenantId: 't1',
+        entries: [
+          {
+            recordedAt: new Date('2026-01-01T00:00:00Z'),
+            eventName: 'contract.created',
+            contractId: 'c1',
+            payload,
+          },
+        ],
+      });
+
+      const result = await service.exportReport('t1', 'report-1', 'csv');
+
+      // Every double quote in the field (including those from JSON.stringify
+      // escaping the value's own embedded quotes) must come out doubled, per
+      // CSV quoting rules, or the row would fail to parse back correctly.
+      const payloadField = JSON.stringify(payload).replace(/"/g, '""');
+      expect(result.content).toContain(payloadField);
+    });
+
+    it('produces a header-only CSV for a report with no trail entries', async () => {
+      reports.findOne.mockResolvedValue({ id: 'report-1', tenantId: 't1', entries: [] });
+
+      const result = await service.exportReport('t1', 'report-1', 'csv');
+
+      expect(result.content).toBe('recordedAt,eventName,contractId,payload');
     });
   });
 

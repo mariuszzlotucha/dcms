@@ -41,6 +41,22 @@ describe('NegotiationApprovalController', () => {
     expect(service.assignRole).toHaveBeenCalledWith('t1', 'c1', 'u1', 'approver');
   });
 
+  it('lists roles scoped to the resolved tenant', async () => {
+    service.listRoles.mockResolvedValue([]);
+
+    await controller.listRoles('c1');
+
+    expect(service.listRoles).toHaveBeenCalledWith('t1', 'c1');
+  });
+
+  it('lists approval requests scoped to the resolved tenant', async () => {
+    service.listApprovalRequests.mockResolvedValue([]);
+
+    await controller.listApprovalRequests('c1');
+
+    expect(service.listApprovalRequests).toHaveBeenCalledWith('t1', 'c1');
+  });
+
   it('grants approval as the authenticated caller', async () => {
     service.grantApproval.mockResolvedValue({ id: 'req-1', status: 'granted' });
 

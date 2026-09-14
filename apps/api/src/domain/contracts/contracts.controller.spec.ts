@@ -80,4 +80,42 @@ describe('ContractsController', () => {
 
     expect(contractsService.submitForApproval).toHaveBeenCalledWith('t1', 'c1', 'u1');
   });
+
+  it('gets a single contract scoped to the resolved tenant', async () => {
+    contractsService.getContract.mockResolvedValue({ id: 'c1' });
+
+    await controller.getContract('c1');
+
+    expect(contractsService.getContract).toHaveBeenCalledWith('t1', 'c1');
+  });
+
+  it('updates a contract scoped to the resolved tenant and authenticated user', async () => {
+    contractsService.updateContract.mockResolvedValue({ id: 'c1' });
+
+    await controller.updateContract('c1', { name: 'New name' }, requestAs('u1'));
+
+    expect(contractsService.updateContract).toHaveBeenCalledWith('t1', 'c1', 'u1', { name: 'New name' });
+  });
+
+  it('archives a contract scoped to the resolved tenant', async () => {
+    contractsService.archiveContract.mockResolvedValue({ id: 'c1', status: 'archived' });
+
+    await controller.archiveContract('c1');
+
+    expect(contractsService.archiveContract).toHaveBeenCalledWith('t1', 'c1');
+  });
+
+  it('deletes a contract scoped to the resolved tenant', async () => {
+    await controller.deleteContract('c1');
+
+    expect(contractsService.deleteContract).toHaveBeenCalledWith('t1', 'c1');
+  });
+
+  it('lists versions scoped to the resolved tenant', async () => {
+    contractsService.listVersions.mockResolvedValue([]);
+
+    await controller.listVersions('c1');
+
+    expect(contractsService.listVersions).toHaveBeenCalledWith('t1', 'c1');
+  });
 });

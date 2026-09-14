@@ -84,12 +84,42 @@ describe('ContractsService', () => {
   });
 
   describe('updateContract', () => {
+    it('merges the DTO onto an editable contract and emits contract.updated', async () => {
+      contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft', name: 'Old name' });
+
+      const result = await service.updateContract('t1', 'c1', 'u1', { name: 'New name' });
+
+      expect(result.name).toBe('New name');
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        'contract.updated',
+        expect.objectContaining({ contractId: 'c1', tenantId: 't1', updatedBy: 'u1' }),
+      );
+    });
+
     it('rejects edits once the contract has left editable territory', async () => {
       contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'signed' });
 
       await expect(service.updateContract('t1', 'c1', 'u1', { name: 'New name' })).rejects.toBeInstanceOf(
         BadRequestException,
       );
+    });
+  });
+
+  describe('listContracts', () => {
+    it('lists all contracts for the tenant when no status filter is given', async () => {
+      contracts.find.mockResolvedValue([]);
+
+      await service.listContracts('t1');
+
+      expect(contracts.find).toHaveBeenCalledWith({ where: { tenantId: 't1' } });
+    });
+
+    it('filters by status when given', async () => {
+      contracts.find.mockResolvedValue([]);
+
+      await service.listContracts('t1', 'draft');
+
+      expect(contracts.find).toHaveBeenCalledWith({ where: { tenantId: 't1', status: 'draft' } });
     });
   });
 
@@ -110,6 +140,12 @@ describe('ContractsService', () => {
       contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft' });
 
       await expect(service.changeStatus('t1', 'c1', 'signed')).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects transitioning to the status the contract is already in', async () => {
+      contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft' });
+
+      await expect(service.changeStatus('t1', 'c1', 'draft')).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('rejects transitioning out of a terminal status', async () => {
@@ -200,6 +236,26 @@ describe('ContractsService', () => {
         service.uploadVersion('t1', 'c1', 'u1', Buffer.from('x'), 'a.pdf', 'application/pdf'),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(fileStorageService.uploadFile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listVersions', () => {
+    it('throws NotFound when the contract does not belong to the tenant', async () => {
+      contracts.findOne.mockResolvedValue(null);
+
+      await expect(service.listVersions('t1', 'missing')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('lists versions newest-first once the contract is confirmed to belong to the tenant', async () => {
+      contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft' });
+      versions.find.mockResolvedValue([]);
+
+      await service.listVersions('t1', 'c1');
+
+      expect(versions.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1', contractId: 'c1' },
+        order: { versionNumber: 'DESC' },
+      });
     });
   });
 });
