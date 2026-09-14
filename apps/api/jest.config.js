@@ -10,5 +10,7 @@ module.exports = {
     '^@app/(.*)$': '<rootDir>/src/app/$1',
     '^@platform/(.*)$': '<rootDir>/src/platform/$1',
     '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+    '^@contracts/(.*)$': '<rootDir>/../../shared/contracts/$1',
+    '^@$': '<rootDir>/src/events',
   },
 };

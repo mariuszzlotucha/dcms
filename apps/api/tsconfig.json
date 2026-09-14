@@ -12,6 +12,7 @@
       "@app/*": ["src/app/*"],
       "@platform/*": ["src/platform/*"],
       "@domain/*": ["src/domain/*"],
+      "@contracts/*": ["../../shared/contracts/*"],
       "@": ["src/events"]
     },
     "experimentalDecorators": true,

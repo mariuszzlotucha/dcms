@@ -34,6 +34,8 @@ import { AuditModule } from '@platform/audit';
 import { PiiRedactionModule } from '@platform/pii-redaction';
 import { DataRetentionModule } from '@platform/data-retention';
 import { PasswordPolicyModule } from '@platform/password-policy';
+import { ContractsModule } from '@domain/contracts';
+import { TemplatesModule } from '@domain/templates';
 
 // Single source of truth for both SecurityModule (which enforces it) and
 // SessionsModule (whose RefreshTokenGuard refuses cookie-sourced refresh
@@ -239,6 +241,8 @@ const CSRF_ENABLED = false;
       maxFailedAttempts: 5,
       lockoutDurationMinutes: 15,
     }),
+    TemplatesModule,
+    ContractsModule,
   ],
 })
 export class AppModule { }
