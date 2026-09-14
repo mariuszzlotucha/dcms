@@ -34,8 +34,8 @@ const coreProviders: Provider[] = [
 @Module({})
 export class SecurityModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Nest 11 / Express 5: replace '*' with '{*splat}' if '*' stops matching.
-    consumer.apply(HelmetMiddleware).forRoutes('*');
+    // Express 5's path-to-regexp v8 requires a named wildcard param.
+    consumer.apply(HelmetMiddleware).forRoutes('{*splat}');
   }
 
   static forRoot(config: SecurityModuleConfig): DynamicModule {
