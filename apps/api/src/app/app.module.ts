@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmHealthIndicator } from '@nestjs/terminus';
 import { validateConfig } from './config/config.schema';
 import type { AppConfig } from './config/config.schema';
 import { HealthModule } from '@platform/health/health.module';
@@ -61,7 +62,12 @@ import { PasswordPolicyModule } from '@platform/password-policy';
         return { level: isProd ? 'info' : 'debug', prettyPrint: !isProd };
       },
     }),
-    HealthModule.forRoot(),
+    HealthModule.forRootAsync({
+      inject: [TypeOrmHealthIndicator],
+      useFactory: (typeOrmHealthIndicator: TypeOrmHealthIndicator) => ({
+        checks: [() => typeOrmHealthIndicator.pingCheck('database')],
+      }),
+    }),
     SecretsModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService<AppConfig, true>) => {
