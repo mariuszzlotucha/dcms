@@ -1,10 +1,13 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { SESSIONS_MODULE_CONFIG, SessionsModuleConfig } from '../sessions.config';
 
 export type RequestWithRefreshToken = Request & { refreshToken: string };
 
@@ -16,6 +19,11 @@ export type RequestWithRefreshToken = Request & { refreshToken: string };
  */
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
+  constructor(
+    @Inject(SESSIONS_MODULE_CONFIG)
+    private readonly config: SessionsModuleConfig,
+  ) {}
+
   canActivate(context: ExecutionContext): boolean {
     const req = context
       .switchToHttp()
@@ -26,6 +34,16 @@ export class RefreshTokenGuard implements CanActivate {
     const body = req.body as { refreshToken?: unknown } | undefined;
     const fromBody =
       typeof body?.refreshToken === 'string' ? body.refreshToken : undefined;
+
+    // A cookie-sourced token is exactly the CSRF-forgeable case (a browser
+    // attaches cookies to cross-site requests automatically) — CSRF
+    // protection must be active before this path is trusted. The JSON-body
+    // path is unaffected: no browser auto-attaches a request body.
+    if (fromCookie !== undefined && !this.config.csrfEnabled) {
+      throw new ForbiddenException(
+        'Cookie-based refresh tokens require CSRF protection to be enabled',
+      );
+    }
 
     const token = fromCookie ?? fromBody;
     if (!token) {

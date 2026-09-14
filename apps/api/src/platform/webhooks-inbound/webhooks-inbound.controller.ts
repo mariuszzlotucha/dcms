@@ -1,4 +1,4 @@
-import { Controller, HttpCode, NotFoundException, Param, Post, Req } from '@nestjs/common';
+import { BadRequestException, Controller, HttpCode, NotFoundException, Param, Post, Req } from '@nestjs/common';
 import { RawBodyRequest } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Request } from 'express';
@@ -33,6 +33,22 @@ export class WebhooksInboundController {
 
     const secret = this.secretsService.getProviderSecret(provider.secretName);
     const result = provider.verify(request.rawBody, request.headers, secret);
+
+    if (!result.verified) {
+      // Rejected here, not left to each listener to check `verified` itself
+      // — a forged/garbled payload must never reach WEBHOOK_RECEIVED
+      // subscribers, and the provider (e.g. Stripe) needs a non-200 to
+      // trigger its own retry/alerting for a bad signature.
+      this.eventEmitter.emit(
+        PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED,
+        {
+          reason: `unverified ${provider.name} webhook signature`,
+          path: request.path,
+          ip: request.ip ?? '',
+        } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED],
+      );
+      throw new BadRequestException('Webhook signature verification failed');
+    }
 
     this.eventEmitter.emit(
       PLATFORM_EVENTS.WEBHOOK_RECEIVED,

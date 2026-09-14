@@ -42,6 +42,14 @@ async function bootstrap() {
   // scavenger hunt for a missing middleware.
   app.use(cookieParser());
 
+  // Explicit, reviewed cap instead of body-parser's implicit ~100kb default
+  // (docs/dcms-security-hardening.md) — protects against DoS via huge JSON
+  // payloads. Doesn't affect file uploads: those go through multer's own
+  // multipart handling and size limit (file-storage's maxSizeBytes), not
+  // this JSON/urlencoded body parser.
+  app.useBodyParser('json', { limit: '1mb' });
+  app.useBodyParser('urlencoded', { limit: '1mb', extended: true });
+
   app.enableCors(
     createCorsOptions(app.get<SecurityModuleConfig>(SECURITY_MODULE_CONFIG)),
   );

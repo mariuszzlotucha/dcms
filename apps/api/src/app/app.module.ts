@@ -35,6 +35,12 @@ import { PiiRedactionModule } from '@platform/pii-redaction';
 import { DataRetentionModule } from '@platform/data-retention';
 import { PasswordPolicyModule } from '@platform/password-policy';
 
+// Single source of truth for both SecurityModule (which enforces it) and
+// SessionsModule (whose RefreshTokenGuard refuses cookie-sourced refresh
+// tokens unless it's true) — see SessionsModuleConfig.csrfEnabled for why
+// these two must never drift apart.
+const CSRF_ENABLED = false;
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate: validateConfig }),
@@ -119,7 +125,7 @@ import { PasswordPolicyModule } from '@platform/password-policy';
         cors: {
           allowedOrigins: configService.get('CORS_ORIGIN', { infer: true }),
         },
-        csrf: { enabled: false },
+        csrf: { enabled: CSRF_ENABLED },
         encryption: { masterKey: secretsService.getEncryptionMasterKey() },
       }),
     }),
@@ -133,6 +139,7 @@ import { PasswordPolicyModule } from '@platform/password-policy';
     SessionsModule.forRoot({
       refreshTokenExpiresIn: '30d',
       accessTokenExpiresIn: '15m', // keep in sync with AuthModule's jwtExpiresIn
+      csrfEnabled: CSRF_ENABLED,
     }),
     RbacModule.forRoot({
       defaultRole: 'member',
