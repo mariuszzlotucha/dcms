@@ -49,5 +49,20 @@ describe('HealthModule', () => {
       expect(module.get(HealthService)).toBeInstanceOf(HealthService);
       expect(module.get(HEALTH_MODULE_CONFIG)).toEqual({ checks, source: 'db' });
     });
+
+    it('defaults imports and inject to empty arrays when omitted', async () => {
+      const checks: HealthIndicatorFunction[] = [jest.fn()];
+
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+          HealthModule.forRootAsync({
+            useFactory: () => ({ checks }),
+          }),
+        ],
+      }).compile();
+
+      expect(module.get(HealthService)).toBeInstanceOf(HealthService);
+      expect(module.get(HEALTH_MODULE_CONFIG)).toEqual({ checks });
+    });
   });
 });
