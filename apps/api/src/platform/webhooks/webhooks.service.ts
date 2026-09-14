@@ -44,18 +44,19 @@ export class WebhooksService {
     await this.webhookSubscriptions.save(subscription);
   }
 
-  async deliver(eventType: string, payload: unknown): Promise<void> {
-    const subscriptions = await this.findMatchingSubscriptions(eventType);
+  async deliver(tenantId: string, eventType: string, payload: unknown): Promise<void> {
+    const subscriptions = await this.findMatchingSubscriptions(tenantId, eventType);
 
     await Promise.all(
       subscriptions.map((subscription) => this.deliverToSubscription(subscription, eventType, payload)),
     );
   }
 
-  private async findMatchingSubscriptions(eventType: string): Promise<WebhookSubscription[]> {
+  private async findMatchingSubscriptions(tenantId: string, eventType: string): Promise<WebhookSubscription[]> {
     return this.webhookSubscriptions
       .createQueryBuilder('subscription')
-      .where('subscription.revokedAt IS NULL')
+      .where('subscription.tenantId = :tenantId', { tenantId })
+      .andWhere('subscription.revokedAt IS NULL')
       .andWhere(':eventType = ANY(subscription.eventTypes)', { eventType })
       .getMany();
   }
