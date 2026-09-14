@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CronTime } from 'cron';
@@ -10,7 +10,7 @@ const JOB_NAME = 'secrets-rotation';
 const KNOWN_SECRET_NAMES = ['jwtSigningKey', 'encryptionMasterKey'];
 
 @Injectable()
-export class SecretsRotationJob implements OnModuleInit {
+export class SecretsRotationJob implements OnApplicationBootstrap {
   private readonly logger = new Logger(SecretsRotationJob.name);
 
   constructor(
@@ -21,7 +21,7 @@ export class SecretsRotationJob implements OnModuleInit {
     private readonly config: SchedulerModuleConfig,
   ) {}
 
-  onModuleInit(): void {
+  onApplicationBootstrap(): void {
     const job = this.schedulerRegistry.getCronJob(JOB_NAME);
     job.setTime(new CronTime(this.config.secretsRotationCron));
     job.start();

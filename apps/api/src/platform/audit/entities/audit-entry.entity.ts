@@ -8,10 +8,10 @@ export class AuditEntry {
   @Column()
   eventName: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   actorId: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   tenantId: string | null;
 
   @Column({ type: 'jsonb' })

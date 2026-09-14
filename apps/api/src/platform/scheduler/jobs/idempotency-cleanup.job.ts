@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CronTime } from 'cron';
@@ -9,7 +9,7 @@ import { SCHEDULER_MODULE_CONFIG, SchedulerModuleConfig } from '../scheduler.con
 const JOB_NAME = 'idempotency-cleanup';
 
 @Injectable()
-export class IdempotencyCleanupJob implements OnModuleInit {
+export class IdempotencyCleanupJob implements OnApplicationBootstrap {
   private readonly logger = new Logger(IdempotencyCleanupJob.name);
 
   constructor(
@@ -20,7 +20,7 @@ export class IdempotencyCleanupJob implements OnModuleInit {
     private readonly config: SchedulerModuleConfig,
   ) {}
 
-  onModuleInit(): void {
+  onApplicationBootstrap(): void {
     const job = this.schedulerRegistry.getCronJob(JOB_NAME);
     job.setTime(new CronTime(this.config.idempotencyCleanupCron));
     job.start();
