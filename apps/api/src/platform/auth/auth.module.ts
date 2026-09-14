@@ -13,6 +13,7 @@ import { User } from './entities/user.entity';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LinkedInStrategy } from './strategies/linkedin.strategy';
+import { OauthStateStore } from './oauth/oauth-state.store';
 
 // JwtModule deliberately registered without options — the signing key comes
 // from SecretsService and is passed explicitly at sign/verify time.
@@ -24,6 +25,7 @@ const coreImports = [
 
 const coreProviders: Provider[] = [
   AuthService,
+  OauthStateStore,
   JwtStrategy,
   GoogleStrategy,
   LinkedInStrategy,
