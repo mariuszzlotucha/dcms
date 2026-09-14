@@ -45,7 +45,11 @@ export class FileStorageService {
       throw new BadRequestException('File exceeds maximum allowed size');
     }
 
-    const storageKey = `${tenantId}/${randomUUID()}-${originalFilename}`;
+    // S3 keys are flat strings — a literal "../" isn't resolved the way it
+    // would be on a filesystem — but sanitize anyway so this stays safe if
+    // storage ever moves to a local/POSIX backend.
+    const sanitizedFilename = originalFilename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const storageKey = `${tenantId}/${randomUUID()}-${sanitizedFilename}`;
 
     await this.client.send(
       new PutObjectCommand({
@@ -102,8 +106,15 @@ export class FileStorageService {
     );
   }
 
-  async listFiles(tenantId?: string): Promise<FileRecord[]> {
-    return this.files.find(tenantId ? { where: { tenantId } } : {});
+  async listFiles(tenantId: string): Promise<FileRecord[]> {
+    return this.files.find({ where: { tenantId } });
+  }
+
+  // Deliberately separate from listFiles rather than an omittable tenantId
+  // param — a system-wide sweep should be something a caller opts into by
+  // name, not something that happens by forgetting an argument.
+  async listAllFiles(): Promise<FileRecord[]> {
+    return this.files.find();
   }
 
   async listFilesByUploader(uploadedBy: string): Promise<FileRecord[]> {

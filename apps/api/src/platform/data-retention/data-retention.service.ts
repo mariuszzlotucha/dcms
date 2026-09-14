@@ -53,7 +53,7 @@ export class DataRetentionService {
   // account no longer exists. This will need revisiting once domain/contracts
   // exists and files can be tied to a contract's lifecycle instead.
   async purgeOrphanedFiles(tenantId?: string): Promise<number> {
-    const files = await this.fileStorageService.listFiles(tenantId);
+    const files = tenantId ? await this.fileStorageService.listFiles(tenantId) : await this.fileStorageService.listAllFiles();
     let purgedCount = 0;
 
     for (const file of files) {
