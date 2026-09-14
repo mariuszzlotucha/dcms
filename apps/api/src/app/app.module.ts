@@ -35,6 +35,7 @@ import { PiiRedactionModule } from '@platform/pii-redaction';
 import { DataRetentionModule } from '@platform/data-retention';
 import { PasswordPolicyModule } from '@platform/password-policy';
 import { AccessControlModule } from '@domain/access-control';
+import { AnalyticsInsightsModule } from '@domain/analytics-insights';
 import { ContractsModule } from '@domain/contracts';
 import { EsignatureModule } from '@domain/esignature';
 import { NegotiationApprovalModule } from '@domain/negotiation-approval';
@@ -262,6 +263,7 @@ const CSRF_ENABLED = false;
       },
     }),
     AccessControlModule,
+    AnalyticsInsightsModule,
   ],
 })
 export class AppModule { }
