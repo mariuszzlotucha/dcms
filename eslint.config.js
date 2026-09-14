@@ -2,6 +2,9 @@ import boundaries from 'eslint-plugin-boundaries';
 import tseslint from 'typescript-eslint';
 
 export default [
+    {
+        ignores: ['**/dist/**', '**/build/**', '**/node_modules/**', '**/coverage/**'],
+    },
     ...tseslint.configs.recommended,
     {
         files: ['apps/api/src/platform/**/*.config.ts'],
@@ -11,7 +14,6 @@ export default [
     },
     {
         files: ['**/*.ts', '**/*.tsx'],
-        ignores: ['**/dist/**', '**/node_modules/**'],
         languageOptions: {
             parserOptions: {
                 ecmaFeatures: { jsx: true },

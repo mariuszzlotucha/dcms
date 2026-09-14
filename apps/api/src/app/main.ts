@@ -80,7 +80,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  // eslint-disable-next-line no-console
   console.error('Failed to start DCMS API:', error);
   process.exit(1);
 });
