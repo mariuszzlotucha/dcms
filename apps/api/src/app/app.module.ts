@@ -36,6 +36,7 @@ import { DataRetentionModule } from '@platform/data-retention';
 import { PasswordPolicyModule } from '@platform/password-policy';
 import { AccessControlModule } from '@domain/access-control';
 import { AnalyticsInsightsModule } from '@domain/analytics-insights';
+import { ComplianceReportingModule } from '@domain/compliance-reporting';
 import { ContractsModule } from '@domain/contracts';
 import { EsignatureModule } from '@domain/esignature';
 import { IntegrationsModule } from '@domain/integrations';
@@ -268,6 +269,7 @@ const CSRF_ENABLED = false;
     AnalyticsInsightsModule,
     NotificationsRemindersModule,
     IntegrationsModule,
+    ComplianceReportingModule,
   ],
 })
 export class AppModule { }
