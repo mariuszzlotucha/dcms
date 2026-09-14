@@ -6,8 +6,7 @@ import { Repository } from 'typeorm';
 import { NotificationsService } from '@platform/notifications/notifications.service';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
 import { Subscription } from './entities/subscription.entity';
-import { BILLING_MODULE_CONFIG, BillingModuleConfig } from './billing.config';
-import { STRIPE_CLIENT } from './billing.module';
+import { BILLING_MODULE_CONFIG, BillingModuleConfig, STRIPE_CLIENT } from './billing.config';
 
 @Injectable()
 export class BillingService {

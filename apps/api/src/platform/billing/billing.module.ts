@@ -3,12 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import Stripe from 'stripe';
 import { SecretsService } from '@platform/secrets/secrets.service';
 import { Subscription } from './entities/subscription.entity';
-import { BILLING_MODULE_CONFIG, BillingModuleConfig } from './billing.config';
+import { BILLING_MODULE_CONFIG, BillingModuleConfig, STRIPE_CLIENT } from './billing.config';
 import { BillingController } from './billing.controller';
 import { BillingListener } from './billing.listener';
 import { BillingService } from './billing.service';
-
-export const STRIPE_CLIENT = 'STRIPE_CLIENT';
 
 interface BillingModuleAsyncOptions {
   useFactory: (...args: unknown[]) => BillingModuleConfig | Promise<BillingModuleConfig>;

@@ -3,16 +3,13 @@ import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '@platform/auth/entities/user.entity';
 import { Session } from '@platform/sessions/entities/session.entity';
-import { DATA_RETENTION_MODULE_CONFIG, DataRetentionModuleConfig } from './data-retention.config';
+import {
+  DATA_RETENTION_MODULE_CONFIG,
+  DataRetentionModuleConfig,
+  USER_ACCOUNT_QUERIES,
+  UserAccountQueries,
+} from './data-retention.config';
 import { DataRetentionService } from './data-retention.service';
-
-export const USER_ACCOUNT_QUERIES = 'USER_ACCOUNT_QUERIES';
-
-export interface UserAccountQueries {
-  findUserIdsInactiveSince(cutoff: Date): Promise<string[]>;
-  userExists(userId: string): Promise<boolean>;
-  deleteUser(userId: string): Promise<void>;
-}
 
 // Default implementation, backed by auth's real User and sessions' real
 // Session entities now that both are known. "Inactive" = no Session row

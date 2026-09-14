@@ -3,8 +3,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ConsentService } from '@platform/consent/consent.service';
 import { FileStorageService } from '@platform/file-storage/file-storage.service';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
-import { DATA_RETENTION_MODULE_CONFIG, DataRetentionModuleConfig } from './data-retention.config';
-import { USER_ACCOUNT_QUERIES, UserAccountQueries } from './data-retention.module';
+import {
+  DATA_RETENTION_MODULE_CONFIG,
+  DataRetentionModuleConfig,
+  USER_ACCOUNT_QUERIES,
+  UserAccountQueries,
+} from './data-retention.config';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
