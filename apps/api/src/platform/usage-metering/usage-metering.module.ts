@@ -1,11 +1,19 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsageCounter } from './entities/usage-counter.entity';
 import { USAGE_METERING_MODULE_CONFIG, UsageMeteringModuleConfig } from './usage-metering.config';
 import { UsageMeteringService } from './usage-metering.service';
 
 interface UsageMeteringModuleAsyncOptions {
-  useFactory: (...args: unknown[]) => UsageMeteringModuleConfig | Promise<UsageMeteringModuleConfig>;
+  useFactory: (
+    ...args: unknown[]
+  ) => UsageMeteringModuleConfig | Promise<UsageMeteringModuleConfig>;
   inject?: (InjectionToken | OptionalFactoryDependency)[];
 }
 
@@ -16,7 +24,10 @@ export class UsageMeteringModule {
       module: UsageMeteringModule,
       global: true,
       imports: [TypeOrmModule.forFeature([UsageCounter])],
-      providers: [{ provide: USAGE_METERING_MODULE_CONFIG, useValue: config }, UsageMeteringService],
+      providers: [
+        { provide: USAGE_METERING_MODULE_CONFIG, useValue: config },
+        UsageMeteringService,
+      ],
       exports: [UsageMeteringService],
     };
   }

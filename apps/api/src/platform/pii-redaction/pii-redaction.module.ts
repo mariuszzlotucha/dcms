@@ -1,4 +1,10 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { PII_REDACTION_MODULE_CONFIG, PiiRedactionModuleConfig } from './pii-redaction.config';
 import { PiiRedactionService } from './pii-redaction.service';
 

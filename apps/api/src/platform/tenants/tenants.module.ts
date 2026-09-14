@@ -1,4 +1,10 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Tenant } from './entities/tenant.entity';
 import { TenantContextService } from './context/tenant-context.service';
@@ -19,7 +25,11 @@ export class TenantsModule {
       global: true,
       imports: [TypeOrmModule.forFeature([Tenant])],
       controllers: [TenantsController],
-      providers: [{ provide: TENANTS_MODULE_CONFIG, useValue: config }, TenantsService, TenantContextService],
+      providers: [
+        { provide: TENANTS_MODULE_CONFIG, useValue: config },
+        TenantsService,
+        TenantContextService,
+      ],
       exports: [TenantsService, TenantContextService],
     };
   }

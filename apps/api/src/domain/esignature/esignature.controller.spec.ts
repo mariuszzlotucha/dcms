@@ -22,7 +22,13 @@ describe('EsignatureController', () => {
     const dto = { fileId: 'file-1', signerEmail: 'signer@example.com', signerName: 'Jane Signer' };
     await controller.requestSignature('c1', dto);
 
-    expect(service.requestSignature).toHaveBeenCalledWith('t1', 'c1', 'file-1', 'signer@example.com', 'Jane Signer');
+    expect(service.requestSignature).toHaveBeenCalledWith(
+      't1',
+      'c1',
+      'file-1',
+      'signer@example.com',
+      'Jane Signer',
+    );
   });
 
   it('lists envelopes scoped to the resolved tenant', async () => {

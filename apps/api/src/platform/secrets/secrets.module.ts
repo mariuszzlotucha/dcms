@@ -15,10 +15,7 @@ export class SecretsModule {
     return {
       module: SecretsModule,
       global: true,
-      providers: [
-        { provide: SECRETS_MODULE_CONFIG, useValue: config },
-        SecretsService,
-      ],
+      providers: [{ provide: SECRETS_MODULE_CONFIG, useValue: config }, SecretsService],
       exports: [SecretsService],
     };
   }

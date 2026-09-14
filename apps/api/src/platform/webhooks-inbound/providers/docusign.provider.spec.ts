@@ -7,7 +7,9 @@ describe('docusignProvider', () => {
   const sign = (body: Buffer) => createHmac('sha256', secret).update(body).digest('base64');
 
   it('verifies a correctly-signed payload and extracts the event type', () => {
-    const body = Buffer.from(JSON.stringify({ event: 'envelope-completed', data: { envelopeId: 'ds-1' } }));
+    const body = Buffer.from(
+      JSON.stringify({ event: 'envelope-completed', data: { envelopeId: 'ds-1' } }),
+    );
     const headers = { 'x-docusign-signature-1': sign(body) };
 
     const result = docusignProvider.verify(body, headers, secret);
@@ -20,8 +22,12 @@ describe('docusignProvider', () => {
   });
 
   it('rejects a payload with a tampered body (signature no longer matches)', () => {
-    const original = Buffer.from(JSON.stringify({ event: 'envelope-completed', data: { envelopeId: 'ds-1' } }));
-    const tampered = Buffer.from(JSON.stringify({ event: 'envelope-completed', data: { envelopeId: 'ds-2' } }));
+    const original = Buffer.from(
+      JSON.stringify({ event: 'envelope-completed', data: { envelopeId: 'ds-1' } }),
+    );
+    const tampered = Buffer.from(
+      JSON.stringify({ event: 'envelope-completed', data: { envelopeId: 'ds-2' } }),
+    );
     const headers = { 'x-docusign-signature-1': sign(original) };
 
     const result = docusignProvider.verify(tampered, headers, secret);

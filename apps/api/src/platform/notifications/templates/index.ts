@@ -1,6 +1,9 @@
 import { PasswordResetTemplateData, buildPasswordResetTemplate } from './password-reset.template';
 import { ReminderTemplateData, buildReminderTemplate } from './reminder.template';
-import { SubscriptionUpdatedTemplateData, buildSubscriptionUpdatedTemplate } from './subscription-updated.template';
+import {
+  SubscriptionUpdatedTemplateData,
+  buildSubscriptionUpdatedTemplate,
+} from './subscription-updated.template';
 import { WelcomeTemplateData, buildWelcomeTemplate } from './welcome.template';
 
 export interface NotificationTemplateDataMap {

@@ -18,7 +18,10 @@ export const docusignProvider: WebhookProvider = {
     const expectedBuffer = Buffer.from(expected);
     const providedBuffer = Buffer.from(signature);
 
-    if (expectedBuffer.length !== providedBuffer.length || !timingSafeEqual(expectedBuffer, providedBuffer)) {
+    if (
+      expectedBuffer.length !== providedBuffer.length ||
+      !timingSafeEqual(expectedBuffer, providedBuffer)
+    ) {
       return { verified: false, eventType: 'unknown', payload: null };
     }
 

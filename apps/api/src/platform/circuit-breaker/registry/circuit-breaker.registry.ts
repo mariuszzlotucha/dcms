@@ -2,7 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import CircuitBreaker from 'opossum';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../../events';
-import { CIRCUIT_BREAKER_MODULE_CONFIG, CircuitBreakerModuleConfig } from '../circuit-breaker.config';
+import {
+  CIRCUIT_BREAKER_MODULE_CONFIG,
+  CircuitBreakerModuleConfig,
+} from '../circuit-breaker.config';
 
 type Thunk<T> = () => Promise<T>;
 
@@ -36,17 +39,15 @@ export class CircuitBreakerRegistry {
     });
 
     breaker.on('open', () => {
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.CIRCUIT_BREAKER_OPENED,
-        { provider: providerName } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CIRCUIT_BREAKER_OPENED],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.CIRCUIT_BREAKER_OPENED, {
+        provider: providerName,
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CIRCUIT_BREAKER_OPENED]);
     });
 
     breaker.on('close', () => {
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.CIRCUIT_BREAKER_CLOSED,
-        { provider: providerName } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CIRCUIT_BREAKER_CLOSED],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.CIRCUIT_BREAKER_CLOSED, {
+        provider: providerName,
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CIRCUIT_BREAKER_CLOSED]);
     });
 
     this.breakers.set(providerName, breaker);

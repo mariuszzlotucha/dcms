@@ -69,7 +69,10 @@ describe('PiiRedactionService', () => {
 
     it('applies extra configured patterns in addition to the built-in ones', () => {
       const ssnConfig: PiiRedactionModuleConfig = { extraPatterns: [/\b\d{3}-\d{2}-\d{4}\b/] };
-      const ssnService = new PiiRedactionService(secretsService as unknown as SecretsService, ssnConfig);
+      const ssnService = new PiiRedactionService(
+        secretsService as unknown as SecretsService,
+        ssnConfig,
+      );
 
       const result = ssnService.redactText('SSN: 123-45-6789');
 
@@ -78,7 +81,10 @@ describe('PiiRedactionService', () => {
 
     it('handles a non-global extra pattern correctly across multiple matches', () => {
       const nonGlobalConfig: PiiRedactionModuleConfig = { extraPatterns: [/CODE-\d+/] };
-      const codeService = new PiiRedactionService(secretsService as unknown as SecretsService, nonGlobalConfig);
+      const codeService = new PiiRedactionService(
+        secretsService as unknown as SecretsService,
+        nonGlobalConfig,
+      );
 
       const result = codeService.redactText('CODE-111 and CODE-222');
 
@@ -96,7 +102,9 @@ describe('PiiRedactionService', () => {
     });
 
     it('redacts a nested field via a dotted path', () => {
-      const result = service.redactObject({ contact: { email: 'jane@example.com' } }, ['contact.email']);
+      const result = service.redactObject({ contact: { email: 'jane@example.com' } }, [
+        'contact.email',
+      ]);
 
       expect(result.contact.email).toBe(tokenFor('jane@example.com'));
     });
@@ -110,7 +118,9 @@ describe('PiiRedactionService', () => {
     });
 
     it('silently ignores a path that does not exist on the object', () => {
-      const result = service.redactObject({ name: 'Jane' } as { name: string; email?: string }, ['email']);
+      const result = service.redactObject({ name: 'Jane' } as { name: string; email?: string }, [
+        'email',
+      ]);
 
       expect(result).toEqual({ name: 'Jane' });
     });

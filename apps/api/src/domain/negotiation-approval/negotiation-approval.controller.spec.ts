@@ -68,9 +68,18 @@ describe('NegotiationApprovalController', () => {
   it('rejects approval with a reason as the authenticated caller', async () => {
     service.rejectApproval.mockResolvedValue({ id: 'req-1', status: 'rejected' });
 
-    await controller.rejectApproval('c1', { reason: 'missing indemnity clause' }, requestAs('approver-1'));
+    await controller.rejectApproval(
+      'c1',
+      { reason: 'missing indemnity clause' },
+      requestAs('approver-1'),
+    );
 
-    expect(service.rejectApproval).toHaveBeenCalledWith('t1', 'c1', 'approver-1', 'missing indemnity clause');
+    expect(service.rejectApproval).toHaveBeenCalledWith(
+      't1',
+      'c1',
+      'approver-1',
+      'missing indemnity clause',
+    );
   });
 
   it('requests a revision as the authenticated caller', async () => {

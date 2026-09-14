@@ -12,10 +12,7 @@ import { SessionsService } from './sessions.service';
 import { Session } from './entities/session.entity';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 
-const coreImports = [
-  TypeOrmModule.forFeature([Session, User]),
-  JwtModule.register({}),
-];
+const coreImports = [TypeOrmModule.forFeature([Session, User]), JwtModule.register({})];
 
 const coreProviders: Provider[] = [SessionsService, RefreshTokenGuard];
 
@@ -26,10 +23,7 @@ export class SessionsModule {
       module: SessionsModule,
       imports: coreImports,
       controllers: [SessionsController],
-      providers: [
-        { provide: SESSIONS_MODULE_CONFIG, useValue: config },
-        ...coreProviders,
-      ],
+      providers: [{ provide: SESSIONS_MODULE_CONFIG, useValue: config }, ...coreProviders],
       exports: [SessionsService],
     };
   }

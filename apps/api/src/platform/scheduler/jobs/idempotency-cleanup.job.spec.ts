@@ -64,7 +64,10 @@ describe('IdempotencyCleanupJob', () => {
         jobName: 'idempotency-cleanup',
         reason: 'db unavailable',
       });
-      expect(eventEmitter.emit).not.toHaveBeenCalledWith(PLATFORM_EVENTS.SCHEDULER_JOB_COMPLETED, expect.anything());
+      expect(eventEmitter.emit).not.toHaveBeenCalledWith(
+        PLATFORM_EVENTS.SCHEDULER_JOB_COMPLETED,
+        expect.anything(),
+      );
     });
 
     it('falls back to a generic reason when a non-Error is thrown', async () => {

@@ -4,7 +4,8 @@ import { DEFAULT_REDACT_PATHS, buildPinoHttpOptions } from './logging.module';
 // buildPinoHttpOptions always returns a plain Options object in this
 // codebase (never the DestinationStream/tuple variants of the return type),
 // so tests narrow to that for property access.
-const build = (config: Parameters<typeof buildPinoHttpOptions>[0]) => buildPinoHttpOptions(config) as Options;
+const build = (config: Parameters<typeof buildPinoHttpOptions>[0]) =>
+  buildPinoHttpOptions(config) as Options;
 
 describe('buildPinoHttpOptions', () => {
   it('defaults to info level when none is configured', () => {
@@ -31,7 +32,9 @@ describe('buildPinoHttpOptions', () => {
     expect(options.redact).toEqual(
       expect.arrayContaining([...DEFAULT_REDACT_PATHS, 'req.body.ssn']),
     );
-    expect((options.redact as string[]).filter((path) => path === 'req.headers.authorization')).toHaveLength(1);
+    expect(
+      (options.redact as string[]).filter((path) => path === 'req.headers.authorization'),
+    ).toHaveLength(1);
   });
 
   it('omits transport when prettyPrint is not enabled', () => {

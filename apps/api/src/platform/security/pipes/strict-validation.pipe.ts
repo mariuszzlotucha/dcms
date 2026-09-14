@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  ValidationError,
-  ValidationPipe,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, ValidationError, ValidationPipe } from '@nestjs/common';
 
 export class ValidationRejectedException extends BadRequestException {
   constructor(public readonly validationErrors: ValidationError[]) {

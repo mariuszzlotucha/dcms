@@ -1,4 +1,10 @@
-import { ForbiddenException, Inject, Injectable, Scope, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Scope,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { RbacService } from '@platform/rbac/rbac.service';

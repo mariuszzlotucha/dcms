@@ -15,7 +15,11 @@ describe('initializeObservability', () => {
   beforeEach(() => {
     sdkStart = jest.fn();
     MockedNodeSDK.mockImplementation(
-      () => ({ start: sdkStart, shutdown: jest.fn().mockResolvedValue(undefined) }) as unknown as NodeSDK,
+      () =>
+        ({
+          start: sdkStart,
+          shutdown: jest.fn().mockResolvedValue(undefined),
+        }) as unknown as NodeSDK,
     );
   });
 
@@ -24,7 +28,11 @@ describe('initializeObservability', () => {
   });
 
   it('does not start the SDK when disabled, even with an endpoint configured', () => {
-    initializeObservability({ serviceName: 'dcms-api', otlpEndpoint: 'https://otel.example', enabled: false });
+    initializeObservability({
+      serviceName: 'dcms-api',
+      otlpEndpoint: 'https://otel.example',
+      enabled: false,
+    });
 
     expect(MockedNodeSDK).not.toHaveBeenCalled();
   });
@@ -36,7 +44,11 @@ describe('initializeObservability', () => {
   });
 
   it('starts the SDK when enabled with an OTLP endpoint', () => {
-    initializeObservability({ serviceName: 'dcms-api', otlpEndpoint: 'https://otel.example', enabled: true });
+    initializeObservability({
+      serviceName: 'dcms-api',
+      otlpEndpoint: 'https://otel.example',
+      enabled: true,
+    });
 
     expect(MockedNodeSDK).toHaveBeenCalledTimes(1);
     expect(sdkStart).toHaveBeenCalledTimes(1);

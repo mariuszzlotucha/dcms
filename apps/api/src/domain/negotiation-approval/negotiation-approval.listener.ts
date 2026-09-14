@@ -20,7 +20,10 @@ export class NegotiationApprovalListener {
   async handleContractSubmittedForApproval(
     event: EventPayloadMap[typeof EVENTS.CONTRACT_SUBMITTED_FOR_APPROVAL],
   ): Promise<void> {
-    await this.negotiationApprovalService.createApprovalRequestForSubmission(event.tenantId, event.contractId);
+    await this.negotiationApprovalService.createApprovalRequestForSubmission(
+      event.tenantId,
+      event.contractId,
+    );
   }
 
   // architecture doc 1.3 / 3: "auth.user.registered — allows assigning a new

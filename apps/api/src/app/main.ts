@@ -21,11 +21,10 @@ initializeObservability({
   enabled: process.env.OTEL_ENABLED === 'true',
 });
 
-
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
-    rawBody: true
+    rawBody: true,
   });
   app.useLogger(app.get(PinoLogger));
 
@@ -50,9 +49,7 @@ async function bootstrap() {
   app.useBodyParser('json', { limit: '1mb' });
   app.useBodyParser('urlencoded', { limit: '1mb', extended: true });
 
-  app.enableCors(
-    createCorsOptions(app.get<SecurityModuleConfig>(SECURITY_MODULE_CONFIG)),
-  );
+  app.enableCors(createCorsOptions(app.get<SecurityModuleConfig>(SECURITY_MODULE_CONFIG)));
 
   app.setGlobalPrefix('api', {
     exclude: [
@@ -64,12 +61,12 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   setupSwagger(app, {
-  path: 'docs',
-  title: 'DCMS API',
-  description: 'Digital Contract Management System — public API',
-  version: '1.0',
-  enabled: process.env.NODE_ENV !== 'production',
-});
+    path: 'docs',
+    title: 'DCMS API',
+    description: 'Digital Contract Management System — public API',
+    version: '1.0',
+    enabled: process.env.NODE_ENV !== 'production',
+  });
 
   const port = configService.get('PORT', { infer: true });
   await app.listen(port);

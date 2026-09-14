@@ -53,7 +53,9 @@ describe('UsageMeteringService', () => {
 
     it('blocks immediately without incrementing when the plan limit is zero', async () => {
       billingService.getSubscription.mockResolvedValue({ plan: 'free' } as Subscription);
-      const zeroLimitConfig: UsageMeteringModuleConfig = { limitsByPlan: { free: { 'contracts.create': 0 } } };
+      const zeroLimitConfig: UsageMeteringModuleConfig = {
+        limitsByPlan: { free: { 'contracts.create': 0 } },
+      };
       const zeroLimitService = new UsageMeteringService(
         usageCounters as never,
         zeroLimitConfig,

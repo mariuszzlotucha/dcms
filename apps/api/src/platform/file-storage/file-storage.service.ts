@@ -1,5 +1,10 @@
 import { randomUUID } from 'crypto';
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -71,15 +76,12 @@ export class FileStorageService {
       }),
     );
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.FILE_UPLOADED,
-      {
-        tenantId,
-        fileId: fileRecord.id,
-        sizeBytes: fileRecord.sizeBytes,
-        mimeType: fileRecord.mimeType,
-      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FILE_UPLOADED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.FILE_UPLOADED, {
+      tenantId,
+      fileId: fileRecord.id,
+      sizeBytes: fileRecord.sizeBytes,
+      mimeType: fileRecord.mimeType,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FILE_UPLOADED]);
 
     return fileRecord;
   }
@@ -97,13 +99,15 @@ export class FileStorageService {
   async deleteFile(tenantId: string, fileId: string): Promise<void> {
     const fileRecord = await this.findOwnedFile(tenantId, fileId);
 
-    await this.client.send(new DeleteObjectCommand({ Bucket: this.config.bucket, Key: fileRecord.storageKey }));
+    await this.client.send(
+      new DeleteObjectCommand({ Bucket: this.config.bucket, Key: fileRecord.storageKey }),
+    );
     await this.files.remove(fileRecord);
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.FILE_DELETED,
-      { tenantId, fileId } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FILE_DELETED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.FILE_DELETED, {
+      tenantId,
+      fileId,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FILE_DELETED]);
   }
 
   async listFiles(tenantId: string): Promise<FileRecord[]> {

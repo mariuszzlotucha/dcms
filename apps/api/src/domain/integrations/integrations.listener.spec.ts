@@ -25,25 +25,42 @@ describe('IntegrationsListener', () => {
   });
 
   it('disconnects the tenant when the integrations flag is toggled off', async () => {
-    await listener.handleFeatureFlagToggled({ tenantId: 't1', flagKey: 'integrations', enabled: false });
+    await listener.handleFeatureFlagToggled({
+      tenantId: 't1',
+      flagKey: 'integrations',
+      enabled: false,
+    });
 
     expect(service.handleFeatureFlagDisabled).toHaveBeenCalledWith('t1');
   });
 
   it('ignores featureFlag.toggled for a different flag', async () => {
-    await listener.handleFeatureFlagToggled({ tenantId: 't1', flagKey: 'beta_dashboard', enabled: false });
+    await listener.handleFeatureFlagToggled({
+      tenantId: 't1',
+      flagKey: 'beta_dashboard',
+      enabled: false,
+    });
 
     expect(service.handleFeatureFlagDisabled).not.toHaveBeenCalled();
   });
 
   it('ignores featureFlag.toggled when the integrations flag is turned on', async () => {
-    await listener.handleFeatureFlagToggled({ tenantId: 't1', flagKey: 'integrations', enabled: true });
+    await listener.handleFeatureFlagToggled({
+      tenantId: 't1',
+      flagKey: 'integrations',
+      enabled: true,
+    });
 
     expect(service.handleFeatureFlagDisabled).not.toHaveBeenCalled();
   });
 
   it('reacts to contract.created by requesting a sync', async () => {
-    await listener.handleContractCreated({ tenantId: 't1', contractId: 'c1', templateId: null, createdBy: 'u1' });
+    await listener.handleContractCreated({
+      tenantId: 't1',
+      contractId: 'c1',
+      templateId: null,
+      createdBy: 'u1',
+    });
 
     expect(service.requestSync).toHaveBeenCalledWith('t1', 'c1');
   });

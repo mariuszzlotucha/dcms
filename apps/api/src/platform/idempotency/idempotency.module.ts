@@ -1,4 +1,10 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { IdempotencyRecord } from './entities/idempotency-record.entity';
 import { IDEMPOTENCY_MODULE_CONFIG, IdempotencyModuleConfig } from './idempotency.config';

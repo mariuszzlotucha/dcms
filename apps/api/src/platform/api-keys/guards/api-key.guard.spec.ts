@@ -17,7 +17,9 @@ describe('ApiKeyGuard', () => {
   });
 
   it('rejects a request with no x-api-key header', async () => {
-    await expect(guard.canActivate(buildContext({ headers: {} }))).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(buildContext({ headers: {} }))).rejects.toThrow(
+      UnauthorizedException,
+    );
     expect(apiKeys.findOne).not.toHaveBeenCalled();
   });
 
@@ -35,7 +37,9 @@ describe('ApiKeyGuard', () => {
     await guard.canActivate(buildContext({ headers: { 'x-api-key': rawKey } }));
 
     const expectedHash = createHash('sha256').update(rawKey).digest('hex');
-    expect(apiKeys.findOne).toHaveBeenCalledWith({ where: { keyHash: expectedHash, revokedAt: IsNull() } });
+    expect(apiKeys.findOne).toHaveBeenCalledWith({
+      where: { keyHash: expectedHash, revokedAt: IsNull() },
+    });
   });
 
   it('rejects an unknown or revoked key', async () => {

@@ -54,8 +54,18 @@ describe('AccessControlController', () => {
   it('invites a participant scoped to the resolved tenant and authenticated inviter', async () => {
     service.inviteParticipant.mockResolvedValue({ id: 'invite-1' });
 
-    await controller.inviteParticipant('c1', { email: 'stranger@example.com', permission: 'view' }, requestAs('admin-1'));
+    await controller.inviteParticipant(
+      'c1',
+      { email: 'stranger@example.com', permission: 'view' },
+      requestAs('admin-1'),
+    );
 
-    expect(service.inviteParticipant).toHaveBeenCalledWith('t1', 'c1', 'stranger@example.com', 'view', 'admin-1');
+    expect(service.inviteParticipant).toHaveBeenCalledWith(
+      't1',
+      'c1',
+      'stranger@example.com',
+      'view',
+      'admin-1',
+    );
   });
 });

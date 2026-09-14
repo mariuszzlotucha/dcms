@@ -23,11 +23,8 @@ export interface SecurityModuleConfig {
   };
 }
 
-export interface SecurityModuleAsyncOptions
-  extends Pick<ModuleMetadata, 'imports'> {
-  useFactory: (
-    ...args: any[]
-  ) => Promise<SecurityModuleConfig> | SecurityModuleConfig;
+export interface SecurityModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  useFactory: (...args: any[]) => Promise<SecurityModuleConfig> | SecurityModuleConfig;
   inject?: any[];
 }
 

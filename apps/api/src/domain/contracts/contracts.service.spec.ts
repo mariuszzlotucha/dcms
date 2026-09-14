@@ -39,7 +39,9 @@ describe('ContractsService', () => {
       delete: jest.fn(),
     };
     fileStorageService = { uploadFile: jest.fn().mockResolvedValue({ id: 'file-1' }) };
-    usageMeteringService = { checkAndIncrement: jest.fn().mockResolvedValue({ allowed: true, current: 1, limit: 10 }) };
+    usageMeteringService = {
+      checkAndIncrement: jest.fn().mockResolvedValue({ allowed: true, current: 1, limit: 10 }),
+    };
     eventEmitter = { emit: jest.fn() };
 
     service = new ContractsService(
@@ -53,7 +55,10 @@ describe('ContractsService', () => {
 
   describe('createContract', () => {
     it('creates a draft contract after checking the usage limit and emits contract.created', async () => {
-      const result = await service.createContract('t1', 'u1', { name: 'MSA', templateId: undefined });
+      const result = await service.createContract('t1', 'u1', {
+        name: 'MSA',
+        templateId: undefined,
+      });
 
       expect(usageMeteringService.checkAndIncrement).toHaveBeenCalledWith('t1', 'contracts.create');
       expect(contracts.create).toHaveBeenCalledWith(
@@ -67,9 +72,15 @@ describe('ContractsService', () => {
     });
 
     it('rejects creation once the plan limit is exceeded', async () => {
-      usageMeteringService.checkAndIncrement.mockResolvedValue({ allowed: false, current: 10, limit: 10 });
+      usageMeteringService.checkAndIncrement.mockResolvedValue({
+        allowed: false,
+        current: 10,
+        limit: 10,
+      });
 
-      await expect(service.createContract('t1', 'u1', { name: 'MSA' })).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(service.createContract('t1', 'u1', { name: 'MSA' })).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
       expect(contracts.save).not.toHaveBeenCalled();
     });
   });
@@ -85,7 +96,12 @@ describe('ContractsService', () => {
 
   describe('updateContract', () => {
     it('merges the DTO onto an editable contract and emits contract.updated', async () => {
-      contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft', name: 'Old name' });
+      contracts.findOne.mockResolvedValue({
+        id: 'c1',
+        tenantId: 't1',
+        status: 'draft',
+        name: 'Old name',
+      });
 
       const result = await service.updateContract('t1', 'c1', 'u1', { name: 'New name' });
 
@@ -99,9 +115,9 @@ describe('ContractsService', () => {
     it('rejects edits once the contract has left editable territory', async () => {
       contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'signed' });
 
-      await expect(service.updateContract('t1', 'c1', 'u1', { name: 'New name' })).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(
+        service.updateContract('t1', 'c1', 'u1', { name: 'New name' }),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 
@@ -132,26 +148,37 @@ describe('ContractsService', () => {
       expect(result.status).toBe('in_review');
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'contract.statusChanged',
-        expect.objectContaining({ contractId: 'c1', tenantId: 't1', previousStatus: 'draft', newStatus: 'in_review' }),
+        expect.objectContaining({
+          contractId: 'c1',
+          tenantId: 't1',
+          previousStatus: 'draft',
+          newStatus: 'in_review',
+        }),
       );
     });
 
     it('rejects a transition that skips the documented lifecycle', async () => {
       contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft' });
 
-      await expect(service.changeStatus('t1', 'c1', 'signed')).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.changeStatus('t1', 'c1', 'signed')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
     });
 
     it('rejects transitioning to the status the contract is already in', async () => {
       contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft' });
 
-      await expect(service.changeStatus('t1', 'c1', 'draft')).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.changeStatus('t1', 'c1', 'draft')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
     });
 
     it('rejects transitioning out of a terminal status', async () => {
       contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'terminated' });
 
-      await expect(service.changeStatus('t1', 'c1', 'active')).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.changeStatus('t1', 'c1', 'active')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
     });
   });
 
@@ -166,7 +193,10 @@ describe('ContractsService', () => {
         'contract.archived',
         expect.objectContaining({ contractId: 'c1', tenantId: 't1' }),
       );
-      expect(eventEmitter.emit).not.toHaveBeenCalledWith('contract.statusChanged', expect.anything());
+      expect(eventEmitter.emit).not.toHaveBeenCalledWith(
+        'contract.statusChanged',
+        expect.anything(),
+      );
     });
   });
 
@@ -207,7 +237,9 @@ describe('ContractsService', () => {
     it('rejects submission outside of negotiation', async () => {
       contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft' });
 
-      await expect(service.submitForApproval('t1', 'c1', 'u1')).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.submitForApproval('t1', 'c1', 'u1')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
     });
   });
 
@@ -215,17 +247,40 @@ describe('ContractsService', () => {
     it('uploads a file, checks the usage limit, and emits contract.versionCreated', async () => {
       contracts.findOne.mockResolvedValue({ id: 'c1', tenantId: 't1', status: 'draft' });
 
-      const result = await service.uploadVersion('t1', 'c1', 'u1', Buffer.from('x'), 'a.pdf', 'application/pdf');
+      const result = await service.uploadVersion(
+        't1',
+        'c1',
+        'u1',
+        Buffer.from('x'),
+        'a.pdf',
+        'application/pdf',
+      );
 
       expect(usageMeteringService.checkAndIncrement).toHaveBeenCalledWith('t1', 'contracts.create');
-      expect(fileStorageService.uploadFile).toHaveBeenCalledWith('t1', 'u1', Buffer.from('x'), 'a.pdf', 'application/pdf');
+      expect(fileStorageService.uploadFile).toHaveBeenCalledWith(
+        't1',
+        'u1',
+        Buffer.from('x'),
+        'a.pdf',
+        'application/pdf',
+      );
       expect(versions.create).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 't1', contractId: 'c1', versionNumber: 1, fileId: 'file-1' }),
+        expect.objectContaining({
+          tenantId: 't1',
+          contractId: 'c1',
+          versionNumber: 1,
+          fileId: 'file-1',
+        }),
       );
       expect(result.id).toBe('v1');
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'contract.versionCreated',
-        expect.objectContaining({ contractId: 'c1', tenantId: 't1', versionId: 'v1', createdBy: 'u1' }),
+        expect.objectContaining({
+          contractId: 'c1',
+          tenantId: 't1',
+          versionId: 'v1',
+          createdBy: 'u1',
+        }),
       );
     });
 

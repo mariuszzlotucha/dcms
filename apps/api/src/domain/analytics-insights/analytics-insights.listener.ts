@@ -20,12 +20,16 @@ export class AnalyticsInsightsListener {
   }
 
   @OnEvent(EVENTS.ESIGNATURE_COMPLETED)
-  async handleEsignatureCompleted(event: EventPayloadMap[typeof EVENTS.ESIGNATURE_COMPLETED]): Promise<void> {
+  async handleEsignatureCompleted(
+    event: EventPayloadMap[typeof EVENTS.ESIGNATURE_COMPLETED],
+  ): Promise<void> {
     await this.analyticsInsightsService.recordEsignatureCompleted(event.tenantId);
   }
 
   @OnEvent(EVENTS.ESIGNATURE_EXPIRED)
-  async handleEsignatureExpired(event: EventPayloadMap[typeof EVENTS.ESIGNATURE_EXPIRED]): Promise<void> {
+  async handleEsignatureExpired(
+    event: EventPayloadMap[typeof EVENTS.ESIGNATURE_EXPIRED],
+  ): Promise<void> {
     await this.analyticsInsightsService.recordEsignatureExpired(event.tenantId);
   }
 

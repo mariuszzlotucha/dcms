@@ -56,10 +56,7 @@ export class OauthStateStore {
   // `verify.length` to decide which call signature to invoke (see
   // node_modules/passport-oauth2/lib/strategy.js). 2 and 3 match the
   // same NullStore/SessionStore signatures it ships with.
-  store(
-    req: Request,
-    callback: (err: Error | null, state?: string) => void,
-  ): void {
+  store(req: Request, callback: (err: Error | null, state?: string) => void): void {
     const nonce = randomBytes(24).toString('base64url');
     const expiresAt = Date.now() + STATE_TTL_MS;
     const cookieValue = `${expiresAt}.${this.sign(nonce, expiresAt)}`;
@@ -109,9 +106,7 @@ export class OauthStateStore {
   }
 
   private sign(nonce: string, expiresAt: number): string {
-    return createHmac('sha256', this.key)
-      .update(`${nonce}.${expiresAt}`)
-      .digest('base64url');
+    return createHmac('sha256', this.key).update(`${nonce}.${expiresAt}`).digest('base64url');
   }
 
   private signaturesMatch(a: string, b: string): boolean {

@@ -42,7 +42,9 @@ describe('SecretsService', () => {
       eventEmitter as unknown as EventEmitter2,
     );
 
-    expect(() => bareService.getProviderSecret('stripe')).toThrow('Provider secret "stripe" is not configured');
+    expect(() => bareService.getProviderSecret('stripe')).toThrow(
+      'Provider secret "stripe" is not configured',
+    );
   });
 
   it('emits SECRETS_ROTATED with the secret name and a timestamp', () => {

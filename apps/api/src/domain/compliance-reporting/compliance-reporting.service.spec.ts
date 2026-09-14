@@ -22,7 +22,11 @@ describe('ComplianceReportingService', () => {
     };
     eventEmitter = { emit: jest.fn() };
 
-    service = new ComplianceReportingService(trailEntries as never, reports as never, eventEmitter as never);
+    service = new ComplianceReportingService(
+      trailEntries as never,
+      reports as never,
+      eventEmitter as never,
+    );
   });
 
   describe('recordEvent', () => {
@@ -30,7 +34,12 @@ describe('ComplianceReportingService', () => {
       await service.recordEvent('t1', 'c1', 'contract.created', { foo: 'bar' });
 
       expect(trailEntries.save).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 't1', contractId: 'c1', eventName: 'contract.created', payload: { foo: 'bar' } }),
+        expect.objectContaining({
+          tenantId: 't1',
+          contractId: 'c1',
+          eventName: 'contract.created',
+          payload: { foo: 'bar' },
+        }),
       );
     });
   });
@@ -39,8 +48,13 @@ describe('ComplianceReportingService', () => {
     it('scopes the snapshot to one contract when a contractId is given', async () => {
       await service.generateReport('t1', 'c1', 'u1');
 
-      expect(trailEntries.find).toHaveBeenCalledWith({ where: { tenantId: 't1', contractId: 'c1' }, order: { recordedAt: 'ASC' } });
-      expect(reports.save).toHaveBeenCalledWith(expect.objectContaining({ tenantId: 't1', contractId: 'c1', generatedBy: 'u1' }));
+      expect(trailEntries.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1', contractId: 'c1' },
+        order: { recordedAt: 'ASC' },
+      });
+      expect(reports.save).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantId: 't1', contractId: 'c1', generatedBy: 'u1' }),
+      );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'complianceReport.generated',
         expect.objectContaining({ tenantId: 't1', contractId: 'c1', generatedBy: 'u1' }),
@@ -50,7 +64,10 @@ describe('ComplianceReportingService', () => {
     it('produces a tenant-wide report when no contractId is given', async () => {
       await service.generateReport('t1', null, 'u1');
 
-      expect(trailEntries.find).toHaveBeenCalledWith({ where: { tenantId: 't1' }, order: { recordedAt: 'ASC' } });
+      expect(trailEntries.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1' },
+        order: { recordedAt: 'ASC' },
+      });
       expect(reports.save).toHaveBeenCalledWith(expect.objectContaining({ contractId: null }));
     });
   });
@@ -67,7 +84,9 @@ describe('ComplianceReportingService', () => {
     it('throws NotFound when the report does not belong to the tenant', async () => {
       reports.findOne.mockResolvedValue(null);
 
-      await expect(service.getReport('t1', 'other-tenant-report')).rejects.toThrow(NotFoundException);
+      await expect(service.getReport('t1', 'other-tenant-report')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -79,7 +98,9 @@ describe('ComplianceReportingService', () => {
     it('rejects pdf as not yet implemented', async () => {
       reports.findOne.mockResolvedValue({ id: 'report-1', tenantId: 't1', entries: [] });
 
-      await expect(service.exportReport('t1', 'report-1', 'pdf')).rejects.toThrow(NotImplementedException);
+      await expect(service.exportReport('t1', 'report-1', 'pdf')).rejects.toThrow(
+        NotImplementedException,
+      );
       expect(reports.save).not.toHaveBeenCalled();
     });
 
@@ -87,14 +108,23 @@ describe('ComplianceReportingService', () => {
       reports.findOne.mockResolvedValue({
         id: 'report-1',
         tenantId: 't1',
-        entries: [{ recordedAt: new Date('2026-01-01T00:00:00Z'), eventName: 'contract.created', contractId: 'c1', payload: { a: 1 } }],
+        entries: [
+          {
+            recordedAt: new Date('2026-01-01T00:00:00Z'),
+            eventName: 'contract.created',
+            contractId: 'c1',
+            payload: { a: 1 },
+          },
+        ],
       });
 
       const result = await service.exportReport('t1', 'report-1', 'csv');
 
       expect(result.content).toContain('recordedAt,eventName,contractId,payload');
       expect(result.content).toContain('contract.created');
-      expect(reports.save).toHaveBeenCalledWith(expect.objectContaining({ exportedFormat: 'csv', exportedAt: expect.any(Date) }));
+      expect(reports.save).toHaveBeenCalledWith(
+        expect.objectContaining({ exportedFormat: 'csv', exportedAt: expect.any(Date) }),
+      );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'complianceReport.exported',
         expect.objectContaining({ reportId: 'report-1', tenantId: 't1', format: 'csv' }),
@@ -138,7 +168,10 @@ describe('ComplianceReportingService', () => {
     it('lists reports scoped to the tenant, newest first', async () => {
       await service.listReports('t1');
 
-      expect(reports.find).toHaveBeenCalledWith({ where: { tenantId: 't1' }, order: { generatedAt: 'DESC' } });
+      expect(reports.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1' },
+        order: { generatedAt: 'DESC' },
+      });
     });
   });
 });

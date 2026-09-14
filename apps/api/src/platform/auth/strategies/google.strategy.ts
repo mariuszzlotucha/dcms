@@ -32,11 +32,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     } as StrategyOptions & { store: OauthStateStore });
   }
 
-  validate(
-    _accessToken: string,
-    _refreshToken: string,
-    profile: Profile,
-  ): OauthProfile {
+  validate(_accessToken: string, _refreshToken: string, profile: Profile): OauthProfile {
     return { email: profile.emails?.[0]?.value ?? null };
   }
 }

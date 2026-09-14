@@ -20,19 +20,31 @@ describe('TemplatesListener', () => {
 
   describe('handleFeatureFlagToggled', () => {
     it('seeds the premium catalog when premium_templates is enabled', async () => {
-      await listener.handleFeatureFlagToggled({ tenantId: 't1', flagKey: 'premium_templates', enabled: true });
+      await listener.handleFeatureFlagToggled({
+        tenantId: 't1',
+        flagKey: 'premium_templates',
+        enabled: true,
+      });
 
       expect(templatesService.seedPremiumTemplates).toHaveBeenCalledWith('t1');
     });
 
     it('ignores unrelated flags', async () => {
-      await listener.handleFeatureFlagToggled({ tenantId: 't1', flagKey: 'beta_dashboard', enabled: true });
+      await listener.handleFeatureFlagToggled({
+        tenantId: 't1',
+        flagKey: 'beta_dashboard',
+        enabled: true,
+      });
 
       expect(templatesService.seedPremiumTemplates).not.toHaveBeenCalled();
     });
 
     it('ignores premium_templates being disabled', async () => {
-      await listener.handleFeatureFlagToggled({ tenantId: 't1', flagKey: 'premium_templates', enabled: false });
+      await listener.handleFeatureFlagToggled({
+        tenantId: 't1',
+        flagKey: 'premium_templates',
+        enabled: false,
+      });
 
       expect(templatesService.seedPremiumTemplates).not.toHaveBeenCalled();
     });

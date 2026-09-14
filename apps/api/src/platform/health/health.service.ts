@@ -1,8 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  HealthCheckService,
-  HealthIndicatorFunction,
-} from '@nestjs/terminus';
+import { HealthCheckService, HealthIndicatorFunction } from '@nestjs/terminus';
 import { HEALTH_MODULE_CONFIG, HealthModuleConfig } from './health.config';
 
 @Injectable()
@@ -12,7 +9,6 @@ export class HealthService {
     @Inject(HEALTH_MODULE_CONFIG)
     private readonly config: HealthModuleConfig,
   ) {}
-
 
   checkLiveness() {
     return this.health.check([]);

@@ -40,10 +40,12 @@ export class ConsentService {
       }),
     );
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.CONSENT_GRANTED,
-      { userId, tenantId, consentType, version } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CONSENT_GRANTED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.CONSENT_GRANTED, {
+      userId,
+      tenantId,
+      consentType,
+      version,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CONSENT_GRANTED]);
 
     return record;
   }
@@ -62,10 +64,11 @@ export class ConsentService {
       }),
     );
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.CONSENT_REVOKED,
-      { tenantId, userId, consentType } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CONSENT_REVOKED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.CONSENT_REVOKED, {
+      tenantId,
+      userId,
+      consentType,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.CONSENT_REVOKED]);
 
     return record;
   }
@@ -74,7 +77,13 @@ export class ConsentService {
     const records = await this.consentRecords.find({ where: { userId, tenantId, consentType } });
 
     if (records.length === 0) {
-      return { consentType, state: 'never_granted', version: null, grantedAt: null, revokedAt: null };
+      return {
+        consentType,
+        state: 'never_granted',
+        version: null,
+        grantedAt: null,
+        revokedAt: null,
+      };
     }
 
     const mostRecent = records.reduce((latest, record) => {
@@ -105,7 +114,9 @@ export class ConsentService {
 
   async getAllStatuses(userId: string, tenantId: string): Promise<ConsentStatus[]> {
     return Promise.all(
-      Object.keys(this.config.currentVersions).map((consentType) => this.getStatus(userId, tenantId, consentType)),
+      Object.keys(this.config.currentVersions).map((consentType) =>
+        this.getStatus(userId, tenantId, consentType),
+      ),
     );
   }
 
@@ -122,7 +133,11 @@ export class ConsentService {
     return qb.getMany();
   }
 
-  async deleteRecords(userId: string, tenantId: string, consentType: string): Promise<ConsentRecord[]> {
+  async deleteRecords(
+    userId: string,
+    tenantId: string,
+    consentType: string,
+  ): Promise<ConsentRecord[]> {
     const records = await this.consentRecords.find({ where: { userId, tenantId, consentType } });
 
     if (records.length === 0) {

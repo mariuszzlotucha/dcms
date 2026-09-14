@@ -26,11 +26,8 @@ export interface SessionsModuleConfig {
   csrfEnabled: boolean;
 }
 
-export interface SessionsModuleAsyncOptions
-  extends Pick<ModuleMetadata, 'imports'> {
-  useFactory: (
-    ...args: any[]
-  ) => Promise<SessionsModuleConfig> | SessionsModuleConfig;
+export interface SessionsModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  useFactory: (...args: any[]) => Promise<SessionsModuleConfig> | SessionsModuleConfig;
   inject?: any[];
 }
 

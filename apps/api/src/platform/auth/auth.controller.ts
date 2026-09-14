@@ -62,10 +62,7 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(OauthGuard('google'))
-  googleCallback(
-    @Req() req: Request & { user: OauthProfile },
-    @Ip() ip: string,
-  ) {
+  googleCallback(@Req() req: Request & { user: OauthProfile }, @Ip() ip: string) {
     return this.authService.oauthLogin(req.user, 'google', ip);
   }
 
@@ -77,10 +74,7 @@ export class AuthController {
 
   @Get('linkedin/callback')
   @UseGuards(OauthGuard('linkedin'))
-  linkedinCallback(
-    @Req() req: Request & { user: OauthProfile },
-    @Ip() ip: string,
-  ) {
+  linkedinCallback(@Req() req: Request & { user: OauthProfile }, @Ip() ip: string) {
     return this.authService.oauthLogin(req.user, 'linkedin', ip);
   }
 

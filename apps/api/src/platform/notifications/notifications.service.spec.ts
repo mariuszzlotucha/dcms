@@ -22,7 +22,11 @@ describe('NotificationsService', () => {
     secretsService = { getProviderSecret: jest.fn().mockReturnValue('resend-api-key') };
     eventEmitter = { emit: jest.fn() };
 
-    service = new NotificationsService(config, secretsService as unknown as SecretsService, eventEmitter as unknown as EventEmitter2);
+    service = new NotificationsService(
+      config,
+      secretsService as unknown as SecretsService,
+      eventEmitter as unknown as EventEmitter2,
+    );
   });
 
   it('constructs the Resend client with the configured secret', () => {
@@ -66,7 +70,10 @@ describe('NotificationsService', () => {
       tenantId: 't1',
       reason: 'invalid recipient',
     });
-    expect(eventEmitter.emit).not.toHaveBeenCalledWith(PLATFORM_EVENTS.NOTIFICATION_SENT, expect.anything());
+    expect(eventEmitter.emit).not.toHaveBeenCalledWith(
+      PLATFORM_EVENTS.NOTIFICATION_SENT,
+      expect.anything(),
+    );
   });
 
   it('emits NOTIFICATION_FAILED (and does not throw) when the Resend call itself rejects', async () => {
@@ -85,10 +92,15 @@ describe('NotificationsService', () => {
   it('renders the password-reset template with the reset link', async () => {
     mockSend.mockResolvedValue({ data: {}, error: null });
 
-    await service.send('t1', 'user@example.com', 'password-reset', { resetLink: 'https://dcms.app/reset/abc' });
+    await service.send('t1', 'user@example.com', 'password-reset', {
+      resetLink: 'https://dcms.app/reset/abc',
+    });
 
     expect(mockSend).toHaveBeenCalledWith(
-      expect.objectContaining({ subject: 'Reset your DCMS password', text: expect.stringContaining('https://dcms.app/reset/abc') }),
+      expect.objectContaining({
+        subject: 'Reset your DCMS password',
+        text: expect.stringContaining('https://dcms.app/reset/abc'),
+      }),
     );
   });
 });

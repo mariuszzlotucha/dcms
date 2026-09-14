@@ -12,7 +12,13 @@ import { Session } from './entities/session.entity';
 const hashOf = (token: string) => createHash('sha256').update(token).digest('hex');
 
 describe('SessionsService', () => {
-  let sessions: { save: jest.Mock; create: jest.Mock; findOne: jest.Mock; update: jest.Mock; find: jest.Mock };
+  let sessions: {
+    save: jest.Mock;
+    create: jest.Mock;
+    findOne: jest.Mock;
+    update: jest.Mock;
+    find: jest.Mock;
+  };
   let users: { findOne: jest.Mock };
   let config: SessionsModuleConfig;
   let jwtService: { sign: jest.Mock };
@@ -49,7 +55,11 @@ describe('SessionsService', () => {
       const result = await service.createSession('u1');
 
       expect(sessions.create).toHaveBeenCalledWith(
-        expect.objectContaining({ userId: 'u1', refreshTokenHash: hashOf(result.refreshToken), revokedAt: null }),
+        expect.objectContaining({
+          userId: 'u1',
+          refreshTokenHash: hashOf(result.refreshToken),
+          revokedAt: null,
+        }),
       );
     });
 
@@ -79,7 +89,10 @@ describe('SessionsService', () => {
     });
 
     it('throws when refreshTokenExpiresIn is not a valid duration string', async () => {
-      const badConfig: SessionsModuleConfig = { refreshTokenExpiresIn: 'not-a-duration', csrfEnabled: false };
+      const badConfig: SessionsModuleConfig = {
+        refreshTokenExpiresIn: 'not-a-duration',
+        csrfEnabled: false,
+      };
       const badService = new SessionsService(
         sessions as never,
         users as never,
@@ -119,7 +132,10 @@ describe('SessionsService', () => {
     });
 
     it('rejects an expired session', async () => {
-      sessions.findOne.mockResolvedValue({ ...activeSession(), expiresAt: new Date(Date.now() - 1000) });
+      sessions.findOne.mockResolvedValue({
+        ...activeSession(),
+        expiresAt: new Date(Date.now() - 1000),
+      });
 
       await expect(service.rotateSession('old-token')).rejects.toThrow(UnauthorizedException);
     });
@@ -185,7 +201,10 @@ describe('SessionsService', () => {
 
       await customService.rotateSession('old-token');
 
-      expect(jwtService.sign).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ expiresIn: '5m' }));
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ expiresIn: '5m' }),
+      );
     });
   });
 
@@ -209,7 +228,9 @@ describe('SessionsService', () => {
     it('throws NotFoundException when no row matched (wrong owner or already revoked)', async () => {
       sessions.update.mockResolvedValue({ affected: 0 });
 
-      await expect(service.revokeSession('s1', 'someone-elses-id')).rejects.toThrow(NotFoundException);
+      await expect(service.revokeSession('s1', 'someone-elses-id')).rejects.toThrow(
+        NotFoundException,
+      );
       expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
   });

@@ -75,7 +75,9 @@ describe('FieldEncryptionService', () => {
     it('rejects a malformed payload missing segments', () => {
       const service = new FieldEncryptionService(configWithKey);
 
-      expect(() => service.decrypt('v1.onlyOneSegment')).toThrow('Invalid encrypted payload format');
+      expect(() => service.decrypt('v1.onlyOneSegment')).toThrow(
+        'Invalid encrypted payload format',
+      );
     });
 
     it('rejects a payload whose ciphertext has been tampered with (auth tag mismatch)', () => {

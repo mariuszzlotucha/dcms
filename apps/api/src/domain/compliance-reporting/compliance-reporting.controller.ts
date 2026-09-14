@@ -26,7 +26,10 @@ export class ComplianceReportingController {
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
   @UsePipes(new ZodValidationPipe(generateComplianceReportSchema))
-  async generateReport(@Body() dto: GenerateComplianceReportDto, @Req() request: Request): Promise<ComplianceReport> {
+  async generateReport(
+    @Body() dto: GenerateComplianceReportDto,
+    @Req() request: Request,
+  ): Promise<ComplianceReport> {
     const tenantId = await this.tenantContext.getTenantId();
     const userId = (request.user as { userId: string }).userId;
     return this.complianceReportingService.generateReport(tenantId, dto.contractId ?? null, userId);
@@ -48,7 +51,10 @@ export class ComplianceReportingController {
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
   @UsePipes(new ZodValidationPipe(exportComplianceReportSchema))
-  async exportReport(@Param('id') id: string, @Body() dto: ExportComplianceReportDto): Promise<ComplianceReportExport> {
+  async exportReport(
+    @Param('id') id: string,
+    @Body() dto: ExportComplianceReportDto,
+  ): Promise<ComplianceReportExport> {
     const tenantId = await this.tenantContext.getTenantId();
     return this.complianceReportingService.exportReport(tenantId, id, dto.format);
   }

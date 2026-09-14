@@ -1,10 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { LoggerModule, Params } from 'nestjs-pino';
 import { randomUUID } from 'crypto';
-import {
-  LoggingModuleAsyncOptions,
-  LoggingModuleConfig,
-} from './logging.config';
+import { LoggingModuleAsyncOptions, LoggingModuleConfig } from './logging.config';
 
 // Always redacted regardless of config: credentials must never reach logs.
 // req.body.* entries are inert today (pino-http doesn't log bodies by
@@ -19,9 +16,7 @@ export const DEFAULT_REDACT_PATHS = [
 // Builds the pino-http options shared by forRoot and forRootAsync.
 // Exported (not just used internally) so its redaction/request-id logic can
 // be unit-tested directly instead of only through a full DynamicModule compile.
-export function buildPinoHttpOptions(
-  config: LoggingModuleConfig,
-): Params['pinoHttp'] {
+export function buildPinoHttpOptions(config: LoggingModuleConfig): Params['pinoHttp'] {
   return {
     level: config.level ?? 'info',
     // Respects x-request-id coming from a reverse proxy / frontend;
@@ -34,9 +29,7 @@ export function buildPinoHttpOptions(
     },
     // Provisional, lightweight hygiene — NOT the final PII masking
     // mechanism. That's `pii-redaction` in Phase 4.
-    redact: [
-      ...new Set([...DEFAULT_REDACT_PATHS, ...(config.redactPaths ?? [])]),
-    ],
+    redact: [...new Set([...DEFAULT_REDACT_PATHS, ...(config.redactPaths ?? [])])],
     transport: config.prettyPrint
       ? { target: 'pino-pretty', options: { singleLine: true } }
       : undefined,

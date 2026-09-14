@@ -1,4 +1,10 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import Stripe from 'stripe';
 import { SecretsService } from '@platform/secrets/secrets.service';
@@ -15,7 +21,8 @@ interface BillingModuleAsyncOptions {
 
 const stripeClientProvider: Provider = {
   provide: STRIPE_CLIENT,
-  useFactory: (secretsService: SecretsService) => new Stripe(secretsService.getProviderSecret('stripe')),
+  useFactory: (secretsService: SecretsService) =>
+    new Stripe(secretsService.getProviderSecret('stripe')),
   inject: [SecretsService],
 };
 

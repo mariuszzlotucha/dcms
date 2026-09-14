@@ -6,17 +6,38 @@ import { DataRetentionService } from './data-retention.service';
 import { DataRetentionModuleConfig, UserAccountQueries } from './data-retention.config';
 
 describe('DataRetentionService', () => {
-  let consentService: { findRevokedBefore: jest.Mock; deleteRecords: jest.Mock; deleteAllForUser: jest.Mock };
-  let fileStorageService: { listFiles: jest.Mock; listAllFiles: jest.Mock; listFilesByUploader: jest.Mock; deleteFile: jest.Mock };
+  let consentService: {
+    findRevokedBefore: jest.Mock;
+    deleteRecords: jest.Mock;
+    deleteAllForUser: jest.Mock;
+  };
+  let fileStorageService: {
+    listFiles: jest.Mock;
+    listAllFiles: jest.Mock;
+    listFilesByUploader: jest.Mock;
+    deleteFile: jest.Mock;
+  };
   let userAccountQueries: jest.Mocked<UserAccountQueries>;
   let eventEmitter: { emit: jest.Mock };
   let service: DataRetentionService;
 
-  const config: DataRetentionModuleConfig = { inactiveAccountDeletionDays: 365, revokedConsentPurgeDays: 90 };
+  const config: DataRetentionModuleConfig = {
+    inactiveAccountDeletionDays: 365,
+    revokedConsentPurgeDays: 90,
+  };
 
   beforeEach(() => {
-    consentService = { findRevokedBefore: jest.fn(), deleteRecords: jest.fn(), deleteAllForUser: jest.fn() };
-    fileStorageService = { listFiles: jest.fn(), listAllFiles: jest.fn(), listFilesByUploader: jest.fn(), deleteFile: jest.fn() };
+    consentService = {
+      findRevokedBefore: jest.fn(),
+      deleteRecords: jest.fn(),
+      deleteAllForUser: jest.fn(),
+    };
+    fileStorageService = {
+      listFiles: jest.fn(),
+      listAllFiles: jest.fn(),
+      listFilesByUploader: jest.fn(),
+      deleteFile: jest.fn(),
+    };
     userAccountQueries = {
       findUserIdsInactiveSince: jest.fn(),
       userExists: jest.fn(),
@@ -91,7 +112,9 @@ describe('DataRetentionService', () => {
     });
 
     it('skips files whose uploader still exists', async () => {
-      fileStorageService.listAllFiles.mockResolvedValue([{ id: 'f1', tenantId: 't1', uploadedBy: 'u1' }]);
+      fileStorageService.listAllFiles.mockResolvedValue([
+        { id: 'f1', tenantId: 't1', uploadedBy: 'u1' },
+      ]);
       userAccountQueries.userExists.mockResolvedValue(true);
 
       const count = await service.purgeOrphanedFiles();
@@ -101,7 +124,9 @@ describe('DataRetentionService', () => {
     });
 
     it('deletes and counts files whose uploader no longer exists', async () => {
-      fileStorageService.listAllFiles.mockResolvedValue([{ id: 'f1', tenantId: 't1', uploadedBy: 'ghost' }]);
+      fileStorageService.listAllFiles.mockResolvedValue([
+        { id: 'f1', tenantId: 't1', uploadedBy: 'ghost' },
+      ]);
       userAccountQueries.userExists.mockResolvedValue(false);
 
       const count = await service.purgeOrphanedFiles();

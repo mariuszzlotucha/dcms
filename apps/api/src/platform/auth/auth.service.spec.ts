@@ -109,48 +109,71 @@ describe('AuthService', () => {
     it('throws ConflictException when the email is already registered (unique violation)', async () => {
       users.save.mockRejectedValueOnce(buildUniqueViolation());
 
-      await expect(service.register('taken@example.com', 'Password1')).rejects.toThrow(ConflictException);
-      expect(eventEmitter.emit).not.toHaveBeenCalledWith(PLATFORM_EVENTS.AUTH_USER_REGISTERED, expect.anything());
+      await expect(service.register('taken@example.com', 'Password1')).rejects.toThrow(
+        ConflictException,
+      );
+      expect(eventEmitter.emit).not.toHaveBeenCalledWith(
+        PLATFORM_EVENTS.AUTH_USER_REGISTERED,
+        expect.anything(),
+      );
     });
 
     it('rethrows unrelated database errors unchanged', async () => {
       const otherError = new Error('connection lost');
       users.save.mockRejectedValueOnce(otherError);
 
-      await expect(service.register('new@example.com', 'Password1')).rejects.toThrow('connection lost');
+      await expect(service.register('new@example.com', 'Password1')).rejects.toThrow(
+        'connection lost',
+      );
     });
   });
 
   describe('login', () => {
     it('rejects a locked-out account without attempting password verification', async () => {
-      users.findOne.mockResolvedValue({ id: 'u1', email: 'user@example.com', passwordHash: 'hash' } as User);
+      users.findOne.mockResolvedValue({
+        id: 'u1',
+        email: 'user@example.com',
+        passwordHash: 'hash',
+      } as User);
       passwordPolicy.isLockedOut.mockResolvedValue(true);
 
-      await expect(service.login('user@example.com', 'wrong', '1.2.3.4')).rejects.toThrow(UnauthorizedException);
-      expect(mockedArgon2.verify).not.toHaveBeenCalled();
-      expect(eventEmitter.emit).toHaveBeenCalledWith(
-        PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED,
-        { email: 'user@example.com', reason: 'account_locked', ip: '1.2.3.4' },
+      await expect(service.login('user@example.com', 'wrong', '1.2.3.4')).rejects.toThrow(
+        UnauthorizedException,
       );
+      expect(mockedArgon2.verify).not.toHaveBeenCalled();
+      expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED, {
+        email: 'user@example.com',
+        reason: 'account_locked',
+        ip: '1.2.3.4',
+      });
     });
 
     it('verifies against a dummy hash (timing parity) when the user does not exist', async () => {
       users.findOne.mockResolvedValue(null);
 
-      await expect(service.login('nobody@example.com', 'whatever', '1.2.3.4')).rejects.toThrow(UnauthorizedException);
+      await expect(service.login('nobody@example.com', 'whatever', '1.2.3.4')).rejects.toThrow(
+        UnauthorizedException,
+      );
 
       expect(mockedArgon2.verify).toHaveBeenCalledWith('dummy-hash', 'whatever');
       expect(passwordPolicy.recordFailedAttempt).not.toHaveBeenCalled();
-      expect(eventEmitter.emit).toHaveBeenCalledWith(
-        PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED,
-        { email: 'nobody@example.com', reason: 'invalid_credentials', ip: '1.2.3.4' },
-      );
+      expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED, {
+        email: 'nobody@example.com',
+        reason: 'invalid_credentials',
+        ip: '1.2.3.4',
+      });
     });
 
     it('verifies against the dummy hash (not user.passwordHash) for an OAuth-only user with no password', async () => {
-      users.findOne.mockResolvedValue({ id: 'u1', email: 'oauth@example.com', passwordHash: null } as User);
+      users.findOne.mockResolvedValue({
+        id: 'u1',
+        email: 'oauth@example.com',
+        passwordHash: null,
+      } as User);
 
-      await expect(service.login('oauth@example.com', 'whatever', '1.2.3.4')).rejects.toThrow(UnauthorizedException);
+      await expect(service.login('oauth@example.com', 'whatever', '1.2.3.4')).rejects.toThrow(
+        UnauthorizedException,
+      );
 
       expect(mockedArgon2.verify).toHaveBeenCalledWith('dummy-hash', 'whatever');
       // Unlike the nonexistent-user case, a real account CAN be locked here.
@@ -158,10 +181,16 @@ describe('AuthService', () => {
     });
 
     it('records a failed attempt and rejects on a wrong password for an existing user', async () => {
-      users.findOne.mockResolvedValue({ id: 'u1', email: 'user@example.com', passwordHash: 'real-hash' } as User);
+      users.findOne.mockResolvedValue({
+        id: 'u1',
+        email: 'user@example.com',
+        passwordHash: 'real-hash',
+      } as User);
       mockedArgon2.verify.mockResolvedValue(false as never);
 
-      await expect(service.login('user@example.com', 'wrong', '1.2.3.4')).rejects.toThrow(UnauthorizedException);
+      await expect(service.login('user@example.com', 'wrong', '1.2.3.4')).rejects.toThrow(
+        UnauthorizedException,
+      );
 
       expect(mockedArgon2.verify).toHaveBeenCalledWith('real-hash', 'wrong');
       expect(passwordPolicy.recordFailedAttempt).toHaveBeenCalledWith('u1');
@@ -201,12 +230,19 @@ describe('AuthService', () => {
     });
 
     it('logs in an existing user without creating a new one', async () => {
-      users.findOne.mockResolvedValue({ id: 'u1', email: 'existing@example.com', tenantId: null } as User);
+      users.findOne.mockResolvedValue({
+        id: 'u1',
+        email: 'existing@example.com',
+        tenantId: null,
+      } as User);
 
       await service.oauthLogin({ email: 'existing@example.com' }, 'google', '1.2.3.4');
 
       expect(users.save).not.toHaveBeenCalled();
-      expect(eventEmitter.emit).not.toHaveBeenCalledWith(PLATFORM_EVENTS.AUTH_USER_REGISTERED, expect.anything());
+      expect(eventEmitter.emit).not.toHaveBeenCalledWith(
+        PLATFORM_EVENTS.AUTH_USER_REGISTERED,
+        expect.anything(),
+      );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         PLATFORM_EVENTS.AUTH_USER_LOGGED_IN,
         expect.objectContaining({ method: 'oauth' }),
@@ -232,13 +268,20 @@ describe('AuthService', () => {
     it('recovers from a concurrent-insert race by loading the row the winner created', async () => {
       users.findOne.mockResolvedValueOnce(null);
       users.save.mockRejectedValueOnce(buildUniqueViolation());
-      users.findOneOrFail.mockResolvedValue({ id: 'u1', email: 'new@example.com', tenantId: null } as User);
+      users.findOneOrFail.mockResolvedValue({
+        id: 'u1',
+        email: 'new@example.com',
+        tenantId: null,
+      } as User);
 
       await service.oauthLogin({ email: 'new@example.com' }, 'google', '1.2.3.4');
 
       expect(users.findOneOrFail).toHaveBeenCalledWith({ where: { email: 'new@example.com' } });
       // The loser of the race didn't create the row, so it must not claim credit for registering it.
-      expect(eventEmitter.emit).not.toHaveBeenCalledWith(PLATFORM_EVENTS.AUTH_USER_REGISTERED, expect.anything());
+      expect(eventEmitter.emit).not.toHaveBeenCalledWith(
+        PLATFORM_EVENTS.AUTH_USER_REGISTERED,
+        expect.anything(),
+      );
     });
 
     it('rethrows a non-unique-violation error during user creation', async () => {
@@ -246,9 +289,9 @@ describe('AuthService', () => {
       const otherError = new Error('connection lost');
       users.save.mockRejectedValueOnce(otherError);
 
-      await expect(service.oauthLogin({ email: 'new@example.com' }, 'google', '1.2.3.4')).rejects.toThrow(
-        'connection lost',
-      );
+      await expect(
+        service.oauthLogin({ email: 'new@example.com' }, 'google', '1.2.3.4'),
+      ).rejects.toThrow('connection lost');
     });
   });
 });

@@ -3,7 +3,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Resend } from 'resend';
 import { SecretsService } from '@platform/secrets/secrets.service';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
-import { NOTIFICATION_TEMPLATES, NotificationTemplateDataMap, NotificationTemplateName, RenderedTemplate } from './templates';
+import {
+  NOTIFICATION_TEMPLATES,
+  NotificationTemplateDataMap,
+  NotificationTemplateName,
+  RenderedTemplate,
+} from './templates';
 import { NOTIFICATIONS_MODULE_CONFIG, NotificationsModuleConfig } from './notifications.config';
 
 @Injectable()
@@ -25,7 +30,9 @@ export class NotificationsService {
     template: T,
     data: NotificationTemplateDataMap[T],
   ): Promise<void> {
-    const render = NOTIFICATION_TEMPLATES[template] as (input: NotificationTemplateDataMap[T]) => RenderedTemplate;
+    const render = NOTIFICATION_TEMPLATES[template] as (
+      input: NotificationTemplateDataMap[T],
+    ) => RenderedTemplate;
     const { subject, body } = render(data);
 
     try {
@@ -40,18 +47,17 @@ export class NotificationsService {
         throw new Error(result.error.message);
       }
 
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.NOTIFICATION_SENT,
-        { tenantId, recipient, template, channel: 'email' } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.NOTIFICATION_SENT],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.NOTIFICATION_SENT, {
+        tenantId,
+        recipient,
+        template,
+        channel: 'email',
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.NOTIFICATION_SENT]);
     } catch (error) {
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.NOTIFICATION_FAILED,
-        {
-          tenantId,
-          reason: error instanceof Error ? error.message : 'Unknown error',
-        } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.NOTIFICATION_FAILED],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.NOTIFICATION_FAILED, {
+        tenantId,
+        reason: error instanceof Error ? error.message : 'Unknown error',
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.NOTIFICATION_FAILED]);
     }
   }
 }

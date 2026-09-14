@@ -7,10 +7,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Request } from 'express';
-import {
-  PLATFORM_EVENTS,
-  PlatformEventPayloadMap,
-} from '../../events';
+import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../../events';
 import { CsrfService } from '../csrf/csrf.service';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -44,9 +41,7 @@ export class CsrfGuard implements CanActivate {
     if (req.cookies === undefined) {
       // Fail loudly on misconfiguration instead of silently 403-ing every
       // state-changing request with a confusing "invalid token".
-      throw new Error(
-        'CsrfGuard requires cookie-parser: add app.use(cookieParser()) in main.ts',
-      );
+      throw new Error('CsrfGuard requires cookie-parser: add app.use(cookieParser()) in main.ts');
     }
     if (SAFE_METHODS.has(req.method)) return true;
     if (this.csrfService.validateRequest(req)) return true;

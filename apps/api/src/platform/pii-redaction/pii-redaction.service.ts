@@ -38,7 +38,9 @@ export class PiiRedactionService {
   }
 
   private applyPattern(text: string, pattern: RegExp): string {
-    const globalPattern = pattern.global ? pattern : new RegExp(pattern.source, `${pattern.flags}g`);
+    const globalPattern = pattern.global
+      ? pattern
+      : new RegExp(pattern.source, `${pattern.flags}g`);
     return text.replace(globalPattern, (match) => this.tokenize(match));
   }
 

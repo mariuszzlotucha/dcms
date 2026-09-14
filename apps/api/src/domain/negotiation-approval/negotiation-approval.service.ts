@@ -28,7 +28,9 @@ export class NegotiationApprovalService {
     userId: string,
     role: NegotiationRole,
   ): Promise<NegotiationRoleAssignment> {
-    let assignment = await this.roleAssignments.findOne({ where: { tenantId, contractId, userId } });
+    let assignment = await this.roleAssignments.findOne({
+      where: { tenantId, contractId, userId },
+    });
 
     if (assignment) {
       assignment.role = role;
@@ -38,10 +40,12 @@ export class NegotiationApprovalService {
 
     const saved = await this.roleAssignments.save(assignment);
 
-    this.eventEmitter.emit(
-      EVENTS.NEGOTIATION_ROLE_ASSIGNED,
-      { contractId, tenantId, userId, role } satisfies EventPayloadMap[typeof EVENTS.NEGOTIATION_ROLE_ASSIGNED],
-    );
+    this.eventEmitter.emit(EVENTS.NEGOTIATION_ROLE_ASSIGNED, {
+      contractId,
+      tenantId,
+      userId,
+      role,
+    } satisfies EventPayloadMap[typeof EVENTS.NEGOTIATION_ROLE_ASSIGNED]);
 
     return saved;
   }
@@ -50,35 +54,46 @@ export class NegotiationApprovalService {
     return this.roleAssignments.find({ where: { tenantId, contractId } });
   }
 
-  async requestRevision(tenantId: string, contractId: string, requestedBy: string, comment: string): Promise<void> {
-    const isParticipant = await this.roleAssignments.findOne({ where: { tenantId, contractId, userId: requestedBy } });
+  async requestRevision(
+    tenantId: string,
+    contractId: string,
+    requestedBy: string,
+    comment: string,
+  ): Promise<void> {
+    const isParticipant = await this.roleAssignments.findOne({
+      where: { tenantId, contractId, userId: requestedBy },
+    });
 
     if (!isParticipant) {
-      throw new ForbiddenException('Only a user with an assigned role on this contract can request a revision');
+      throw new ForbiddenException(
+        'Only a user with an assigned role on this contract can request a revision',
+      );
     }
 
-    this.eventEmitter.emit(
-      EVENTS.NEGOTIATION_REVISION_REQUESTED,
-      {
-        contractId,
-        tenantId,
-        requestedBy,
-        comment,
-      } satisfies EventPayloadMap[typeof EVENTS.NEGOTIATION_REVISION_REQUESTED],
-    );
+    this.eventEmitter.emit(EVENTS.NEGOTIATION_REVISION_REQUESTED, {
+      contractId,
+      tenantId,
+      requestedBy,
+      comment,
+    } satisfies EventPayloadMap[typeof EVENTS.NEGOTIATION_REVISION_REQUESTED]);
   }
 
   async listApprovalRequests(tenantId: string, contractId: string): Promise<ApprovalRequest[]> {
     return this.approvalRequests.find({ where: { tenantId, contractId } });
   }
 
-  async grantApproval(tenantId: string, contractId: string, approverId: string): Promise<ApprovalRequest> {
+  async grantApproval(
+    tenantId: string,
+    contractId: string,
+    approverId: string,
+  ): Promise<ApprovalRequest> {
     const request = await this.decideApprovalRequest(tenantId, contractId, approverId, 'granted');
 
-    this.eventEmitter.emit(
-      EVENTS.APPROVAL_GRANTED,
-      { contractId, tenantId, approverId } satisfies EventPayloadMap[typeof EVENTS.APPROVAL_GRANTED],
-    );
+    this.eventEmitter.emit(EVENTS.APPROVAL_GRANTED, {
+      contractId,
+      tenantId,
+      approverId,
+    } satisfies EventPayloadMap[typeof EVENTS.APPROVAL_GRANTED]);
 
     return request;
   }
@@ -89,12 +104,20 @@ export class NegotiationApprovalService {
     approverId: string,
     reason: string,
   ): Promise<ApprovalRequest> {
-    const request = await this.decideApprovalRequest(tenantId, contractId, approverId, 'rejected', reason);
-
-    this.eventEmitter.emit(
-      EVENTS.APPROVAL_REJECTED,
-      { contractId, tenantId, approverId, reason } satisfies EventPayloadMap[typeof EVENTS.APPROVAL_REJECTED],
+    const request = await this.decideApprovalRequest(
+      tenantId,
+      contractId,
+      approverId,
+      'rejected',
+      reason,
     );
+
+    this.eventEmitter.emit(EVENTS.APPROVAL_REJECTED, {
+      contractId,
+      tenantId,
+      approverId,
+      reason,
+    } satisfies EventPayloadMap[typeof EVENTS.APPROVAL_REJECTED]);
 
     return request;
   }
@@ -123,17 +146,19 @@ export class NegotiationApprovalService {
     }
 
     await this.approvalRequests.save(
-      this.approvalRequests.create({ tenantId, contractId, approverId: approver.userId, status: 'pending' }),
+      this.approvalRequests.create({
+        tenantId,
+        contractId,
+        approverId: approver.userId,
+        status: 'pending',
+      }),
     );
 
-    this.eventEmitter.emit(
-      EVENTS.APPROVAL_REQUESTED,
-      {
-        contractId,
-        tenantId,
-        approverId: approver.userId,
-      } satisfies EventPayloadMap[typeof EVENTS.APPROVAL_REQUESTED],
-    );
+    this.eventEmitter.emit(EVENTS.APPROVAL_REQUESTED, {
+      contractId,
+      tenantId,
+      approverId: approver.userId,
+    } satisfies EventPayloadMap[typeof EVENTS.APPROVAL_REQUESTED]);
   }
 
   // Invoked from NegotiationApprovalListener on tenant.created. Idempotent:
@@ -162,7 +187,9 @@ export class NegotiationApprovalService {
     });
 
     if (!request) {
-      throw new NotFoundException('No pending approval request found for this approver on this contract');
+      throw new NotFoundException(
+        'No pending approval request found for this approver on this contract',
+      );
     }
 
     request.status = outcome;

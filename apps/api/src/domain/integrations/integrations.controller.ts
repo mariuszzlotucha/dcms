@@ -4,7 +4,11 @@ import { Roles } from '@platform/rbac/decorators/roles.decorator';
 import { RolesGuard } from '@platform/rbac/guards/roles.guard';
 import { ZodValidationPipe } from '@platform/security/pipes/zod-validation.pipe';
 import { TenantContextService } from '@platform/tenants/context/tenant-context.service';
-import { ConnectIntegrationDto, connectIntegrationSchema, IntegrationType } from '@contracts/integrations.schema';
+import {
+  ConnectIntegrationDto,
+  connectIntegrationSchema,
+  IntegrationType,
+} from '@contracts/integrations.schema';
 import { IntegrationConnection } from './entities/integration-connection.entity';
 import { IntegrationsService } from './integrations.service';
 

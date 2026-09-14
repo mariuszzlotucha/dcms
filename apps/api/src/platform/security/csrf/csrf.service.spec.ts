@@ -7,14 +7,14 @@ jest.mock('csrf-csrf');
 describe('CsrfService', () => {
   const mockedDoubleCsrf = doubleCsrf as jest.MockedFunction<typeof doubleCsrf>;
   let validateRequest: jest.Mock;
-  let generateToken: jest.Mock;
+  let generateCsrfToken: jest.Mock;
 
   beforeEach(() => {
     validateRequest = jest.fn();
-    generateToken = jest.fn();
+    generateCsrfToken = jest.fn();
     mockedDoubleCsrf.mockReturnValue({
       validateRequest,
-      generateToken,
+      generateCsrfToken,
     } as unknown as ReturnType<typeof doubleCsrf>);
   });
 
@@ -49,9 +49,9 @@ describe('CsrfService', () => {
 
   describe('when csrf is enabled', () => {
     it('throws at construction time if no secret is configured', () => {
-      expect(
-        () => new CsrfService({ ...baseConfig, csrf: { enabled: true } }),
-      ).toThrow('SecurityModuleConfig.csrf.secret is required when csrf.enabled is true');
+      expect(() => new CsrfService({ ...baseConfig, csrf: { enabled: true } })).toThrow(
+        'SecurityModuleConfig.csrf.secret is required when csrf.enabled is true',
+      );
     });
 
     it('constructs doubleCsrf with the configured secret and cookie options', () => {
@@ -64,6 +64,7 @@ describe('CsrfService', () => {
       expect(mockedDoubleCsrf).toHaveBeenCalledTimes(1);
       const callArgs = mockedDoubleCsrf.mock.calls[0][0];
       expect(callArgs.getSecret()).toBe('top-secret');
+      expect(callArgs.getSessionIdentifier({} as never)).toBe('stateless');
       expect(callArgs.cookieOptions).toEqual({ httpOnly: true, secure: true, sameSite: 'strict' });
     });
 
@@ -78,12 +79,12 @@ describe('CsrfService', () => {
 
     it('delegates generateToken to the doubleCsrf instance', () => {
       const service = new CsrfService({ ...baseConfig, csrf: { enabled: true, secret: 's' } });
-      generateToken.mockReturnValue('the-token');
+      generateCsrfToken.mockReturnValue('the-token');
 
       const req = {} as never;
       const res = {} as never;
       expect(service.generateToken(req, res)).toBe('the-token');
-      expect(generateToken).toHaveBeenCalledWith(req, res);
+      expect(generateCsrfToken).toHaveBeenCalledWith(req, res);
     });
   });
 });

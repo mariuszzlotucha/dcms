@@ -1,10 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
-import {
-  SECRETS_MODULE_CONFIG,
-  SecretsModuleConfig,
-} from './secrets.config';
+import { SECRETS_MODULE_CONFIG, SecretsModuleConfig } from './secrets.config';
 
 @Injectable()
 export class SecretsService {
@@ -41,6 +38,9 @@ export class SecretsService {
       secretName,
       rotatedAt: new Date(),
     };
-    this.eventEmitter.emit(PLATFORM_EVENTS.SECRETS_ROTATED, event satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SECRETS_ROTATED]);
+    this.eventEmitter.emit(
+      PLATFORM_EVENTS.SECRETS_ROTATED,
+      event satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SECRETS_ROTATED],
+    );
   }
 }

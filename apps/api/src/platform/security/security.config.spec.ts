@@ -12,7 +12,9 @@ describe('buildCookieOptions', () => {
   });
 
   it('always sets httpOnly: true regardless of config (not configurable)', () => {
-    expect(buildCookieOptions({ ...baseConfig, cookies: { secure: false, sameSite: 'none' } }).httpOnly).toBe(true);
+    expect(
+      buildCookieOptions({ ...baseConfig, cookies: { secure: false, sameSite: 'none' } }).httpOnly,
+    ).toBe(true);
   });
 
   it('respects a configured secure: false', () => {
@@ -20,6 +22,8 @@ describe('buildCookieOptions', () => {
   });
 
   it('respects a configured sameSite', () => {
-    expect(buildCookieOptions({ ...baseConfig, cookies: { sameSite: 'strict' } }).sameSite).toBe('strict');
+    expect(buildCookieOptions({ ...baseConfig, cookies: { sameSite: 'strict' } }).sameSite).toBe(
+      'strict',
+    );
   });
 });

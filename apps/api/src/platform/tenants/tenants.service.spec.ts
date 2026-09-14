@@ -60,7 +60,11 @@ describe('TenantsService', () => {
     it('returns the tenant when found', async () => {
       tenants.findOne.mockResolvedValue({ id: 't1', name: 'Acme Inc', plan: 'free' });
 
-      await expect(service.getTenant('t1')).resolves.toEqual({ id: 't1', name: 'Acme Inc', plan: 'free' });
+      await expect(service.getTenant('t1')).resolves.toEqual({
+        id: 't1',
+        name: 'Acme Inc',
+        plan: 'free',
+      });
     });
 
     it('throws NotFoundException when the tenant does not exist', async () => {

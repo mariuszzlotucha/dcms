@@ -24,12 +24,15 @@ export class CsrfService {
     if (this.enabled) {
       const secret = config.csrf?.secret;
       if (!secret) {
-        throw new Error(
-          'SecurityModuleConfig.csrf.secret is required when csrf.enabled is true',
-        );
+        throw new Error('SecurityModuleConfig.csrf.secret is required when csrf.enabled is true');
       }
       this.utils = doubleCsrf({
         getSecret: () => secret,
+        // This module never depends on `sessions` (see platform-backend.md), so CSRF
+        // protection here is pure secret-based double-submit-cookie, not session-bound.
+        // A constant identifier preserves that behavior under csrf-csrf v4's newly
+        // required field rather than introducing a cross-module session dependency.
+        getSessionIdentifier: () => 'stateless',
         cookieOptions: buildCookieOptions(config),
       });
     }
@@ -44,6 +47,6 @@ export class CsrfService {
     if (!this.utils) {
       throw new Error('CSRF protection is not enabled');
     }
-    return this.utils.generateToken(req, res);
+    return this.utils.generateCsrfToken(req, res);
   }
 }

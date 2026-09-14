@@ -2,11 +2,7 @@ import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {
-  AUTH_MODULE_CONFIG,
-  AuthModuleAsyncOptions,
-  AuthModuleConfig,
-} from './auth.config';
+import { AUTH_MODULE_CONFIG, AuthModuleAsyncOptions, AuthModuleConfig } from './auth.config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { User } from './entities/user.entity';
@@ -38,10 +34,7 @@ export class AuthModule {
       module: AuthModule,
       imports: coreImports,
       controllers: [AuthController],
-      providers: [
-        { provide: AUTH_MODULE_CONFIG, useValue: config },
-        ...coreProviders,
-      ],
+      providers: [{ provide: AUTH_MODULE_CONFIG, useValue: config }, ...coreProviders],
       exports: [AuthService],
     };
   }

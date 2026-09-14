@@ -1,4 +1,10 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RoleAssignment } from './entities/role-assignment.entity';
 import { RBAC_MODULE_CONFIG, RbacModuleConfig } from './rbac.config';

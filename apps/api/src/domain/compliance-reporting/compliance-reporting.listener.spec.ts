@@ -9,7 +9,10 @@ describe('ComplianceReportingListener', () => {
   beforeEach(() => {
     service = { recordEvent: jest.fn() };
     eventEmitter = { onAny: jest.fn() };
-    listener = new ComplianceReportingListener(eventEmitter as never, service as unknown as ComplianceReportingService);
+    listener = new ComplianceReportingListener(
+      eventEmitter as never,
+      service as unknown as ComplianceReportingService,
+    );
   });
 
   it('subscribes via onAny on module init', () => {
@@ -19,7 +22,11 @@ describe('ComplianceReportingListener', () => {
   });
 
   it('records a relevant event carrying both tenantId and contractId', async () => {
-    await listener.handleEvent('contract.statusChanged', { tenantId: 't1', contractId: 'c1', newStatus: 'approved' });
+    await listener.handleEvent('contract.statusChanged', {
+      tenantId: 't1',
+      contractId: 'c1',
+      newStatus: 'approved',
+    });
 
     expect(service.recordEvent).toHaveBeenCalledWith('t1', 'c1', 'contract.statusChanged', {
       tenantId: 't1',
@@ -29,13 +36,21 @@ describe('ComplianceReportingListener', () => {
   });
 
   it('ignores events outside the named modules (e.g. platform events)', async () => {
-    await listener.handleEvent('billing.subscription.updated', { tenantId: 't1', plan: 'pro', status: 'active' });
+    await listener.handleEvent('billing.subscription.updated', {
+      tenantId: 't1',
+      plan: 'pro',
+      status: 'active',
+    });
 
     expect(service.recordEvent).not.toHaveBeenCalled();
   });
 
   it('ignores a relevant event missing a contractId', async () => {
-    await listener.handleEvent('negotiation.roleAssigned', { tenantId: 't1', userId: 'u1', role: 'reviewer' });
+    await listener.handleEvent('negotiation.roleAssigned', {
+      tenantId: 't1',
+      userId: 'u1',
+      role: 'reviewer',
+    });
 
     expect(service.recordEvent).not.toHaveBeenCalled();
   });

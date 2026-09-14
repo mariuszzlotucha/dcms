@@ -12,7 +12,11 @@ interface DocuSignConnectPayload {
   };
 }
 
-const RELEVANT_EVENT_TYPES = new Set(['envelope-completed', 'envelope-declined', 'envelope-voided']);
+const RELEVANT_EVENT_TYPES = new Set([
+  'envelope-completed',
+  'envelope-declined',
+  'envelope-voided',
+]);
 
 // architecture doc 1.4: esignature "Does NOT store provider logic itself" —
 // verifying and routing the DocuSign Connect webhook is platform/
@@ -23,8 +27,14 @@ export class EsignatureListener {
   constructor(private readonly esignatureService: EsignatureService) {}
 
   @OnEvent(EVENTS.WEBHOOK_RECEIVED)
-  async handleWebhookReceived(event: EventPayloadMap[typeof EVENTS.WEBHOOK_RECEIVED]): Promise<void> {
-    if (!event.verified || event.provider !== 'docusign' || !RELEVANT_EVENT_TYPES.has(event.eventType)) {
+  async handleWebhookReceived(
+    event: EventPayloadMap[typeof EVENTS.WEBHOOK_RECEIVED],
+  ): Promise<void> {
+    if (
+      !event.verified ||
+      event.provider !== 'docusign' ||
+      !RELEVANT_EVENT_TYPES.has(event.eventType)
+    ) {
       return;
     }
 

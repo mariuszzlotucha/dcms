@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards, UsePipes } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '@platform/auth/guards/jwt-auth.guard';
 import { Roles } from '@platform/rbac/decorators/roles.decorator';
@@ -34,13 +44,22 @@ export class AccessControlController {
   ): Promise<ContractAccessGrant> {
     const tenantId = await this.tenantContext.getTenantId();
     const grantedBy = (request.user as { userId: string }).userId;
-    return this.accessControlService.grantAccess(tenantId, contractId, dto.userId, dto.permission, grantedBy);
+    return this.accessControlService.grantAccess(
+      tenantId,
+      contractId,
+      dto.userId,
+      dto.permission,
+      grantedBy,
+    );
   }
 
   @Delete('grants/:userId')
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
-  async revokeAccess(@Param('contractId') contractId: string, @Param('userId') userId: string): Promise<void> {
+  async revokeAccess(
+    @Param('contractId') contractId: string,
+    @Param('userId') userId: string,
+  ): Promise<void> {
     const tenantId = await this.tenantContext.getTenantId();
     return this.accessControlService.revokeAccess(tenantId, contractId, userId);
   }
@@ -62,6 +81,12 @@ export class AccessControlController {
   ): Promise<CollaborationInvite> {
     const tenantId = await this.tenantContext.getTenantId();
     const invitedBy = (request.user as { userId: string }).userId;
-    return this.accessControlService.inviteParticipant(tenantId, contractId, dto.email, dto.permission, invitedBy);
+    return this.accessControlService.inviteParticipant(
+      tenantId,
+      contractId,
+      dto.email,
+      dto.permission,
+      invitedBy,
+    );
   }
 }

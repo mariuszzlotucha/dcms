@@ -1,4 +1,11 @@
-import { DynamicModule, Injectable, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  Injectable,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '@platform/auth/entities/user.entity';
@@ -23,7 +30,9 @@ class AuthUserAccountQueries implements UserAccountQueries {
   async findUserIdsInactiveSince(cutoff: Date): Promise<string[]> {
     const rows = await this.users
       .createQueryBuilder('user')
-      .leftJoin(Session, 'session', 'session.userId = user.id AND session.createdAt > :cutoff', { cutoff })
+      .leftJoin(Session, 'session', 'session.userId = user.id AND session.createdAt > :cutoff', {
+        cutoff,
+      })
       .where('session.id IS NULL')
       .select('user.id', 'id')
       .getRawMany<{ id: string }>();
@@ -42,21 +51,29 @@ class AuthUserAccountQueries implements UserAccountQueries {
 }
 
 interface DataRetentionModuleAsyncOptions {
-  useFactory: (...args: unknown[]) => DataRetentionModuleConfig | Promise<DataRetentionModuleConfig>;
+  useFactory: (
+    ...args: unknown[]
+  ) => DataRetentionModuleConfig | Promise<DataRetentionModuleConfig>;
   inject?: (InjectionToken | OptionalFactoryDependency)[];
   userAccountQueriesProvider?: Provider;
 }
 
 @Module({})
 export class DataRetentionModule {
-  static forRoot(config: DataRetentionModuleConfig, userAccountQueriesProvider?: Provider): DynamicModule {
+  static forRoot(
+    config: DataRetentionModuleConfig,
+    userAccountQueriesProvider?: Provider,
+  ): DynamicModule {
     return {
       module: DataRetentionModule,
       global: true,
       imports: [TypeOrmModule.forFeature([User, Session])],
       providers: [
         { provide: DATA_RETENTION_MODULE_CONFIG, useValue: config },
-        userAccountQueriesProvider ?? { provide: USER_ACCOUNT_QUERIES, useClass: AuthUserAccountQueries },
+        userAccountQueriesProvider ?? {
+          provide: USER_ACCOUNT_QUERIES,
+          useClass: AuthUserAccountQueries,
+        },
         DataRetentionService,
       ],
       exports: [DataRetentionService],
@@ -76,7 +93,10 @@ export class DataRetentionModule {
       imports: [TypeOrmModule.forFeature([User, Session])],
       providers: [
         configProvider,
-        options.userAccountQueriesProvider ?? { provide: USER_ACCOUNT_QUERIES, useClass: AuthUserAccountQueries },
+        options.userAccountQueriesProvider ?? {
+          provide: USER_ACCOUNT_QUERIES,
+          useClass: AuthUserAccountQueries,
+        },
         DataRetentionService,
       ],
       exports: [DataRetentionService],

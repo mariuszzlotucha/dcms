@@ -19,7 +19,9 @@ export class ContractsListener {
   // over time, and only the first grant should actually move the contract —
   // later ones are a no-op, not a bug worth crashing an event listener over.
   @OnEvent(EVENTS.APPROVAL_GRANTED)
-  async handleApprovalGranted(event: EventPayloadMap[typeof EVENTS.APPROVAL_GRANTED]): Promise<void> {
+  async handleApprovalGranted(
+    event: EventPayloadMap[typeof EVENTS.APPROVAL_GRANTED],
+  ): Promise<void> {
     try {
       await this.contractsService.changeStatus(event.tenantId, event.contractId, 'approved');
     } catch (error) {

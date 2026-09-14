@@ -17,7 +17,11 @@ describe('AccessControlListener', () => {
   });
 
   it('resolves pending invites on auth.user.registered', async () => {
-    await listener.handleAuthUserRegistered({ tenantId: 't1', userId: 'u1', email: 'new@example.com' });
+    await listener.handleAuthUserRegistered({
+      tenantId: 't1',
+      userId: 'u1',
+      email: 'new@example.com',
+    });
 
     expect(service.resolvePendingInvites).toHaveBeenCalledWith('t1', 'new@example.com', 'u1');
   });

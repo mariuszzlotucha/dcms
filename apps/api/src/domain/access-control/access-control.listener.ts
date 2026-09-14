@@ -18,7 +18,13 @@ export class AccessControlListener {
   // domain-level contract permissions." Concretely: resolves any pending
   // collaboration invites addressed to their email into real grants.
   @OnEvent(EVENTS.AUTH_USER_REGISTERED)
-  async handleAuthUserRegistered(event: EventPayloadMap[typeof EVENTS.AUTH_USER_REGISTERED]): Promise<void> {
-    await this.accessControlService.resolvePendingInvites(event.tenantId, event.email, event.userId);
+  async handleAuthUserRegistered(
+    event: EventPayloadMap[typeof EVENTS.AUTH_USER_REGISTERED],
+  ): Promise<void> {
+    await this.accessControlService.resolvePendingInvites(
+      event.tenantId,
+      event.email,
+      event.userId,
+    );
   }
 }

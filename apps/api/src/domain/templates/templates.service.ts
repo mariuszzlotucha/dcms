@@ -13,7 +13,12 @@ import type {
 } from '@contracts/template.schema';
 import { TemplateClause } from './entities/template-clause.entity';
 import { Template } from './entities/template.entity';
-import { PREMIUM_TEMPLATES, STARTER_TEMPLATES, SYSTEM_SEED_ACTOR, TemplateSeed } from './templates.seed';
+import {
+  PREMIUM_TEMPLATES,
+  STARTER_TEMPLATES,
+  SYSTEM_SEED_ACTOR,
+  TemplateSeed,
+} from './templates.seed';
 
 export interface ListTemplatesFilter {
   category?: TemplateCategory;
@@ -30,7 +35,11 @@ export class TemplatesService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async createTemplate(tenantId: string, createdBy: string, dto: CreateTemplateDto): Promise<Template> {
+  async createTemplate(
+    tenantId: string,
+    createdBy: string,
+    dto: CreateTemplateDto,
+  ): Promise<Template> {
     return this.insertTemplate(tenantId, createdBy, dto, false);
   }
 
@@ -45,10 +54,11 @@ export class TemplatesService {
     Object.assign(template, dto);
     const saved = await this.templates.save(template);
 
-    this.eventEmitter.emit(
-      EVENTS.TEMPLATE_UPDATED,
-      { templateId: saved.id, tenantId, updatedBy } satisfies EventPayloadMap[typeof EVENTS.TEMPLATE_UPDATED],
-    );
+    this.eventEmitter.emit(EVENTS.TEMPLATE_UPDATED, {
+      templateId: saved.id,
+      tenantId,
+      updatedBy,
+    } satisfies EventPayloadMap[typeof EVENTS.TEMPLATE_UPDATED]);
 
     return saved;
   }
@@ -63,10 +73,10 @@ export class TemplatesService {
     template.status = 'published';
     const saved = await this.templates.save(template);
 
-    this.eventEmitter.emit(
-      EVENTS.TEMPLATE_PUBLISHED,
-      { templateId: saved.id, tenantId } satisfies EventPayloadMap[typeof EVENTS.TEMPLATE_PUBLISHED],
-    );
+    this.eventEmitter.emit(EVENTS.TEMPLATE_PUBLISHED, {
+      templateId: saved.id,
+      tenantId,
+    } satisfies EventPayloadMap[typeof EVENTS.TEMPLATE_PUBLISHED]);
 
     return saved;
   }
@@ -90,11 +100,21 @@ export class TemplatesService {
     return this.clauses.find({ where: { tenantId, templateId }, order: { order: 'ASC' } });
   }
 
-  async addClause(tenantId: string, templateId: string, dto: AddTemplateClauseDto): Promise<TemplateClause> {
+  async addClause(
+    tenantId: string,
+    templateId: string,
+    dto: AddTemplateClauseDto,
+  ): Promise<TemplateClause> {
     await this.getTemplate(tenantId, templateId);
 
     const clause = await this.clauses.save(
-      this.clauses.create({ tenantId, templateId, title: dto.title, body: dto.body, order: dto.order ?? 0 }),
+      this.clauses.create({
+        tenantId,
+        templateId,
+        title: dto.title,
+        body: dto.body,
+        order: dto.order ?? 0,
+      }),
     );
 
     this.emitClauseLibraryUpdated(tenantId, templateId, clause.id);
@@ -136,7 +156,11 @@ export class TemplatesService {
     await this.seedIfMissing(tenantId, PREMIUM_TEMPLATES, true);
   }
 
-  private async seedIfMissing(tenantId: string, seeds: TemplateSeed[], isPremium: boolean): Promise<void> {
+  private async seedIfMissing(
+    tenantId: string,
+    seeds: TemplateSeed[],
+    isPremium: boolean,
+  ): Promise<void> {
     const existing = await this.templates.find({ where: { tenantId, isPremium } });
     const existingNames = new Set(existing.map((t) => t.name));
 
@@ -148,7 +172,12 @@ export class TemplatesService {
       await this.insertTemplate(
         tenantId,
         SYSTEM_SEED_ACTOR,
-        { name: seed.name, description: seed.description, category: seed.category, fields: seed.fields },
+        {
+          name: seed.name,
+          description: seed.description,
+          category: seed.category,
+          fields: seed.fields,
+        },
         isPremium,
       );
     }
@@ -173,15 +202,20 @@ export class TemplatesService {
       }),
     );
 
-    this.eventEmitter.emit(
-      EVENTS.TEMPLATE_CREATED,
-      { templateId: template.id, tenantId, createdBy } satisfies EventPayloadMap[typeof EVENTS.TEMPLATE_CREATED],
-    );
+    this.eventEmitter.emit(EVENTS.TEMPLATE_CREATED, {
+      templateId: template.id,
+      tenantId,
+      createdBy,
+    } satisfies EventPayloadMap[typeof EVENTS.TEMPLATE_CREATED]);
 
     return template;
   }
 
-  private async getClause(tenantId: string, templateId: string, clauseId: string): Promise<TemplateClause> {
+  private async getClause(
+    tenantId: string,
+    templateId: string,
+    clauseId: string,
+  ): Promise<TemplateClause> {
     await this.getTemplate(tenantId, templateId);
 
     const clause = await this.clauses.findOne({ where: { id: clauseId, tenantId, templateId } });
@@ -194,9 +228,10 @@ export class TemplatesService {
   }
 
   private emitClauseLibraryUpdated(tenantId: string, templateId: string, clauseId: string): void {
-    this.eventEmitter.emit(
-      EVENTS.TEMPLATE_CLAUSE_LIBRARY_UPDATED,
-      { templateId, tenantId, clauseId } satisfies EventPayloadMap[typeof EVENTS.TEMPLATE_CLAUSE_LIBRARY_UPDATED],
-    );
+    this.eventEmitter.emit(EVENTS.TEMPLATE_CLAUSE_LIBRARY_UPDATED, {
+      templateId,
+      tenantId,
+      clauseId,
+    } satisfies EventPayloadMap[typeof EVENTS.TEMPLATE_CLAUSE_LIBRARY_UPDATED]);
   }
 }

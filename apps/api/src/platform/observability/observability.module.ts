@@ -15,7 +15,9 @@ export function initializeObservability(config: ObservabilityModuleConfig): void
   }
 
   const sdk = new NodeSDK({
-    resource: resourceFromAttributes({ [SemanticResourceAttributes.SERVICE_NAME]: config.serviceName }),
+    resource: resourceFromAttributes({
+      [SemanticResourceAttributes.SERVICE_NAME]: config.serviceName,
+    }),
     traceExporter: new OTLPTraceExporter({ url: `${config.otlpEndpoint}/v1/traces` }),
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({ url: `${config.otlpEndpoint}/v1/metrics` }),

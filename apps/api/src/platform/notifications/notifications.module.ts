@@ -1,9 +1,17 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { NOTIFICATIONS_MODULE_CONFIG, NotificationsModuleConfig } from './notifications.config';
 import { NotificationsService } from './notifications.service';
 
 interface NotificationsModuleAsyncOptions {
-  useFactory: (...args: unknown[]) => NotificationsModuleConfig | Promise<NotificationsModuleConfig>;
+  useFactory: (
+    ...args: unknown[]
+  ) => NotificationsModuleConfig | Promise<NotificationsModuleConfig>;
   inject?: (InjectionToken | OptionalFactoryDependency)[];
 }
 

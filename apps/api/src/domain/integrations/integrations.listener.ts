@@ -17,7 +17,9 @@ export class IntegrationsListener {
   // architecture doc 1.9 / 3: "featureFlag.toggled — controls integration
   // availability as a premium/enterprise feature."
   @OnEvent(EVENTS.FEATURE_FLAG_TOGGLED)
-  async handleFeatureFlagToggled(event: EventPayloadMap[typeof EVENTS.FEATURE_FLAG_TOGGLED]): Promise<void> {
+  async handleFeatureFlagToggled(
+    event: EventPayloadMap[typeof EVENTS.FEATURE_FLAG_TOGGLED],
+  ): Promise<void> {
     if (event.flagKey !== INTEGRATIONS_FLAG || event.enabled) {
       return;
     }
@@ -26,12 +28,16 @@ export class IntegrationsListener {
   }
 
   @OnEvent(EVENTS.CONTRACT_CREATED)
-  async handleContractCreated(event: EventPayloadMap[typeof EVENTS.CONTRACT_CREATED]): Promise<void> {
+  async handleContractCreated(
+    event: EventPayloadMap[typeof EVENTS.CONTRACT_CREATED],
+  ): Promise<void> {
     await this.integrationsService.requestSync(event.tenantId, event.contractId);
   }
 
   @OnEvent(EVENTS.CONTRACT_STATUS_CHANGED)
-  async handleContractStatusChanged(event: EventPayloadMap[typeof EVENTS.CONTRACT_STATUS_CHANGED]): Promise<void> {
+  async handleContractStatusChanged(
+    event: EventPayloadMap[typeof EVENTS.CONTRACT_STATUS_CHANGED],
+  ): Promise<void> {
     await this.integrationsService.requestSync(event.tenantId, event.contractId);
   }
 }

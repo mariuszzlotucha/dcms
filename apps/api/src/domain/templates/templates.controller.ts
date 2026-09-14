@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards, UsePipes } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '@platform/auth/guards/jwt-auth.guard';
 import { Roles } from '@platform/rbac/decorators/roles.decorator';
@@ -86,7 +98,10 @@ export class TemplatesController {
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
   @UsePipes(new ZodValidationPipe(addTemplateClauseSchema))
-  async addClause(@Param('id') id: string, @Body() dto: AddTemplateClauseDto): Promise<TemplateClause> {
+  async addClause(
+    @Param('id') id: string,
+    @Body() dto: AddTemplateClauseDto,
+  ): Promise<TemplateClause> {
     const tenantId = await this.tenantContext.getTenantId();
     return this.templatesService.addClause(tenantId, id, dto);
   }

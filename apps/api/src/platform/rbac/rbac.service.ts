@@ -27,10 +27,11 @@ export class RbacService {
 
     const saved = await this.roleAssignments.save(assignment);
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.RBAC_ROLE_ASSIGNED,
-      { userId, tenantId, role } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.RBAC_ROLE_ASSIGNED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.RBAC_ROLE_ASSIGNED, {
+      userId,
+      tenantId,
+      role,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.RBAC_ROLE_ASSIGNED]);
 
     return saved;
   }

@@ -24,7 +24,9 @@ export class NotificationsRemindersListener {
   }
 
   @OnEvent(EVENTS.APPROVAL_REQUESTED)
-  async handleApprovalRequested(event: EventPayloadMap[typeof EVENTS.APPROVAL_REQUESTED]): Promise<void> {
+  async handleApprovalRequested(
+    event: EventPayloadMap[typeof EVENTS.APPROVAL_REQUESTED],
+  ): Promise<void> {
     await this.notificationsRemindersService.scheduleApprovalReminder(
       event.tenantId,
       event.contractId,
@@ -42,14 +44,22 @@ export class NotificationsRemindersListener {
   }
 
   @OnEvent(EVENTS.ESIGNATURE_EXPIRED)
-  async handleEsignatureExpired(event: EventPayloadMap[typeof EVENTS.ESIGNATURE_EXPIRED]): Promise<void> {
-    await this.notificationsRemindersService.notifySignatureExpired(event.tenantId, event.contractId);
+  async handleEsignatureExpired(
+    event: EventPayloadMap[typeof EVENTS.ESIGNATURE_EXPIRED],
+  ): Promise<void> {
+    await this.notificationsRemindersService.notifySignatureExpired(
+      event.tenantId,
+      event.contractId,
+    );
   }
 
   @OnEvent(EVENTS.NEGOTIATION_REVISION_REQUESTED)
   async handleNegotiationRevisionRequested(
     event: EventPayloadMap[typeof EVENTS.NEGOTIATION_REVISION_REQUESTED],
   ): Promise<void> {
-    await this.notificationsRemindersService.notifyRevisionRequested(event.tenantId, event.contractId);
+    await this.notificationsRemindersService.notifyRevisionRequested(
+      event.tenantId,
+      event.contractId,
+    );
   }
 }

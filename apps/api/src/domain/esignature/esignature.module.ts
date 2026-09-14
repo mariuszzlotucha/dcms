@@ -1,4 +1,10 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SignatureEnvelope } from './entities/signature-envelope.entity';
 import { ESIGNATURE_MODULE_CONFIG, EsignatureModuleConfig } from './esignature.config';
@@ -40,7 +46,12 @@ export class EsignatureModule {
       module: EsignatureModule,
       imports: [TypeOrmModule.forFeature([SignatureEnvelope])],
       controllers: [EsignatureController],
-      providers: [configProvider, EsignatureService, EsignatureListener, DocuSignEsignatureProvider],
+      providers: [
+        configProvider,
+        EsignatureService,
+        EsignatureListener,
+        DocuSignEsignatureProvider,
+      ],
       exports: [EsignatureService],
     };
   }

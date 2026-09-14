@@ -1,10 +1,4 @@
-import {
-  DynamicModule,
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  Provider,
-} from '@nestjs/common';
+import { DynamicModule, MiddlewareConsumer, Module, NestModule, Provider } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import {
   SECURITY_MODULE_CONFIG,
@@ -42,10 +36,7 @@ export class SecurityModule implements NestModule {
     return {
       module: SecurityModule,
       controllers: [SecurityController],
-      providers: [
-        { provide: SECURITY_MODULE_CONFIG, useValue: config },
-        ...coreProviders,
-      ],
+      providers: [{ provide: SECURITY_MODULE_CONFIG, useValue: config }, ...coreProviders],
       exports: [SECURITY_MODULE_CONFIG, FieldEncryptionService],
     };
   }

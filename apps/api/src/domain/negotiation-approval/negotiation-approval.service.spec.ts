@@ -48,18 +48,31 @@ describe('NegotiationApprovalService', () => {
       expect(result.id).toBe('role-1');
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'negotiation.roleAssigned',
-        expect.objectContaining({ contractId: 'c1', tenantId: 't1', userId: 'u1', role: 'approver' }),
+        expect.objectContaining({
+          contractId: 'c1',
+          tenantId: 't1',
+          userId: 'u1',
+          role: 'approver',
+        }),
       );
     });
 
     it('upserts (re-assigns) an existing role for the same user on the same contract', async () => {
-      const existing = { id: 'role-1', tenantId: 't1', contractId: 'c1', userId: 'u1', role: 'reviewer' };
+      const existing = {
+        id: 'role-1',
+        tenantId: 't1',
+        contractId: 'c1',
+        userId: 'u1',
+        role: 'reviewer',
+      };
       roleAssignments.findOne.mockResolvedValue(existing);
 
       await service.assignRole('t1', 'c1', 'u1', 'approver');
 
       expect(roleAssignments.create).not.toHaveBeenCalled();
-      expect(roleAssignments.save).toHaveBeenCalledWith(expect.objectContaining({ role: 'approver' }));
+      expect(roleAssignments.save).toHaveBeenCalledWith(
+        expect.objectContaining({ role: 'approver' }),
+      );
     });
   });
 
@@ -69,7 +82,9 @@ describe('NegotiationApprovalService', () => {
 
       await service.listRoles('t1', 'c1');
 
-      expect(roleAssignments.find).toHaveBeenCalledWith({ where: { tenantId: 't1', contractId: 'c1' } });
+      expect(roleAssignments.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1', contractId: 'c1' },
+      });
     });
   });
 
@@ -79,7 +94,9 @@ describe('NegotiationApprovalService', () => {
 
       await service.listApprovalRequests('t1', 'c1');
 
-      expect(approvalRequests.find).toHaveBeenCalledWith({ where: { tenantId: 't1', contractId: 'c1' } });
+      expect(approvalRequests.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1', contractId: 'c1' },
+      });
     });
   });
 
@@ -91,14 +108,21 @@ describe('NegotiationApprovalService', () => {
 
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'negotiation.revisionRequested',
-        expect.objectContaining({ contractId: 'c1', tenantId: 't1', requestedBy: 'u1', comment: 'please fix section 3' }),
+        expect.objectContaining({
+          contractId: 'c1',
+          tenantId: 't1',
+          requestedBy: 'u1',
+          comment: 'please fix section 3',
+        }),
       );
     });
 
     it('rejects a revision request from a user with no role on the contract', async () => {
       roleAssignments.findOne.mockResolvedValue(null);
 
-      await expect(service.requestRevision('t1', 'c1', 'stranger', 'x')).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(service.requestRevision('t1', 'c1', 'stranger', 'x')).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
       expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
   });
@@ -111,7 +135,12 @@ describe('NegotiationApprovalService', () => {
       await service.createApprovalRequestForSubmission('t1', 'c1');
 
       expect(approvalRequests.create).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 't1', contractId: 'c1', approverId: 'approver-1', status: 'pending' }),
+        expect.objectContaining({
+          tenantId: 't1',
+          contractId: 'c1',
+          approverId: 'approver-1',
+          status: 'pending',
+        }),
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'approval.requested',
@@ -157,7 +186,9 @@ describe('NegotiationApprovalService', () => {
     it('throws NotFound when the caller has no pending request (wrong approver or already decided)', async () => {
       approvalRequests.findOne.mockResolvedValue(null);
 
-      await expect(service.grantApproval('t1', 'c1', 'not-the-approver')).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.grantApproval('t1', 'c1', 'not-the-approver')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
     });
   });
 
@@ -165,7 +196,12 @@ describe('NegotiationApprovalService', () => {
     it('rejects a pending request with a reason and emits approval.rejected', async () => {
       approvalRequests.findOne.mockResolvedValue({ id: 'req-1', status: 'pending' });
 
-      const result = await service.rejectApproval('t1', 'c1', 'approver-1', 'missing indemnity clause');
+      const result = await service.rejectApproval(
+        't1',
+        'c1',
+        'approver-1',
+        'missing indemnity clause',
+      );
 
       expect(result.status).toBe('rejected');
       expect(result.reason).toBe('missing indemnity clause');

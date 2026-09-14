@@ -19,7 +19,11 @@ export class ApiKeysService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async createKey(tenantId: string, label: string, scopes: string[]): Promise<{ id: string; rawKey: string }> {
+  async createKey(
+    tenantId: string,
+    label: string,
+    scopes: string[],
+  ): Promise<{ id: string; rawKey: string }> {
     const rawKey = `${this.config.keyPrefix}${randomBytes(32).toString('base64url')}`;
     const keyHash = createHash('sha256').update(rawKey).digest('hex');
 
@@ -27,10 +31,11 @@ export class ApiKeysService {
       this.apiKeys.create({ tenantId, keyHash, scopes, label, revokedAt: null }),
     );
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.API_KEY_CREATED,
-      { tenantId, keyId: apiKey.id, scopes: apiKey.scopes } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.API_KEY_CREATED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.API_KEY_CREATED, {
+      tenantId,
+      keyId: apiKey.id,
+      scopes: apiKey.scopes,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.API_KEY_CREATED]);
 
     return { id: apiKey.id, rawKey };
   }
@@ -50,9 +55,9 @@ export class ApiKeysService {
     apiKey.revokedAt = new Date();
     await this.apiKeys.save(apiKey);
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.API_KEY_REVOKED,
-      { tenantId, keyId: apiKey.id } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.API_KEY_REVOKED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.API_KEY_REVOKED, {
+      tenantId,
+      keyId: apiKey.id,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.API_KEY_REVOKED]);
   }
 }

@@ -8,11 +8,7 @@ import {
   mixin,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  AUTH_MODULE_CONFIG,
-  AuthModuleConfig,
-  OauthProviderName,
-} from '../auth.config';
+import { AUTH_MODULE_CONFIG, AuthModuleConfig, OauthProviderName } from '../auth.config';
 
 /**
  * Counterpart of the placeholder construction in the OAuth strategies:
@@ -22,9 +18,7 @@ import {
 export function OauthGuard(provider: OauthProviderName): Type<CanActivate> {
   @Injectable()
   class ProviderGuard extends AuthGuard(provider) {
-    constructor(
-      @Inject(AUTH_MODULE_CONFIG) readonly config: AuthModuleConfig,
-    ) {
+    constructor(@Inject(AUTH_MODULE_CONFIG) readonly config: AuthModuleConfig) {
       super();
     }
 

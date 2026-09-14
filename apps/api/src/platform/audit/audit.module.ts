@@ -1,4 +1,11 @@
-import { DynamicModule, Injectable, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  Injectable,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuditEntry } from './entities/audit-entry.entity';
@@ -29,7 +36,12 @@ export class AuditService {
   // AUDIT_ENTRY_CREATED exists in PlatformEventPayloadMap but is deliberately never
   // emitted here — this service's own writes are captured by the same wildcard
   // listener that feeds it, so emitting would recurse into itself.
-  async record(eventName: string, actorId: string | null, tenantId: string | null, payload: unknown): Promise<AuditEntry> {
+  async record(
+    eventName: string,
+    actorId: string | null,
+    tenantId: string | null,
+    payload: unknown,
+  ): Promise<AuditEntry> {
     return this.auditEntries.save(
       this.auditEntries.create({ eventName, actorId, tenantId, payload, timestamp: new Date() }),
     );

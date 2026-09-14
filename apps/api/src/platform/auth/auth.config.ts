@@ -14,11 +14,8 @@ export interface AuthModuleConfig {
 
 export type OauthProviderName = keyof NonNullable<AuthModuleConfig['oauth']>;
 
-export interface AuthModuleAsyncOptions
-  extends Pick<ModuleMetadata, 'imports'> {
-  useFactory: (
-    ...args: any[]
-  ) => Promise<AuthModuleConfig> | AuthModuleConfig;
+export interface AuthModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  useFactory: (...args: any[]) => Promise<AuthModuleConfig> | AuthModuleConfig;
   inject?: any[];
 }
 

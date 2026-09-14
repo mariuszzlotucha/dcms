@@ -29,11 +29,7 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, 'linkedin') {
     } as StrategyOption & { store: OauthStateStore });
   }
 
-  validate(
-    _accessToken: string,
-    _refreshToken: string,
-    profile: LinkedInProfile,
-  ): OauthProfile {
+  validate(_accessToken: string, _refreshToken: string, profile: LinkedInProfile): OauthProfile {
     return { email: profile.emails?.[0]?.value ?? null };
   }
 }

@@ -72,8 +72,7 @@ const CSRF_ENABLED = false;
     LoggingModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService<AppConfig, true>) => {
-        const isProd =
-          configService.get('NODE_ENV', { infer: true }) === 'production';
+        const isProd = configService.get('NODE_ENV', { infer: true }) === 'production';
         return { level: isProd ? 'info' : 'debug', prettyPrint: !isProd };
       },
     }),
@@ -99,10 +98,9 @@ const CSRF_ENABLED = false;
           infer: true,
         });
         const stripeWebhookSecret = configService.get('STRIPE_WEBHOOK_SECRET', { infer: true });
-        const piiRedactionKey = configService.get('PII_REDACTION_KEY', { infer: true });  // ← add
+        const piiRedactionKey = configService.get('PII_REDACTION_KEY', { infer: true }); // ← add
         const docusignAccessToken = configService.get('DOCUSIGN_ACCESS_TOKEN', { infer: true });
         const docusignConnectSecret = configService.get('DOCUSIGN_CONNECT_SECRET', { infer: true });
-
 
         return {
           jwtSigningKey: configService.get('JWT_SECRET', { infer: true }),
@@ -197,8 +195,14 @@ const CSRF_ENABLED = false;
         const configService = args[0] as ConfigService<AppConfig, true>;
         return {
           plans: {
-            starter: { stripePriceId: configService.get('STRIPE_PRICE_STARTER', { infer: true }), name: 'Starter' },
-            pro: { stripePriceId: configService.get('STRIPE_PRICE_PRO', { infer: true }), name: 'Pro' },
+            starter: {
+              stripePriceId: configService.get('STRIPE_PRICE_STARTER', { infer: true }),
+              name: 'Starter',
+            },
+            pro: {
+              stripePriceId: configService.get('STRIPE_PRICE_PRO', { infer: true }),
+              name: 'Pro',
+            },
           },
           successUrl: configService.get('BILLING_SUCCESS_URL', { infer: true }),
           cancelUrl: configService.get('BILLING_CANCEL_URL', { infer: true }),
@@ -273,4 +277,4 @@ const CSRF_ENABLED = false;
     ComplianceReportingModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

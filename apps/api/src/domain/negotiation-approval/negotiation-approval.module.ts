@@ -8,7 +8,9 @@ import { NegotiationApprovalListener } from './negotiation-approval.listener';
 import { NegotiationApprovalService } from './negotiation-approval.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([NegotiationRoleAssignment, ApprovalRequest, ApprovalWorkflow])],
+  imports: [
+    TypeOrmModule.forFeature([NegotiationRoleAssignment, ApprovalRequest, ApprovalWorkflow]),
+  ],
   controllers: [NegotiationApprovalController],
   providers: [NegotiationApprovalService, NegotiationApprovalListener],
   exports: [NegotiationApprovalService],

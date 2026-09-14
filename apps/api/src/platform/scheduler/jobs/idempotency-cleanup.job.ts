@@ -33,20 +33,17 @@ export class IdempotencyCleanupJob implements OnApplicationBootstrap {
     try {
       await this.idempotencyService.pruneExpired();
 
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.SCHEDULER_JOB_COMPLETED,
-        { jobName: JOB_NAME, durationMs: Date.now() - startedAt } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SCHEDULER_JOB_COMPLETED],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.SCHEDULER_JOB_COMPLETED, {
+        jobName: JOB_NAME,
+        durationMs: Date.now() - startedAt,
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SCHEDULER_JOB_COMPLETED]);
     } catch (error) {
       this.logger.error(`${JOB_NAME} failed`, error instanceof Error ? error.stack : String(error));
 
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.SCHEDULER_JOB_FAILED,
-        {
-          jobName: JOB_NAME,
-          reason: error instanceof Error ? error.message : 'Unknown error',
-        } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SCHEDULER_JOB_FAILED],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.SCHEDULER_JOB_FAILED, {
+        jobName: JOB_NAME,
+        reason: error instanceof Error ? error.message : 'Unknown error',
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SCHEDULER_JOB_FAILED]);
     }
   }
 }

@@ -5,11 +5,8 @@ export interface HealthModuleConfig {
   checks?: HealthIndicatorFunction[];
 }
 
-export interface HealthModuleAsyncOptions
-  extends Pick<ModuleMetadata, 'imports'> {
-  useFactory: (
-    ...args: any[]
-  ) => Promise<HealthModuleConfig> | HealthModuleConfig;
+export interface HealthModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  useFactory: (...args: any[]) => Promise<HealthModuleConfig> | HealthModuleConfig;
   inject?: any[];
 }
 

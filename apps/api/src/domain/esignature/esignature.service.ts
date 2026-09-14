@@ -64,24 +64,18 @@ export class EsignatureService {
     // the envelope in one round trip for v0 — both events fire together
     // rather than one persisted 'requested' row later being promoted by a
     // webhook, since there is no meaningful gap between the two here.
-    this.eventEmitter.emit(
-      EVENTS.ESIGNATURE_REQUESTED,
-      {
-        contractId,
-        tenantId,
-        envelopeId,
-        provider: envelope.provider,
-      } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_REQUESTED],
-    );
-    this.eventEmitter.emit(
-      EVENTS.ESIGNATURE_SENT,
-      {
-        contractId,
-        tenantId,
-        envelopeId,
-        recipientEmail: signerEmail,
-      } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_SENT],
-    );
+    this.eventEmitter.emit(EVENTS.ESIGNATURE_REQUESTED, {
+      contractId,
+      tenantId,
+      envelopeId,
+      provider: envelope.provider,
+    } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_REQUESTED]);
+    this.eventEmitter.emit(EVENTS.ESIGNATURE_SENT, {
+      contractId,
+      tenantId,
+      envelopeId,
+      recipientEmail: signerEmail,
+    } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_SENT]);
 
     return envelope;
   }
@@ -107,15 +101,12 @@ export class EsignatureService {
     envelope.status = 'completed';
     const saved = await this.envelopes.save(envelope);
 
-    this.eventEmitter.emit(
-      EVENTS.ESIGNATURE_COMPLETED,
-      {
-        contractId: saved.contractId,
-        tenantId: saved.tenantId,
-        envelopeId,
-        completedAt,
-      } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_COMPLETED],
-    );
+    this.eventEmitter.emit(EVENTS.ESIGNATURE_COMPLETED, {
+      contractId: saved.contractId,
+      tenantId: saved.tenantId,
+      envelopeId,
+      completedAt,
+    } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_COMPLETED]);
   }
 
   async markDeclined(envelopeId: string, reason: string): Promise<void> {
@@ -129,15 +120,12 @@ export class EsignatureService {
     envelope.declineReason = reason;
     const saved = await this.envelopes.save(envelope);
 
-    this.eventEmitter.emit(
-      EVENTS.ESIGNATURE_DECLINED,
-      {
-        contractId: saved.contractId,
-        tenantId: saved.tenantId,
-        envelopeId,
-        reason,
-      } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_DECLINED],
-    );
+    this.eventEmitter.emit(EVENTS.ESIGNATURE_DECLINED, {
+      contractId: saved.contractId,
+      tenantId: saved.tenantId,
+      envelopeId,
+      reason,
+    } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_DECLINED]);
   }
 
   async markExpired(envelopeId: string): Promise<void> {
@@ -150,14 +138,11 @@ export class EsignatureService {
     envelope.status = 'expired';
     const saved = await this.envelopes.save(envelope);
 
-    this.eventEmitter.emit(
-      EVENTS.ESIGNATURE_EXPIRED,
-      {
-        contractId: saved.contractId,
-        tenantId: saved.tenantId,
-        envelopeId,
-      } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_EXPIRED],
-    );
+    this.eventEmitter.emit(EVENTS.ESIGNATURE_EXPIRED, {
+      contractId: saved.contractId,
+      tenantId: saved.tenantId,
+      envelopeId,
+    } satisfies EventPayloadMap[typeof EVENTS.ESIGNATURE_EXPIRED]);
   }
 
   private async findByEnvelopeId(envelopeId: string): Promise<SignatureEnvelope | null> {

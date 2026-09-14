@@ -1,9 +1,19 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Column, CreateDateColumn, Entity, MoreThan, PrimaryGeneratedColumn, Repository } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  MoreThan,
+  PrimaryGeneratedColumn,
+  Repository,
+} from 'typeorm';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
-import { PASSWORD_POLICY_MODULE_CONFIG, PasswordPolicyModuleConfig } from './password-policy.config';
+import {
+  PASSWORD_POLICY_MODULE_CONFIG,
+  PasswordPolicyModuleConfig,
+} from './password-policy.config';
 
 @Entity('failed_login_attempts')
 export class FailedLoginAttempt {
@@ -51,10 +61,10 @@ export class PasswordPolicyService {
     const count = await this.countRecentAttempts(userId);
 
     if (count === this.config.maxFailedAttempts) {
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.PASSWORD_LOCKED_OUT,
-        { userId, failedAttempts: count } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.PASSWORD_LOCKED_OUT],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.PASSWORD_LOCKED_OUT, {
+        userId,
+        failedAttempts: count,
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.PASSWORD_LOCKED_OUT]);
     }
   }
 
@@ -69,6 +79,8 @@ export class PasswordPolicyService {
 
   private async countRecentAttempts(userId: string): Promise<number> {
     const windowStart = new Date(Date.now() - this.config.lockoutDurationMinutes * 60 * 1000);
-    return this.failedLoginAttempts.count({ where: { userId, attemptedAt: MoreThan(windowStart) } });
+    return this.failedLoginAttempts.count({
+      where: { userId, attemptedAt: MoreThan(windowStart) },
+    });
   }
 }

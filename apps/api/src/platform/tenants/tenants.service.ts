@@ -25,10 +25,11 @@ export class TenantsService {
 
     await this.rbacService.assignRole(creatorUserId, tenant.id, 'owner');
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.TENANT_CREATED,
-      { tenantId: tenant.id, name: tenant.name, plan: tenant.plan } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.TENANT_CREATED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.TENANT_CREATED, {
+      tenantId: tenant.id,
+      name: tenant.name,
+      plan: tenant.plan,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.TENANT_CREATED]);
 
     return tenant;
   }

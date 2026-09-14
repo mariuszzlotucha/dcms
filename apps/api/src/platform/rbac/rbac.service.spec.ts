@@ -37,7 +37,11 @@ describe('RbacService', () => {
 
       await service.assignRole('u1', 't1', 'admin');
 
-      expect(roleAssignments.create).toHaveBeenCalledWith({ userId: 'u1', tenantId: 't1', role: 'admin' });
+      expect(roleAssignments.create).toHaveBeenCalledWith({
+        userId: 'u1',
+        tenantId: 't1',
+        role: 'admin',
+      });
       expect(roleAssignments.save).toHaveBeenCalledWith(
         expect.objectContaining({ userId: 'u1', tenantId: 't1', role: 'admin' }),
       );
@@ -50,7 +54,9 @@ describe('RbacService', () => {
       await service.assignRole('u1', 't1', 'owner');
 
       expect(roleAssignments.create).not.toHaveBeenCalled();
-      expect(roleAssignments.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'a1', role: 'owner' }));
+      expect(roleAssignments.save).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'a1', role: 'owner' }),
+      );
     });
 
     it('emits RBAC_ROLE_ASSIGNED with the new role', async () => {
@@ -82,7 +88,12 @@ describe('RbacService', () => {
 
   describe('isMember', () => {
     it('returns true when a role assignment exists', async () => {
-      roleAssignments.findOne.mockResolvedValue({ id: 'a1', userId: 'u1', tenantId: 't1', role: 'member' });
+      roleAssignments.findOne.mockResolvedValue({
+        id: 'a1',
+        userId: 'u1',
+        tenantId: 't1',
+        role: 'member',
+      });
 
       await expect(service.isMember('u1', 't1')).resolves.toBe(true);
     });

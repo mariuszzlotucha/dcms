@@ -65,7 +65,9 @@ describe('IdempotencyService', () => {
     it('rethrows any other error', async () => {
       records.save.mockRejectedValueOnce(new Error('connection lost'));
 
-      await expect(service.persist('key-1', '/api/contracts', 201, {})).rejects.toThrow('connection lost');
+      await expect(service.persist('key-1', '/api/contracts', 201, {})).rejects.toThrow(
+        'connection lost',
+      );
     });
   });
 

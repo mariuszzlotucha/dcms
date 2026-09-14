@@ -5,7 +5,12 @@ import { PasswordPolicyService } from './password-policy.service';
 import { PasswordPolicyModuleConfig } from './password-policy.config';
 
 describe('PasswordPolicyService', () => {
-  let failedLoginAttempts: { save: jest.Mock; create: jest.Mock; count: jest.Mock; delete: jest.Mock };
+  let failedLoginAttempts: {
+    save: jest.Mock;
+    create: jest.Mock;
+    count: jest.Mock;
+    delete: jest.Mock;
+  };
   let eventEmitter: { emit: jest.Mock };
   let service: PasswordPolicyService;
 
@@ -26,7 +31,11 @@ describe('PasswordPolicyService', () => {
     };
     eventEmitter = { emit: jest.fn() };
 
-    service = new PasswordPolicyService(failedLoginAttempts as never, config, eventEmitter as unknown as EventEmitter2);
+    service = new PasswordPolicyService(
+      failedLoginAttempts as never,
+      config,
+      eventEmitter as unknown as EventEmitter2,
+    );
   });
 
   describe('validateStrength', () => {
@@ -39,11 +48,15 @@ describe('PasswordPolicyService', () => {
     });
 
     it('rejects a password with no number when one is required', () => {
-      expect(() => service.validateStrength('NoNumberHere')).toThrow('must contain at least one number');
+      expect(() => service.validateStrength('NoNumberHere')).toThrow(
+        'must contain at least one number',
+      );
     });
 
     it('rejects a password with no letter when one is required', () => {
-      expect(() => service.validateStrength('1234567890')).toThrow('must contain at least one letter');
+      expect(() => service.validateStrength('1234567890')).toThrow(
+        'must contain at least one letter',
+      );
     });
 
     it('combines every violated rule into a single error message', () => {
@@ -53,7 +66,11 @@ describe('PasswordPolicyService', () => {
     });
 
     it('skips the number/letter checks when the config does not require them', () => {
-      const lenientConfig: PasswordPolicyModuleConfig = { ...config, requireNumber: false, requireLetter: false };
+      const lenientConfig: PasswordPolicyModuleConfig = {
+        ...config,
+        requireNumber: false,
+        requireLetter: false,
+      };
       const lenientService = new PasswordPolicyService(
         failedLoginAttempts as never,
         lenientConfig,

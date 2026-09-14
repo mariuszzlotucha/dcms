@@ -58,9 +58,9 @@ describe('TenantThrottlerGuard', () => {
     it('emits RATE_LIMIT_EXCEEDED with the resolved tenant, tracker key, and configured limit', async () => {
       tenantContext.getTenantId.mockResolvedValue('t1');
 
-      await expect(guard.throwThrottlingException(buildContext({ ip: '1.2.3.4' }), {})).rejects.toThrow(
-        ThrottlerException,
-      );
+      await expect(
+        guard.throwThrottlingException(buildContext({ ip: '1.2.3.4' }), {}),
+      ).rejects.toThrow(ThrottlerException);
 
       expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.RATE_LIMIT_EXCEEDED, {
         tenantId: 't1',
@@ -72,9 +72,9 @@ describe('TenantThrottlerGuard', () => {
     it('falls back to an empty tenantId in the event when there is no tenant context', async () => {
       tenantContext.getTenantId.mockRejectedValue(new Error('no tenant'));
 
-      await expect(guard.throwThrottlingException(buildContext({ ip: '1.2.3.4' }), {})).rejects.toThrow(
-        ThrottlerException,
-      );
+      await expect(
+        guard.throwThrottlingException(buildContext({ ip: '1.2.3.4' }), {}),
+      ).rejects.toThrow(ThrottlerException);
 
       expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.RATE_LIMIT_EXCEEDED, {
         tenantId: '',
@@ -86,7 +86,9 @@ describe('TenantThrottlerGuard', () => {
     it('still throws the throttling exception after emitting the event', async () => {
       tenantContext.getTenantId.mockResolvedValue('t1');
 
-      await expect(guard.throwThrottlingException(buildContext({ ip: '1.2.3.4' }), {})).rejects.toThrow();
+      await expect(
+        guard.throwThrottlingException(buildContext({ ip: '1.2.3.4' }), {}),
+      ).rejects.toThrow();
     });
   });
 });

@@ -18,7 +18,10 @@ describe('RolesGuard', () => {
   beforeEach(() => {
     reflector = { getAllAndOverride: jest.fn() };
     rbacService = { isMember: jest.fn(), hasRole: jest.fn() };
-    guard = new RolesGuard(reflector as unknown as Reflector, rbacService as unknown as RbacService);
+    guard = new RolesGuard(
+      reflector as unknown as Reflector,
+      rbacService as unknown as RbacService,
+    );
   });
 
   it('allows the request through when no roles are required', async () => {
@@ -45,7 +48,10 @@ describe('RolesGuard', () => {
 
   it('throws Unauthorized when the tenant header is repeated (arrives as an array)', async () => {
     reflector.getAllAndOverride.mockReturnValue(['admin']);
-    const context = buildContext({ headers: { 'x-tenant-id': ['t1', 't2'] }, user: { userId: 'u1' } });
+    const context = buildContext({
+      headers: { 'x-tenant-id': ['t1', 't2'] },
+      user: { userId: 'u1' },
+    });
 
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);
     expect(rbacService.isMember).not.toHaveBeenCalled();

@@ -57,11 +57,10 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - run: npm run test
-      # Blocks only on critical CVEs so this doesn't go red over the
-      # existing high/moderate transitive findings tracked via Dependabot
-      # (several need a breaking NestJS major bump to clear) — see
-      # docs/dcms-security-hardening.md. Informational step below reports
-      # the full picture without failing the build.
+      # Blocks only on critical CVEs so a new high/moderate transitive finding
+      # doesn't go red on its own — see docs/dcms-security-hardening.md.
+      # Informational step below reports the full picture without failing
+      # the build; Dependabot tracks anything it finds for triage.
       - run: npm audit --omit=dev --audit-level=critical -w apps/api
         working-directory: .
       - run: npm audit --omit=dev -w apps/api

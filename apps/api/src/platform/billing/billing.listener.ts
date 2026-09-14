@@ -18,7 +18,11 @@ export class BillingListener {
   async handleWebhookReceived(
     event: PlatformEventPayloadMap[typeof PLATFORM_EVENTS.WEBHOOK_RECEIVED],
   ): Promise<void> {
-    if (!event.verified || event.provider !== 'stripe' || !RELEVANT_EVENT_TYPES.has(event.eventType)) {
+    if (
+      !event.verified ||
+      event.provider !== 'stripe' ||
+      !RELEVANT_EVENT_TYPES.has(event.eventType)
+    ) {
       return;
     }
 

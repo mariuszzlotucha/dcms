@@ -9,7 +9,9 @@ describe('FeatureFlagsService', () => {
   let eventEmitter: { emit: jest.Mock };
   let service: FeatureFlagsService;
 
-  const config: FeatureFlagsModuleConfig = { defaultFlags: { beta_dashboard: false, dark_mode: true } };
+  const config: FeatureFlagsModuleConfig = {
+    defaultFlags: { beta_dashboard: false, dark_mode: true },
+  };
 
   beforeEach(() => {
     featureFlags = {
@@ -20,7 +22,11 @@ describe('FeatureFlagsService', () => {
     };
     eventEmitter = { emit: jest.fn() };
 
-    service = new FeatureFlagsService(featureFlags as never, config, eventEmitter as unknown as EventEmitter2);
+    service = new FeatureFlagsService(
+      featureFlags as never,
+      config,
+      eventEmitter as unknown as EventEmitter2,
+    );
   });
 
   describe('isEnabled', () => {
@@ -50,7 +56,11 @@ describe('FeatureFlagsService', () => {
 
       await service.setFlag('t1', 'beta_dashboard', true);
 
-      expect(featureFlags.create).toHaveBeenCalledWith({ tenantId: 't1', flagKey: 'beta_dashboard', enabled: true });
+      expect(featureFlags.create).toHaveBeenCalledWith({
+        tenantId: 't1',
+        flagKey: 'beta_dashboard',
+        enabled: true,
+      });
       expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.FEATURE_FLAG_TOGGLED, {
         tenantId: 't1',
         flagKey: 'beta_dashboard',
@@ -59,17 +69,29 @@ describe('FeatureFlagsService', () => {
     });
 
     it('updates an existing row in place when the value actually changes', async () => {
-      const existing = { id: 'f1', tenantId: 't1', flagKey: 'beta_dashboard', enabled: false } as FeatureFlag;
+      const existing = {
+        id: 'f1',
+        tenantId: 't1',
+        flagKey: 'beta_dashboard',
+        enabled: false,
+      } as FeatureFlag;
       featureFlags.findOne.mockResolvedValue(existing);
 
       await service.setFlag('t1', 'beta_dashboard', true);
 
       expect(featureFlags.create).not.toHaveBeenCalled();
-      expect(featureFlags.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'f1', enabled: true }));
+      expect(featureFlags.save).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'f1', enabled: true }),
+      );
     });
 
     it('is a no-op (no save, no event) when the flag is already set to the requested value', async () => {
-      const existing = { id: 'f1', tenantId: 't1', flagKey: 'beta_dashboard', enabled: true } as FeatureFlag;
+      const existing = {
+        id: 'f1',
+        tenantId: 't1',
+        flagKey: 'beta_dashboard',
+        enabled: true,
+      } as FeatureFlag;
       featureFlags.findOne.mockResolvedValue(existing);
 
       const result = await service.setFlag('t1', 'beta_dashboard', true);
@@ -82,7 +104,9 @@ describe('FeatureFlagsService', () => {
 
   describe('listFlags', () => {
     it('merges tenant overrides on top of the configured defaults', async () => {
-      featureFlags.find.mockResolvedValue([{ flagKey: 'beta_dashboard', enabled: true } as FeatureFlag]);
+      featureFlags.find.mockResolvedValue([
+        { flagKey: 'beta_dashboard', enabled: true } as FeatureFlag,
+      ]);
 
       const result = await service.listFlags('t1');
 
@@ -90,7 +114,9 @@ describe('FeatureFlagsService', () => {
     });
 
     it('includes flags with no default that only exist as a tenant override', async () => {
-      featureFlags.find.mockResolvedValue([{ flagKey: 'custom_flag', enabled: true } as FeatureFlag]);
+      featureFlags.find.mockResolvedValue([
+        { flagKey: 'custom_flag', enabled: true } as FeatureFlag,
+      ]);
 
       const result = await service.listFlags('t1');
 
@@ -100,7 +126,10 @@ describe('FeatureFlagsService', () => {
     it('returns just the defaults when the tenant has no overrides', async () => {
       featureFlags.find.mockResolvedValue([]);
 
-      await expect(service.listFlags('t1')).resolves.toEqual({ beta_dashboard: false, dark_mode: true });
+      await expect(service.listFlags('t1')).resolves.toEqual({
+        beta_dashboard: false,
+        dark_mode: true,
+      });
     });
   });
 });

@@ -22,12 +22,22 @@ jest.mock('@aws-sdk/s3-request-presigner');
 const mockedGetSignedUrl = getSignedUrl as jest.MockedFunction<typeof getSignedUrl>;
 
 describe('FileStorageService', () => {
-  let files: { save: jest.Mock; create: jest.Mock; findOne: jest.Mock; find: jest.Mock; remove: jest.Mock };
+  let files: {
+    save: jest.Mock;
+    create: jest.Mock;
+    findOne: jest.Mock;
+    find: jest.Mock;
+    remove: jest.Mock;
+  };
   let secretsService: { getProviderSecret: jest.Mock };
   let eventEmitter: { emit: jest.Mock };
   let service: FileStorageService;
 
-  const config: FileStorageModuleConfig = { bucket: 'dcms-files', region: 'eu-central-1', maxSizeBytes: 1024 };
+  const config: FileStorageModuleConfig = {
+    bucket: 'dcms-files',
+    region: 'eu-central-1',
+    maxSizeBytes: 1024,
+  };
 
   beforeEach(() => {
     mockSend.mockReset();
@@ -53,9 +63,9 @@ describe('FileStorageService', () => {
     it('rejects a file over the configured size limit without touching S3', async () => {
       const oversized = Buffer.alloc(2048);
 
-      await expect(service.uploadFile('t1', 'u1', oversized, 'contract.pdf', 'application/pdf')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.uploadFile('t1', 'u1', oversized, 'contract.pdf', 'application/pdf'),
+      ).rejects.toThrow(BadRequestException);
       expect(mockSend).not.toHaveBeenCalled();
     });
 
@@ -75,7 +85,13 @@ describe('FileStorageService', () => {
     it('scopes the storage key under the tenant and preserves the original filename in the record', async () => {
       const buffer = Buffer.from('data');
 
-      const record = await service.uploadFile('t1', 'u1', buffer, 'contract.pdf', 'application/pdf');
+      const record = await service.uploadFile(
+        't1',
+        'u1',
+        buffer,
+        'contract.pdf',
+        'application/pdf',
+      );
 
       expect(files.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -117,7 +133,11 @@ describe('FileStorageService', () => {
     });
 
     it('returns a signed URL for a file owned by the tenant', async () => {
-      files.findOne.mockResolvedValue({ id: 'f1', tenantId: 't1', storageKey: 't1/abc-contract.pdf' } as FileRecord);
+      files.findOne.mockResolvedValue({
+        id: 'f1',
+        tenantId: 't1',
+        storageKey: 't1/abc-contract.pdf',
+      } as FileRecord);
       mockedGetSignedUrl.mockResolvedValue('https://signed-url.example');
 
       await expect(service.getDownloadUrl('t1', 'f1')).resolves.toBe('https://signed-url.example');
@@ -138,9 +158,14 @@ describe('FileStorageService', () => {
 
       await service.deleteFile('t1', 'f1');
 
-      expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({ input: expect.objectContaining({ Key: 't1/abc-contract.pdf' }) }));
+      expect(mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({ input: expect.objectContaining({ Key: 't1/abc-contract.pdf' }) }),
+      );
       expect(files.remove).toHaveBeenCalledWith(record);
-      expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.FILE_DELETED, { tenantId: 't1', fileId: 'f1' });
+      expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.FILE_DELETED, {
+        tenantId: 't1',
+        fileId: 'f1',
+      });
     });
   });
 

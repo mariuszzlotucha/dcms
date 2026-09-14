@@ -34,10 +34,15 @@ describe('CircuitBreakerRegistry', () => {
     const lowThresholdConfig: CircuitBreakerModuleConfig = {
       defaults: { timeoutMs: 1000, errorThresholdPercentage: 1, resetTimeoutMs: 30_000 },
     };
-    const lowThresholdRegistry = new CircuitBreakerRegistry(lowThresholdConfig, eventEmitter as unknown as EventEmitter2);
+    const lowThresholdRegistry = new CircuitBreakerRegistry(
+      lowThresholdConfig,
+      eventEmitter as unknown as EventEmitter2,
+    );
     const failingThunk = jest.fn().mockRejectedValue(new Error('provider down'));
 
-    await expect(lowThresholdRegistry.wrap('flaky-provider', failingThunk)).rejects.toThrow('provider down');
+    await expect(lowThresholdRegistry.wrap('flaky-provider', failingThunk)).rejects.toThrow(
+      'provider down',
+    );
     expect(failingThunk).toHaveBeenCalledTimes(1);
 
     // The breaker is now open — a second call must short-circuit without
@@ -50,7 +55,10 @@ describe('CircuitBreakerRegistry', () => {
     const lowThresholdConfig: CircuitBreakerModuleConfig = {
       defaults: { timeoutMs: 1000, errorThresholdPercentage: 1, resetTimeoutMs: 30_000 },
     };
-    const lowThresholdRegistry = new CircuitBreakerRegistry(lowThresholdConfig, eventEmitter as unknown as EventEmitter2);
+    const lowThresholdRegistry = new CircuitBreakerRegistry(
+      lowThresholdConfig,
+      eventEmitter as unknown as EventEmitter2,
+    );
 
     await expect(
       lowThresholdRegistry.wrap('provider-a', async () => {
@@ -66,8 +74,12 @@ describe('CircuitBreakerRegistry', () => {
       defaults: { timeoutMs: 1000, errorThresholdPercentage: 50, resetTimeoutMs: 30_000 },
       overrides: { slow: { timeoutMs: 10 } },
     };
-    const overrideRegistry = new CircuitBreakerRegistry(overrideConfig, eventEmitter as unknown as EventEmitter2);
-    const slowThunk = () => new Promise<string>((resolve) => setTimeout(() => resolve('too-late'), 50));
+    const overrideRegistry = new CircuitBreakerRegistry(
+      overrideConfig,
+      eventEmitter as unknown as EventEmitter2,
+    );
+    const slowThunk = () =>
+      new Promise<string>((resolve) => setTimeout(() => resolve('too-late'), 50));
 
     await expect(overrideRegistry.wrap('slow', slowThunk)).rejects.toThrow();
   });
@@ -76,7 +88,10 @@ describe('CircuitBreakerRegistry', () => {
     const lowThresholdConfig: CircuitBreakerModuleConfig = {
       defaults: { timeoutMs: 1000, errorThresholdPercentage: 1, resetTimeoutMs: 30_000 },
     };
-    const lowThresholdRegistry = new CircuitBreakerRegistry(lowThresholdConfig, eventEmitter as unknown as EventEmitter2);
+    const lowThresholdRegistry = new CircuitBreakerRegistry(
+      lowThresholdConfig,
+      eventEmitter as unknown as EventEmitter2,
+    );
 
     await expect(
       lowThresholdRegistry.wrap('flaky-provider', async () => {
@@ -93,7 +108,10 @@ describe('CircuitBreakerRegistry', () => {
     const recoveringConfig: CircuitBreakerModuleConfig = {
       defaults: { timeoutMs: 1000, errorThresholdPercentage: 1, resetTimeoutMs: 20 },
     };
-    const recoveringRegistry = new CircuitBreakerRegistry(recoveringConfig, eventEmitter as unknown as EventEmitter2);
+    const recoveringRegistry = new CircuitBreakerRegistry(
+      recoveringConfig,
+      eventEmitter as unknown as EventEmitter2,
+    );
 
     await expect(
       recoveringRegistry.wrap('recovering-provider', async () => {
@@ -106,7 +124,9 @@ describe('CircuitBreakerRegistry', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 40));
 
-    await expect(recoveringRegistry.wrap('recovering-provider', async () => 'ok')).resolves.toBe('ok');
+    await expect(recoveringRegistry.wrap('recovering-provider', async () => 'ok')).resolves.toBe(
+      'ok',
+    );
     expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.CIRCUIT_BREAKER_CLOSED, {
       provider: 'recovering-provider',
     });

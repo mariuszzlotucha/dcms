@@ -28,7 +28,11 @@ export class NotificationsRemindersService {
   // actually fires (scheduleSignatureReminder), and there is no
   // Contract#expiresAt field yet for real expiry reminders (out of scope
   // when `contracts` was built) — deliberately not simulated.
-  async scheduleContractStageReminder(tenantId: string, contractId: string, newStatus: string): Promise<void> {
+  async scheduleContractStageReminder(
+    tenantId: string,
+    contractId: string,
+    newStatus: string,
+  ): Promise<void> {
     await this.cancelPending(tenantId, contractId, 'pending_review');
 
     if (newStatus === 'negotiation') {
@@ -36,13 +40,21 @@ export class NotificationsRemindersService {
     }
   }
 
-  async scheduleApprovalReminder(tenantId: string, contractId: string, approverId: string): Promise<void> {
+  async scheduleApprovalReminder(
+    tenantId: string,
+    contractId: string,
+    approverId: string,
+  ): Promise<void> {
     await this.schedule(tenantId, contractId, 'pending_approval', PENDING_APPROVAL_DELAY_MS, {
       recipientUserId: approverId,
     });
   }
 
-  async scheduleSignatureReminder(tenantId: string, contractId: string, recipientEmail: string): Promise<void> {
+  async scheduleSignatureReminder(
+    tenantId: string,
+    contractId: string,
+    recipientEmail: string,
+  ): Promise<void> {
     await this.schedule(tenantId, contractId, 'pending_signature', PENDING_SIGNATURE_DELAY_MS, {
       recipientEmail,
     });
@@ -95,13 +107,19 @@ export class NotificationsRemindersService {
       }),
     );
 
-    this.eventEmitter.emit(
-      EVENTS.REMINDER_SCHEDULED,
-      { tenantId, contractId, reminderType, scheduledFor } satisfies EventPayloadMap[typeof EVENTS.REMINDER_SCHEDULED],
-    );
+    this.eventEmitter.emit(EVENTS.REMINDER_SCHEDULED, {
+      tenantId,
+      contractId,
+      reminderType,
+      scheduledFor,
+    } satisfies EventPayloadMap[typeof EVENTS.REMINDER_SCHEDULED]);
   }
 
-  private async scheduleImmediate(tenantId: string, contractId: string, reminderType: ReminderType): Promise<void> {
+  private async scheduleImmediate(
+    tenantId: string,
+    contractId: string,
+    reminderType: ReminderType,
+  ): Promise<void> {
     const reminder = await this.reminders.save(
       this.reminders.create({
         tenantId,
@@ -116,8 +134,15 @@ export class NotificationsRemindersService {
     await this.dispatch(reminder);
   }
 
-  private async cancelPending(tenantId: string, contractId: string, reminderType: ReminderType): Promise<void> {
-    await this.reminders.update({ tenantId, contractId, reminderType, status: 'pending' }, { status: 'cancelled' });
+  private async cancelPending(
+    tenantId: string,
+    contractId: string,
+    reminderType: ReminderType,
+  ): Promise<void> {
+    await this.reminders.update(
+      { tenantId, contractId, reminderType, status: 'pending' },
+      { status: 'cancelled' },
+    );
   }
 
   private async dispatch(reminder: Reminder): Promise<void> {
@@ -134,23 +159,17 @@ export class NotificationsRemindersService {
     reminder.sentAt = new Date();
     await this.reminders.save(reminder);
 
-    this.eventEmitter.emit(
-      EVENTS.REMINDER_SENT,
-      {
-        tenantId: reminder.tenantId,
-        contractId: reminder.contractId,
-        reminderType: reminder.reminderType,
-      } satisfies EventPayloadMap[typeof EVENTS.REMINDER_SENT],
-    );
+    this.eventEmitter.emit(EVENTS.REMINDER_SENT, {
+      tenantId: reminder.tenantId,
+      contractId: reminder.contractId,
+      reminderType: reminder.reminderType,
+    } satisfies EventPayloadMap[typeof EVENTS.REMINDER_SENT]);
 
-    this.eventEmitter.emit(
-      EVENTS.NOTIFICATION_DISPATCHED,
-      {
-        tenantId: reminder.tenantId,
-        recipient: reminder.recipientEmail ?? reminder.recipientUserId ?? reminder.tenantId,
-        channel,
-        template: 'reminder',
-      } satisfies EventPayloadMap[typeof EVENTS.NOTIFICATION_DISPATCHED],
-    );
+    this.eventEmitter.emit(EVENTS.NOTIFICATION_DISPATCHED, {
+      tenantId: reminder.tenantId,
+      recipient: reminder.recipientEmail ?? reminder.recipientUserId ?? reminder.tenantId,
+      channel,
+      template: 'reminder',
+    } satisfies EventPayloadMap[typeof EVENTS.NOTIFICATION_DISPATCHED]);
   }
 }

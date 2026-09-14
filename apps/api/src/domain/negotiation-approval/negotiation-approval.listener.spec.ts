@@ -17,7 +17,11 @@ describe('NegotiationApprovalListener', () => {
   });
 
   it('creates an approval request on contract.submittedForApproval', async () => {
-    await listener.handleContractSubmittedForApproval({ tenantId: 't1', contractId: 'c1', submittedBy: 'u1' });
+    await listener.handleContractSubmittedForApproval({
+      tenantId: 't1',
+      contractId: 'c1',
+      submittedBy: 'u1',
+    });
 
     expect(service.createApprovalRequestForSubmission).toHaveBeenCalledWith('t1', 'c1');
   });

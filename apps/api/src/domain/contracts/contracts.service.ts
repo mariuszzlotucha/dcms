@@ -1,11 +1,20 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileStorageService } from '@platform/file-storage/file-storage.service';
 import { UsageMeteringService } from '@platform/usage-metering/usage-metering.service';
 import { EVENTS, EventPayloadMap } from '@';
-import type { ContractStatus, CreateContractDto, UpdateContractDto } from '@contracts/contract.schema';
+import type {
+  ContractStatus,
+  CreateContractDto,
+  UpdateContractDto,
+} from '@contracts/contract.schema';
 import { ContractVersion } from './entities/contract-version.entity';
 import { Contract } from './entities/contract.entity';
 
@@ -48,7 +57,11 @@ export class ContractsService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async createContract(tenantId: string, createdBy: string, dto: CreateContractDto): Promise<Contract> {
+  async createContract(
+    tenantId: string,
+    createdBy: string,
+    dto: CreateContractDto,
+  ): Promise<Contract> {
     await this.checkUsageLimit(tenantId);
 
     const contract = await this.contracts.save(
@@ -62,15 +75,12 @@ export class ContractsService {
       }),
     );
 
-    this.eventEmitter.emit(
-      EVENTS.CONTRACT_CREATED,
-      {
-        contractId: contract.id,
-        tenantId,
-        templateId: contract.templateId,
-        createdBy,
-      } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_CREATED],
-    );
+    this.eventEmitter.emit(EVENTS.CONTRACT_CREATED, {
+      contractId: contract.id,
+      tenantId,
+      templateId: contract.templateId,
+      createdBy,
+    } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_CREATED]);
 
     return contract;
   }
@@ -87,26 +97,32 @@ export class ContractsService {
     Object.assign(contract, dto);
     const saved = await this.contracts.save(contract);
 
-    this.eventEmitter.emit(
-      EVENTS.CONTRACT_UPDATED,
-      { contractId: saved.id, tenantId, updatedBy } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_UPDATED],
-    );
+    this.eventEmitter.emit(EVENTS.CONTRACT_UPDATED, {
+      contractId: saved.id,
+      tenantId,
+      updatedBy,
+    } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_UPDATED]);
 
     return saved;
   }
 
-  async changeStatus(tenantId: string, contractId: string, newStatus: ContractStatus): Promise<Contract> {
-    const { contract, previousStatus } = await this.transitionStatus(tenantId, contractId, newStatus);
-
-    this.eventEmitter.emit(
-      EVENTS.CONTRACT_STATUS_CHANGED,
-      {
-        contractId: contract.id,
-        tenantId,
-        previousStatus,
-        newStatus,
-      } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_STATUS_CHANGED],
+  async changeStatus(
+    tenantId: string,
+    contractId: string,
+    newStatus: ContractStatus,
+  ): Promise<Contract> {
+    const { contract, previousStatus } = await this.transitionStatus(
+      tenantId,
+      contractId,
+      newStatus,
     );
+
+    this.eventEmitter.emit(EVENTS.CONTRACT_STATUS_CHANGED, {
+      contractId: contract.id,
+      tenantId,
+      previousStatus,
+      newStatus,
+    } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_STATUS_CHANGED]);
 
     return contract;
   }
@@ -114,10 +130,10 @@ export class ContractsService {
   async archiveContract(tenantId: string, contractId: string): Promise<Contract> {
     const { contract } = await this.transitionStatus(tenantId, contractId, 'archived');
 
-    this.eventEmitter.emit(
-      EVENTS.CONTRACT_ARCHIVED,
-      { contractId: contract.id, tenantId } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_ARCHIVED],
-    );
+    this.eventEmitter.emit(EVENTS.CONTRACT_ARCHIVED, {
+      contractId: contract.id,
+      tenantId,
+    } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_ARCHIVED]);
 
     return contract;
   }
@@ -135,23 +151,28 @@ export class ContractsService {
     await this.versions.delete({ tenantId, contractId });
     await this.contracts.remove(contract);
 
-    this.eventEmitter.emit(
-      EVENTS.CONTRACT_DELETED,
-      { contractId, tenantId } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_DELETED],
-    );
+    this.eventEmitter.emit(EVENTS.CONTRACT_DELETED, {
+      contractId,
+      tenantId,
+    } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_DELETED]);
   }
 
-  async submitForApproval(tenantId: string, contractId: string, submittedBy: string): Promise<void> {
+  async submitForApproval(
+    tenantId: string,
+    contractId: string,
+    submittedBy: string,
+  ): Promise<void> {
     const contract = await this.getContract(tenantId, contractId);
 
     if (contract.status !== 'negotiation') {
       throw new BadRequestException('Only a contract in negotiation can be submitted for approval');
     }
 
-    this.eventEmitter.emit(
-      EVENTS.CONTRACT_SUBMITTED_FOR_APPROVAL,
-      { contractId, tenantId, submittedBy } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_SUBMITTED_FOR_APPROVAL],
-    );
+    this.eventEmitter.emit(EVENTS.CONTRACT_SUBMITTED_FOR_APPROVAL, {
+      contractId,
+      tenantId,
+      submittedBy,
+    } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_SUBMITTED_FOR_APPROVAL]);
   }
 
   async getContract(tenantId: string, contractId: string): Promise<Contract> {
@@ -180,34 +201,48 @@ export class ContractsService {
     this.assertEditable(contract);
     await this.checkUsageLimit(tenantId);
 
-    const file = await this.fileStorageService.uploadFile(tenantId, uploadedBy, buffer, originalFilename, mimeType);
+    const file = await this.fileStorageService.uploadFile(
+      tenantId,
+      uploadedBy,
+      buffer,
+      originalFilename,
+      mimeType,
+    );
     const versionNumber = (await this.versions.count({ where: { tenantId, contractId } })) + 1;
 
     const version = await this.versions.save(
-      this.versions.create({ tenantId, contractId, versionNumber, fileId: file.id, createdBy: uploadedBy }),
+      this.versions.create({
+        tenantId,
+        contractId,
+        versionNumber,
+        fileId: file.id,
+        createdBy: uploadedBy,
+      }),
     );
 
-    this.eventEmitter.emit(
-      EVENTS.CONTRACT_VERSION_CREATED,
-      {
-        contractId,
-        tenantId,
-        versionId: version.id,
-        createdBy: uploadedBy,
-      } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_VERSION_CREATED],
-    );
+    this.eventEmitter.emit(EVENTS.CONTRACT_VERSION_CREATED, {
+      contractId,
+      tenantId,
+      versionId: version.id,
+      createdBy: uploadedBy,
+    } satisfies EventPayloadMap[typeof EVENTS.CONTRACT_VERSION_CREATED]);
 
     return version;
   }
 
   async listVersions(tenantId: string, contractId: string): Promise<ContractVersion[]> {
     await this.getContract(tenantId, contractId);
-    return this.versions.find({ where: { tenantId, contractId }, order: { versionNumber: 'DESC' } });
+    return this.versions.find({
+      where: { tenantId, contractId },
+      order: { versionNumber: 'DESC' },
+    });
   }
 
   private assertEditable(contract: Contract): void {
     if (!EDITABLE_STATUSES.includes(contract.status)) {
-      throw new BadRequestException(`Contract in status "${contract.status}" can no longer be edited`);
+      throw new BadRequestException(
+        `Contract in status "${contract.status}" can no longer be edited`,
+      );
     }
   }
 
@@ -232,7 +267,9 @@ export class ContractsService {
     }
 
     if (!ALLOWED_TRANSITIONS[previousStatus].includes(newStatus)) {
-      throw new BadRequestException(`Cannot move contract from "${previousStatus}" to "${newStatus}"`);
+      throw new BadRequestException(
+        `Cannot move contract from "${previousStatus}" to "${newStatus}"`,
+      );
     }
 
     contract.status = newStatus;

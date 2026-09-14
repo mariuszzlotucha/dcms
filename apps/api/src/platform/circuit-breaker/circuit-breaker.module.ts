@@ -1,9 +1,20 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
-import { CIRCUIT_BREAKER_MODULE_CONFIG, CircuitBreakerModuleConfig } from './circuit-breaker.config';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
+import {
+  CIRCUIT_BREAKER_MODULE_CONFIG,
+  CircuitBreakerModuleConfig,
+} from './circuit-breaker.config';
 import { CircuitBreakerRegistry } from './registry/circuit-breaker.registry';
 
 interface CircuitBreakerModuleAsyncOptions {
-  useFactory: (...args: unknown[]) => CircuitBreakerModuleConfig | Promise<CircuitBreakerModuleConfig>;
+  useFactory: (
+    ...args: unknown[]
+  ) => CircuitBreakerModuleConfig | Promise<CircuitBreakerModuleConfig>;
   inject?: (InjectionToken | OptionalFactoryDependency)[];
 }
 
@@ -13,7 +24,10 @@ export class CircuitBreakerModule {
     return {
       module: CircuitBreakerModule,
       global: true,
-      providers: [{ provide: CIRCUIT_BREAKER_MODULE_CONFIG, useValue: config }, CircuitBreakerRegistry],
+      providers: [
+        { provide: CIRCUIT_BREAKER_MODULE_CONFIG, useValue: config },
+        CircuitBreakerRegistry,
+      ],
       exports: [CircuitBreakerRegistry],
     };
   }

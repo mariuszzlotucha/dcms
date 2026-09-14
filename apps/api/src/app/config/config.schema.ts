@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
 export const configSchema = z.object({
-  NODE_ENV: z
-    .enum(['development', 'production', 'test'])
-    .default('development'),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
 
   // Comma-separated list of allowed origins, each a valid URL.

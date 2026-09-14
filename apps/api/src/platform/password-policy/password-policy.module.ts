@@ -1,10 +1,21 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PASSWORD_POLICY_MODULE_CONFIG, PasswordPolicyModuleConfig } from './password-policy.config';
+import {
+  PASSWORD_POLICY_MODULE_CONFIG,
+  PasswordPolicyModuleConfig,
+} from './password-policy.config';
 import { FailedLoginAttempt, PasswordPolicyService } from './password-policy.service';
 
 interface PasswordPolicyModuleAsyncOptions {
-  useFactory: (...args: unknown[]) => PasswordPolicyModuleConfig | Promise<PasswordPolicyModuleConfig>;
+  useFactory: (
+    ...args: unknown[]
+  ) => PasswordPolicyModuleConfig | Promise<PasswordPolicyModuleConfig>;
   inject?: (InjectionToken | OptionalFactoryDependency)[];
 }
 
@@ -15,7 +26,10 @@ export class PasswordPolicyModule {
       module: PasswordPolicyModule,
       global: true,
       imports: [TypeOrmModule.forFeature([FailedLoginAttempt])],
-      providers: [{ provide: PASSWORD_POLICY_MODULE_CONFIG, useValue: config }, PasswordPolicyService],
+      providers: [
+        { provide: PASSWORD_POLICY_MODULE_CONFIG, useValue: config },
+        PasswordPolicyService,
+      ],
       exports: [PasswordPolicyService],
     };
   }

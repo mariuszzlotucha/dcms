@@ -25,7 +25,13 @@ export class EsignatureController {
     @Body() dto: RequestSignatureDto,
   ): Promise<SignatureEnvelope> {
     const tenantId = await this.tenantContext.getTenantId();
-    return this.esignatureService.requestSignature(tenantId, contractId, dto.fileId, dto.signerEmail, dto.signerName);
+    return this.esignatureService.requestSignature(
+      tenantId,
+      contractId,
+      dto.fileId,
+      dto.signerEmail,
+      dto.signerName,
+    );
   }
 
   @Get('envelopes')

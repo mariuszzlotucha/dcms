@@ -46,14 +46,11 @@ export class TenantThrottlerGuard extends ThrottlerGuard {
     const request = context.switchToHttp().getRequest();
     const key = await this.getTracker(request);
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.RATE_LIMIT_EXCEEDED,
-      {
-        tenantId: (await this.tryGetTenantId()) ?? '',
-        key,
-        limit: this.rateLimitConfig.limit,
-      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.RATE_LIMIT_EXCEEDED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.RATE_LIMIT_EXCEEDED, {
+      tenantId: (await this.tryGetTenantId()) ?? '',
+      key,
+      limit: this.rateLimitConfig.limit,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.RATE_LIMIT_EXCEEDED]);
 
     return super.throwThrottlingException(context, throttlerLimitDetail);
   }

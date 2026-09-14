@@ -5,7 +5,12 @@ import { DeadLetterQueueService } from './dead-letter-queue.service';
 import { DeadLetterEntry } from './entities/dead-letter-entry.entity';
 
 describe('DeadLetterQueueService', () => {
-  let deadLetterEntries: { save: jest.Mock; create: jest.Mock; find: jest.Mock; findOne: jest.Mock };
+  let deadLetterEntries: {
+    save: jest.Mock;
+    create: jest.Mock;
+    find: jest.Mock;
+    findOne: jest.Mock;
+  };
   let eventEmitter: { emit: jest.Mock };
   let service: DeadLetterQueueService;
 
@@ -18,7 +23,10 @@ describe('DeadLetterQueueService', () => {
     };
     eventEmitter = { emit: jest.fn() };
 
-    service = new DeadLetterQueueService(deadLetterEntries as never, eventEmitter as unknown as EventEmitter2);
+    service = new DeadLetterQueueService(
+      deadLetterEntries as never,
+      eventEmitter as unknown as EventEmitter2,
+    );
   });
 
   describe('add', () => {
@@ -74,7 +82,9 @@ describe('DeadLetterQueueService', () => {
 
       const result = await service.retry('d1');
 
-      expect(deadLetterEntries.save).toHaveBeenCalledWith(expect.objectContaining({ retriedAt: expect.any(Date) }));
+      expect(deadLetterEntries.save).toHaveBeenCalledWith(
+        expect.objectContaining({ retriedAt: expect.any(Date) }),
+      );
       expect(result).toEqual({ originalEvent: 'webhooks', payload: { subscriptionId: 's1' } });
     });
   });

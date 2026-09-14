@@ -1,14 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  createCipheriv,
-  createDecipheriv,
-  hkdfSync,
-  randomBytes,
-} from 'crypto';
-import {
-  SECURITY_MODULE_CONFIG,
-  SecurityModuleConfig,
-} from '../security.config';
+import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from 'crypto';
+import { SECURITY_MODULE_CONFIG, SecurityModuleConfig } from '../security.config';
 import { getEncryptedFields } from './field-encryption.decorator';
 
 const ALGORITHM = 'aes-256-gcm';
@@ -51,10 +43,7 @@ export class FieldEncryptionService {
     const key = this.requireKey();
     const iv = randomBytes(IV_LENGTH);
     const cipher = createCipheriv(ALGORITHM, key, iv);
-    const ciphertext = Buffer.concat([
-      cipher.update(plaintext, 'utf8'),
-      cipher.final(),
-    ]);
+    const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
     const authTag = cipher.getAuthTag();
 
     return [
@@ -73,11 +62,7 @@ export class FieldEncryptionService {
       throw new Error('Invalid encrypted payload format');
     }
 
-    const decipher = createDecipheriv(
-      ALGORITHM,
-      key,
-      Buffer.from(ivB64, 'base64'),
-    );
+    const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(ivB64, 'base64'));
     decipher.setAuthTag(Buffer.from(tagB64, 'base64'));
 
     return Buffer.concat([
@@ -95,13 +80,8 @@ export class FieldEncryptionService {
   encryptFields<T extends object>(entity: T): T {
     for (const field of getEncryptedFields(entity)) {
       const value = (entity as Record<string | symbol, unknown>)[field];
-      if (
-        typeof value === 'string' &&
-        value.length > 0 &&
-        !value.startsWith(`${VERSION}.`)
-      ) {
-        (entity as Record<string | symbol, unknown>)[field] =
-          this.encrypt(value);
+      if (typeof value === 'string' && value.length > 0 && !value.startsWith(`${VERSION}.`)) {
+        (entity as Record<string | symbol, unknown>)[field] = this.encrypt(value);
       }
     }
     return entity;
@@ -112,8 +92,7 @@ export class FieldEncryptionService {
     for (const field of getEncryptedFields(entity)) {
       const value = (entity as Record<string | symbol, unknown>)[field];
       if (typeof value === 'string' && value.startsWith(`${VERSION}.`)) {
-        (entity as Record<string | symbol, unknown>)[field] =
-          this.decrypt(value);
+        (entity as Record<string | symbol, unknown>)[field] = this.decrypt(value);
       }
     }
     return entity;

@@ -33,11 +33,19 @@ describe('NotificationsRemindersService', () => {
         { status: 'cancelled' },
       );
       expect(reminders.save).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 't1', contractId: 'c1', reminderType: 'pending_review' }),
+        expect.objectContaining({
+          tenantId: 't1',
+          contractId: 'c1',
+          reminderType: 'pending_review',
+        }),
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'reminder.scheduled',
-        expect.objectContaining({ tenantId: 't1', contractId: 'c1', reminderType: 'pending_review' }),
+        expect.objectContaining({
+          tenantId: 't1',
+          contractId: 'c1',
+          reminderType: 'pending_review',
+        }),
       );
     });
 
@@ -53,7 +61,11 @@ describe('NotificationsRemindersService', () => {
     await service.scheduleApprovalReminder('t1', 'c1', 'approver-1');
 
     expect(reminders.save).toHaveBeenCalledWith(
-      expect.objectContaining({ reminderType: 'pending_approval', recipientUserId: 'approver-1', recipientEmail: null }),
+      expect.objectContaining({
+        reminderType: 'pending_approval',
+        recipientUserId: 'approver-1',
+        recipientEmail: null,
+      }),
     );
   });
 
@@ -61,7 +73,10 @@ describe('NotificationsRemindersService', () => {
     await service.scheduleSignatureReminder('t1', 'c1', 'signer@example.com');
 
     expect(reminders.save).toHaveBeenCalledWith(
-      expect.objectContaining({ reminderType: 'pending_signature', recipientEmail: 'signer@example.com' }),
+      expect.objectContaining({
+        reminderType: 'pending_signature',
+        recipientEmail: 'signer@example.com',
+      }),
     );
   });
 
@@ -72,7 +87,11 @@ describe('NotificationsRemindersService', () => {
       expect(notificationsService.send).not.toHaveBeenCalled();
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'reminder.sent',
-        expect.objectContaining({ tenantId: 't1', contractId: 'c1', reminderType: 'signature_expired' }),
+        expect.objectContaining({
+          tenantId: 't1',
+          contractId: 'c1',
+          reminderType: 'signature_expired',
+        }),
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'notification.dispatched',
@@ -107,11 +126,18 @@ describe('NotificationsRemindersService', () => {
 
       await service.dispatchDueReminders();
 
-      expect(notificationsService.send).toHaveBeenCalledWith('t1', 'signer@example.com', 'reminder', {
-        contractId: 'c1',
-        reminderType: 'pending_signature',
-      });
-      expect(reminders.save).toHaveBeenCalledWith(expect.objectContaining({ status: 'sent', sentAt: expect.any(Date) }));
+      expect(notificationsService.send).toHaveBeenCalledWith(
+        't1',
+        'signer@example.com',
+        'reminder',
+        {
+          contractId: 'c1',
+          reminderType: 'pending_signature',
+        },
+      );
+      expect(reminders.save).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'sent', sentAt: expect.any(Date) }),
+      );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'notification.dispatched',
         expect.objectContaining({ recipient: 'signer@example.com', channel: 'email' }),
@@ -146,7 +172,10 @@ describe('NotificationsRemindersService', () => {
     it('lists reminders scoped to the tenant and contract', async () => {
       await service.listReminders('t1', 'c1');
 
-      expect(reminders.find).toHaveBeenCalledWith({ where: { tenantId: 't1', contractId: 'c1' }, order: { createdAt: 'DESC' } });
+      expect(reminders.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1', contractId: 'c1' },
+        order: { createdAt: 'DESC' },
+      });
     });
   });
 });

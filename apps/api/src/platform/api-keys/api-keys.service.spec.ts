@@ -22,7 +22,11 @@ describe('ApiKeysService', () => {
     };
     eventEmitter = { emit: jest.fn() };
 
-    service = new ApiKeysService(apiKeys as never, config, eventEmitter as unknown as EventEmitter2);
+    service = new ApiKeysService(
+      apiKeys as never,
+      config,
+      eventEmitter as unknown as EventEmitter2,
+    );
   });
 
   describe('createKey', () => {
@@ -37,9 +41,16 @@ describe('ApiKeysService', () => {
 
       const expectedHash = createHash('sha256').update(result.rawKey).digest('hex');
       expect(apiKeys.create).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 't1', keyHash: expectedHash, scopes: ['read'], label: 'CI key' }),
+        expect.objectContaining({
+          tenantId: 't1',
+          keyHash: expectedHash,
+          scopes: ['read'],
+          label: 'CI key',
+        }),
       );
-      expect(apiKeys.create).not.toHaveBeenCalledWith(expect.objectContaining({ keyHash: result.rawKey }));
+      expect(apiKeys.create).not.toHaveBeenCalledWith(
+        expect.objectContaining({ keyHash: result.rawKey }),
+      );
     });
 
     it('generates a different key on each call', async () => {
@@ -63,13 +74,22 @@ describe('ApiKeysService', () => {
   describe('listKeys', () => {
     it('scopes the query to the tenant and never returns the key hash', async () => {
       apiKeys.find.mockResolvedValue([
-        { id: 'k1', tenantId: 't1', keyHash: 'secret-hash', scopes: [], label: 'a', revokedAt: null },
+        {
+          id: 'k1',
+          tenantId: 't1',
+          keyHash: 'secret-hash',
+          scopes: [],
+          label: 'a',
+          revokedAt: null,
+        },
       ]);
 
       const result = await service.listKeys('t1');
 
       expect(apiKeys.find).toHaveBeenCalledWith({ where: { tenantId: 't1' } });
-      expect(result).toEqual([{ id: 'k1', tenantId: 't1', scopes: [], label: 'a', revokedAt: null }]);
+      expect(result).toEqual([
+        { id: 'k1', tenantId: 't1', scopes: [], label: 'a', revokedAt: null },
+      ]);
       expect(result[0]).not.toHaveProperty('keyHash');
     });
   });
@@ -87,8 +107,13 @@ describe('ApiKeysService', () => {
 
       await service.revokeKey('t1', 'k1');
 
-      expect(apiKeys.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'k1', revokedAt: expect.any(Date) }));
-      expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.API_KEY_REVOKED, { tenantId: 't1', keyId: 'k1' });
+      expect(apiKeys.save).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'k1', revokedAt: expect.any(Date) }),
+      );
+      expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.API_KEY_REVOKED, {
+        tenantId: 't1',
+        keyId: 'k1',
+      });
     });
   });
 });

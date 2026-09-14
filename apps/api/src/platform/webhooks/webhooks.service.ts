@@ -7,7 +7,7 @@ import { CircuitBreakerRegistry } from '@platform/circuit-breaker/registry/circu
 import { DeadLetterQueueService } from '@platform/dead-letter-queue/dead-letter-queue.service';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
 import { WebhookDelivery } from './entities/webhook-delivery.entity';
-import { WebhookSubscription } from './entities/webhook-subscription.entity'
+import { WebhookSubscription } from './entities/webhook-subscription.entity';
 
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 500;
@@ -25,7 +25,11 @@ export class WebhooksService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async subscribe(tenantId: string, url: string, eventTypes: string[]): Promise<WebhookSubscription> {
+  async subscribe(
+    tenantId: string,
+    url: string,
+    eventTypes: string[],
+  ): Promise<WebhookSubscription> {
     const secret = randomBytes(32).toString('base64url');
 
     return this.webhookSubscriptions.save(
@@ -34,7 +38,9 @@ export class WebhooksService {
   }
 
   async unsubscribe(tenantId: string, subscriptionId: string): Promise<void> {
-    const subscription = await this.webhookSubscriptions.findOne({ where: { id: subscriptionId, tenantId } });
+    const subscription = await this.webhookSubscriptions.findOne({
+      where: { id: subscriptionId, tenantId },
+    });
 
     if (!subscription) {
       throw new NotFoundException('Webhook subscription not found');
@@ -48,11 +54,16 @@ export class WebhooksService {
     const subscriptions = await this.findMatchingSubscriptions(tenantId, eventType);
 
     await Promise.all(
-      subscriptions.map((subscription) => this.deliverToSubscription(subscription, eventType, payload)),
+      subscriptions.map((subscription) =>
+        this.deliverToSubscription(subscription, eventType, payload),
+      ),
     );
   }
 
-  private async findMatchingSubscriptions(tenantId: string, eventType: string): Promise<WebhookSubscription[]> {
+  private async findMatchingSubscriptions(
+    tenantId: string,
+    eventType: string,
+  ): Promise<WebhookSubscription[]> {
     return this.webhookSubscriptions
       .createQueryBuilder('subscription')
       .where('subscription.tenantId = :tenantId', { tenantId })
@@ -91,10 +102,11 @@ export class WebhooksService {
           delivery.deliveredAt = new Date();
           await this.webhookDeliveries.save(delivery);
 
-          this.eventEmitter.emit(
-            PLATFORM_EVENTS.WEBHOOK_DELIVERED,
-            { tenantId: subscription.tenantId, url: subscription.url, statusCode } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.WEBHOOK_DELIVERED],
-          );
+          this.eventEmitter.emit(PLATFORM_EVENTS.WEBHOOK_DELIVERED, {
+            tenantId: subscription.tenantId,
+            url: subscription.url,
+            statusCode,
+          } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.WEBHOOK_DELIVERED]);
           return;
         }
 
@@ -103,10 +115,11 @@ export class WebhooksService {
         await this.webhookDeliveries.save(delivery);
       }
 
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.WEBHOOK_DELIVERY_FAILED,
-        { tenantId: subscription.tenantId, url: subscription.url, attempt } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.WEBHOOK_DELIVERY_FAILED],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.WEBHOOK_DELIVERY_FAILED, {
+        tenantId: subscription.tenantId,
+        url: subscription.url,
+        attempt,
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.WEBHOOK_DELIVERY_FAILED]);
 
       if (attempt < MAX_ATTEMPTS) {
         await this.delay(RETRY_DELAY_MS);

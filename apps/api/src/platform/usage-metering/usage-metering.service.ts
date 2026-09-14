@@ -106,10 +106,17 @@ export class UsageMeteringService {
     return result.length > 0 ? result[0].count : null;
   }
 
-  private emitLimitExceeded(tenantId: string, metric: string, limit: number, current: number): void {
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.USAGE_LIMIT_EXCEEDED,
-      { tenantId, metric, limit, current } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.USAGE_LIMIT_EXCEEDED],
-    );
+  private emitLimitExceeded(
+    tenantId: string,
+    metric: string,
+    limit: number,
+    current: number,
+  ): void {
+    this.eventEmitter.emit(PLATFORM_EVENTS.USAGE_LIMIT_EXCEEDED, {
+      tenantId,
+      metric,
+      limit,
+      current,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.USAGE_LIMIT_EXCEEDED]);
   }
 }

@@ -37,10 +37,11 @@ export class FeatureFlagsService {
     record.enabled = enabled;
     const saved = await this.featureFlags.save(record);
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.FEATURE_FLAG_TOGGLED,
-      { tenantId, flagKey, enabled } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FEATURE_FLAG_TOGGLED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.FEATURE_FLAG_TOGGLED, {
+      tenantId,
+      flagKey,
+      enabled,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.FEATURE_FLAG_TOGGLED]);
 
     return saved;
   }

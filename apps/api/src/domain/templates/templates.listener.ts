@@ -11,9 +11,7 @@ export class TemplatesListener {
   // architecture doc 1.2 / 3: "tenant.created — seeds a default set of
   // starter templates for a new tenant."
   @OnEvent(EVENTS.TENANT_CREATED)
-  async handleTenantCreated(
-    event: EventPayloadMap[typeof EVENTS.TENANT_CREATED],
-  ): Promise<void> {
+  async handleTenantCreated(event: EventPayloadMap[typeof EVENTS.TENANT_CREATED]): Promise<void> {
     await this.templatesService.seedStarterTemplates(event.tenantId);
   }
 

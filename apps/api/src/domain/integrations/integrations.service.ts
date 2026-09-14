@@ -39,16 +39,23 @@ export class IntegrationsService {
       return;
     }
 
-    await this.connections.save(missing.map((integration) => this.blankConnection(tenantId, integration)));
+    await this.connections.save(
+      missing.map((integration) => this.blankConnection(tenantId, integration)),
+    );
   }
 
-  async connect(tenantId: string, integration: IntegrationType, syncUrl: string): Promise<IntegrationConnection> {
+  async connect(
+    tenantId: string,
+    integration: IntegrationType,
+    syncUrl: string,
+  ): Promise<IntegrationConnection> {
     if (!(await this.featureFlagsService.isEnabled(tenantId, INTEGRATIONS_FLAG))) {
       throw new ForbiddenException('Integrations are not enabled for this tenant');
     }
 
     const connection =
-      (await this.connections.findOne({ where: { tenantId, integration } })) ?? this.blankConnection(tenantId, integration);
+      (await this.connections.findOne({ where: { tenantId, integration } })) ??
+      this.blankConnection(tenantId, integration);
 
     connection.enabled = true;
     connection.syncUrl = syncUrl;
@@ -72,7 +79,9 @@ export class IntegrationsService {
   // tenant to re-supply a syncUrl via connect().
   async handleFeatureFlagDisabled(tenantId: string): Promise<void> {
     const enabled = await this.connections.find({ where: { tenantId, enabled: true } });
-    await Promise.all(enabled.map((connection) => this.disconnect(tenantId, connection.integration)));
+    await Promise.all(
+      enabled.map((connection) => this.disconnect(tenantId, connection.integration)),
+    );
   }
 
   async requestSync(tenantId: string, contractId: string): Promise<void> {
@@ -98,34 +107,30 @@ export class IntegrationsService {
   }
 
   private async sync(connection: IntegrationConnection, contractId: string): Promise<void> {
-    this.eventEmitter.emit(
-      EVENTS.INTEGRATION_SYNC_REQUESTED,
-      {
-        tenantId: connection.tenantId,
-        integration: connection.integration,
-        contractId,
-      } satisfies EventPayloadMap[typeof EVENTS.INTEGRATION_SYNC_REQUESTED],
-    );
+    this.eventEmitter.emit(EVENTS.INTEGRATION_SYNC_REQUESTED, {
+      tenantId: connection.tenantId,
+      integration: connection.integration,
+      contractId,
+    } satisfies EventPayloadMap[typeof EVENTS.INTEGRATION_SYNC_REQUESTED]);
 
     connection.lastSyncStatus = 'syncing';
     await this.connections.save(connection);
 
     try {
-      await this.circuitBreakerRegistry.wrap(connection.integration, () => this.pushToProvider(connection, contractId));
+      await this.circuitBreakerRegistry.wrap(connection.integration, () =>
+        this.pushToProvider(connection, contractId),
+      );
 
       connection.lastSyncStatus = 'completed';
       connection.lastSyncedAt = new Date();
       connection.lastSyncError = null;
       await this.connections.save(connection);
 
-      this.eventEmitter.emit(
-        EVENTS.INTEGRATION_SYNC_COMPLETED,
-        {
-          tenantId: connection.tenantId,
-          integration: connection.integration,
-          contractId,
-        } satisfies EventPayloadMap[typeof EVENTS.INTEGRATION_SYNC_COMPLETED],
-      );
+      this.eventEmitter.emit(EVENTS.INTEGRATION_SYNC_COMPLETED, {
+        tenantId: connection.tenantId,
+        integration: connection.integration,
+        contractId,
+      } satisfies EventPayloadMap[typeof EVENTS.INTEGRATION_SYNC_COMPLETED]);
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown sync failure';
 
@@ -133,14 +138,11 @@ export class IntegrationsService {
       connection.lastSyncError = reason;
       await this.connections.save(connection);
 
-      this.eventEmitter.emit(
-        EVENTS.INTEGRATION_SYNC_FAILED,
-        {
-          tenantId: connection.tenantId,
-          integration: connection.integration,
-          reason,
-        } satisfies EventPayloadMap[typeof EVENTS.INTEGRATION_SYNC_FAILED],
-      );
+      this.eventEmitter.emit(EVENTS.INTEGRATION_SYNC_FAILED, {
+        tenantId: connection.tenantId,
+        integration: connection.integration,
+        reason,
+      } satisfies EventPayloadMap[typeof EVENTS.INTEGRATION_SYNC_FAILED]);
 
       await this.deadLetterQueueService.add(
         EVENTS.INTEGRATION_SYNC_REQUESTED,
@@ -156,7 +158,10 @@ export class IntegrationsService {
   // flow built yet, so connect() hands DCMS a plain relay URL (e.g. a
   // Zapier/Make.com webhook, or a tenant-owned endpoint) rather than a
   // provider credential to fetch via SecretsService.
-  private async pushToProvider(connection: IntegrationConnection, contractId: string): Promise<void> {
+  private async pushToProvider(
+    connection: IntegrationConnection,
+    contractId: string,
+  ): Promise<void> {
     if (!connection.syncUrl) {
       throw new Error(`No syncUrl configured for ${connection.integration}`);
     }
@@ -164,7 +169,11 @@ export class IntegrationsService {
     const response = await fetch(connection.syncUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenantId: connection.tenantId, integration: connection.integration, contractId }),
+      body: JSON.stringify({
+        tenantId: connection.tenantId,
+        integration: connection.integration,
+        contractId,
+      }),
     });
 
     if (!response.ok) {

@@ -38,7 +38,11 @@ export class DataRetentionService {
       }
       seenGroups.add(groupKey);
 
-      const deleted = await this.consentService.deleteRecords(record.userId, record.tenantId, record.consentType);
+      const deleted = await this.consentService.deleteRecords(
+        record.userId,
+        record.tenantId,
+        record.consentType,
+      );
 
       for (const deletedRecord of deleted) {
         this.emitPurged('consent_record', deletedRecord.id, deletedRecord.tenantId);
@@ -53,7 +57,9 @@ export class DataRetentionService {
   // account no longer exists. This will need revisiting once domain/contracts
   // exists and files can be tied to a contract's lifecycle instead.
   async purgeOrphanedFiles(tenantId?: string): Promise<number> {
-    const files = tenantId ? await this.fileStorageService.listFiles(tenantId) : await this.fileStorageService.listAllFiles();
+    const files = tenantId
+      ? await this.fileStorageService.listFiles(tenantId)
+      : await this.fileStorageService.listAllFiles();
     let purgedCount = 0;
 
     for (const file of files) {
@@ -100,10 +106,11 @@ export class DataRetentionService {
   }
 
   private emitPurged(resourceType: string, resourceId: string, tenantId: string | null): void {
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.DATA_RETENTION_PURGED,
-      { tenantId: tenantId ?? '', resourceType, resourceId } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.DATA_RETENTION_PURGED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.DATA_RETENTION_PURGED, {
+      tenantId: tenantId ?? '',
+      resourceType,
+      resourceId,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.DATA_RETENTION_PURGED]);
   }
 
   private daysAgo(days: number): Date {

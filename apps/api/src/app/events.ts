@@ -5,12 +5,8 @@ import { DOMAIN_EVENTS, DomainEventPayloadMap } from '../domain/events';
 // event shadow a platform event with the same name. If the two maps ever
 // share a key, _NoOverlap resolves to `never` and this file stops
 // compiling — fix by renaming the colliding event, not by removing this.
-type _NoOverlap = Extract<
-  keyof PlatformEventPayloadMap,
-  keyof DomainEventPayloadMap
-> extends never
-  ? true
-  : never;
+type _NoOverlap =
+  Extract<keyof PlatformEventPayloadMap, keyof DomainEventPayloadMap> extends never ? true : never;
 const _check: _NoOverlap = true;
 void _check;
 

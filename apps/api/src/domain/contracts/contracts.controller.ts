@@ -86,7 +86,10 @@ export class ContractsController {
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
   @UsePipes(new ZodValidationPipe(changeContractStatusSchema))
-  async changeStatus(@Param('id') id: string, @Body() dto: ChangeContractStatusDto): Promise<Contract> {
+  async changeStatus(
+    @Param('id') id: string,
+    @Body() dto: ChangeContractStatusDto,
+  ): Promise<Contract> {
     const tenantId = await this.tenantContext.getTenantId();
     return this.contractsService.changeStatus(tenantId, id, dto.status);
   }
@@ -123,7 +126,14 @@ export class ContractsController {
   ): Promise<ContractVersion> {
     const tenantId = await this.tenantContext.getTenantId();
     const userId = (request.user as { userId: string }).userId;
-    return this.contractsService.uploadVersion(tenantId, id, userId, file.buffer, file.originalname, file.mimetype);
+    return this.contractsService.uploadVersion(
+      tenantId,
+      id,
+      userId,
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
   }
 
   @Get(':id/versions')

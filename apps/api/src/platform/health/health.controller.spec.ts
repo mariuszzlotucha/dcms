@@ -8,8 +8,12 @@ describe('HealthController', () => {
 
   beforeEach(async () => {
     healthService = {
-      checkLiveness: jest.fn().mockResolvedValue({ status: 'ok', info: {}, error: {}, details: {} }),
-      checkReadiness: jest.fn().mockResolvedValue({ status: 'ok', info: {}, error: {}, details: {} }),
+      checkLiveness: jest
+        .fn()
+        .mockResolvedValue({ status: 'ok', info: {}, error: {}, details: {} }),
+      checkReadiness: jest
+        .fn()
+        .mockResolvedValue({ status: 'ok', info: {}, error: {}, details: {} }),
     };
 
     const module: TestingModule = await Test.createTestingModule({

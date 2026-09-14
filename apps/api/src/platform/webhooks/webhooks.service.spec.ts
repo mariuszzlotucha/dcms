@@ -9,7 +9,12 @@ import { WebhookSubscription } from './entities/webhook-subscription.entity';
 import { WebhookDelivery } from './entities/webhook-delivery.entity';
 
 describe('WebhooksService', () => {
-  let webhookSubscriptions: { save: jest.Mock; create: jest.Mock; findOne: jest.Mock; createQueryBuilder: jest.Mock };
+  let webhookSubscriptions: {
+    save: jest.Mock;
+    create: jest.Mock;
+    findOne: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
   let webhookDeliveries: { save: jest.Mock; create: jest.Mock };
   let circuitBreakerRegistry: { wrap: jest.Mock };
   let deadLetterQueueService: { add: jest.Mock };
@@ -18,7 +23,11 @@ describe('WebhooksService', () => {
   let qb: { where: jest.Mock; andWhere: jest.Mock; getMany: jest.Mock };
 
   beforeEach(() => {
-    qb = { where: jest.fn().mockReturnThis(), andWhere: jest.fn().mockReturnThis(), getMany: jest.fn() };
+    qb = {
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getMany: jest.fn(),
+    };
     webhookSubscriptions = {
       save: jest.fn(async (data) => ({ id: 'sub1', ...data }) as WebhookSubscription),
       create: jest.fn((data) => data),
@@ -47,7 +56,12 @@ describe('WebhooksService', () => {
       await service.subscribe('t1', 'https://example.com/hook', ['contract.created']);
 
       expect(webhookSubscriptions.create).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 't1', url: 'https://example.com/hook', eventTypes: ['contract.created'], revokedAt: null }),
+        expect.objectContaining({
+          tenantId: 't1',
+          url: 'https://example.com/hook',
+          eventTypes: ['contract.created'],
+          revokedAt: null,
+        }),
       );
     });
 
@@ -73,30 +87,43 @@ describe('WebhooksService', () => {
 
       await service.unsubscribe('t1', 'sub1');
 
-      expect(webhookSubscriptions.save).toHaveBeenCalledWith(expect.objectContaining({ revokedAt: expect.any(Date) }));
+      expect(webhookSubscriptions.save).toHaveBeenCalledWith(
+        expect.objectContaining({ revokedAt: expect.any(Date) }),
+      );
     });
   });
 
   describe('deliver', () => {
-    it('queries only that tenant\'s non-revoked subscriptions matching the event type', async () => {
+    it("queries only that tenant's non-revoked subscriptions matching the event type", async () => {
       qb.getMany.mockResolvedValue([]);
 
       await service.deliver('t1', 'contract.created', {});
 
       expect(webhookSubscriptions.createQueryBuilder).toHaveBeenCalledWith('subscription');
-      expect(qb.where).toHaveBeenCalledWith('subscription.tenantId = :tenantId', { tenantId: 't1' });
+      expect(qb.where).toHaveBeenCalledWith('subscription.tenantId = :tenantId', {
+        tenantId: 't1',
+      });
       expect(qb.andWhere).toHaveBeenCalledWith('subscription.revokedAt IS NULL');
-      expect(qb.andWhere).toHaveBeenCalledWith(':eventType = ANY(subscription.eventTypes)', { eventType: 'contract.created' });
+      expect(qb.andWhere).toHaveBeenCalledWith(':eventType = ANY(subscription.eventTypes)', {
+        eventType: 'contract.created',
+      });
     });
 
     it('delivers successfully on the first attempt: signs the body, saves the delivery, and emits WEBHOOK_DELIVERED', async () => {
-      const subscription = { id: 'sub1', tenantId: 't1', url: 'https://example.com/hook', secret: 'shh' } as WebhookSubscription;
+      const subscription = {
+        id: 'sub1',
+        tenantId: 't1',
+        url: 'https://example.com/hook',
+        secret: 'shh',
+      } as WebhookSubscription;
       qb.getMany.mockResolvedValue([subscription]);
       global.fetch = jest.fn().mockResolvedValue({ status: 200 }) as never;
 
       await service.deliver('t1', 'contract.created', { id: 'c1' });
 
-      const expectedSignature = createHmac('sha256', 'shh').update(JSON.stringify({ id: 'c1' })).digest('hex');
+      const expectedSignature = createHmac('sha256', 'shh')
+        .update(JSON.stringify({ id: 'c1' }))
+        .digest('hex');
       expect(global.fetch).toHaveBeenCalledWith(
         'https://example.com/hook',
         expect.objectContaining({
@@ -116,17 +143,30 @@ describe('WebhooksService', () => {
     });
 
     it('uses the target hostname as the circuit breaker key', async () => {
-      const subscription = { id: 'sub1', tenantId: 't1', url: 'https://hooks.example.com/abc', secret: 'shh' } as WebhookSubscription;
+      const subscription = {
+        id: 'sub1',
+        tenantId: 't1',
+        url: 'https://hooks.example.com/abc',
+        secret: 'shh',
+      } as WebhookSubscription;
       qb.getMany.mockResolvedValue([subscription]);
       global.fetch = jest.fn().mockResolvedValue({ status: 200 }) as never;
 
       await service.deliver('t1', 'contract.created', {});
 
-      expect(circuitBreakerRegistry.wrap).toHaveBeenCalledWith('hooks.example.com', expect.any(Function));
+      expect(circuitBreakerRegistry.wrap).toHaveBeenCalledWith(
+        'hooks.example.com',
+        expect.any(Function),
+      );
     });
 
     it('retries after a network error and succeeds on the second attempt, without dead-lettering', async () => {
-      const subscription = { id: 'sub1', tenantId: 't1', url: 'https://example.com/hook', secret: 'shh' } as WebhookSubscription;
+      const subscription = {
+        id: 'sub1',
+        tenantId: 't1',
+        url: 'https://example.com/hook',
+        secret: 'shh',
+      } as WebhookSubscription;
       qb.getMany.mockResolvedValue([subscription]);
       global.fetch = jest
         .fn()
@@ -148,7 +188,12 @@ describe('WebhooksService', () => {
     }, 10_000);
 
     it('dead-letters after exhausting all retry attempts on a persistent failure', async () => {
-      const subscription = { id: 'sub1', tenantId: 't1', url: 'https://example.com/hook', secret: 'shh' } as WebhookSubscription;
+      const subscription = {
+        id: 'sub1',
+        tenantId: 't1',
+        url: 'https://example.com/hook',
+        secret: 'shh',
+      } as WebhookSubscription;
       qb.getMany.mockResolvedValue([subscription]);
       global.fetch = jest.fn().mockResolvedValue({ status: 500 }) as never;
 

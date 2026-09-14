@@ -34,12 +34,17 @@ describe('AuditListener', () => {
 
   describe('onModuleInit', () => {
     it('subscribes via onAny and forwards events into handleEvent', () => {
-      const handleEventSpy = jest.spyOn(listener as unknown as ListenerInternals, 'handleEvent').mockResolvedValue();
+      const handleEventSpy = jest
+        .spyOn(listener as unknown as ListenerInternals, 'handleEvent')
+        .mockResolvedValue();
 
       listener.onModuleInit();
 
       expect(eventEmitter.onAny).toHaveBeenCalledWith(expect.any(Function));
-      const callback = eventEmitter.onAny.mock.calls[0][0] as (event: string, ...values: unknown[]) => void;
+      const callback = eventEmitter.onAny.mock.calls[0][0] as (
+        event: string,
+        ...values: unknown[]
+      ) => void;
       callback('contract.created', { tenantId: 't1' });
 
       expect(handleEventSpy).toHaveBeenCalledWith('contract.created', { tenantId: 't1' });
@@ -65,30 +70,52 @@ describe('AuditListener', () => {
     it('extracts actorId from payload.actorId when present', async () => {
       await handleEvent('contract.created', { actorId: 'u1', tenantId: 't1' });
 
-      expect(auditService.record).toHaveBeenCalledWith('contract.created', 'u1', 't1', expect.anything());
+      expect(auditService.record).toHaveBeenCalledWith(
+        'contract.created',
+        'u1',
+        't1',
+        expect.anything(),
+      );
     });
 
     it('falls back to payload.userId when actorId is absent', async () => {
       await handleEvent('auth.user.registered', { userId: 'u2', tenantId: 't1' });
 
-      expect(auditService.record).toHaveBeenCalledWith('auth.user.registered', 'u2', 't1', expect.anything());
+      expect(auditService.record).toHaveBeenCalledWith(
+        'auth.user.registered',
+        'u2',
+        't1',
+        expect.anything(),
+      );
     });
 
     it('records a null actorId and tenantId when the payload has neither', async () => {
       await handleEvent('scheduler.jobCompleted', { jobName: 'idempotency-cleanup' });
 
-      expect(auditService.record).toHaveBeenCalledWith('scheduler.jobCompleted', null, null, expect.anything());
+      expect(auditService.record).toHaveBeenCalledWith(
+        'scheduler.jobCompleted',
+        null,
+        null,
+        expect.anything(),
+      );
     });
 
     it('leaves a non-object payload as-is (no redaction round-trip) and records null actor/tenant', async () => {
       await handleEvent('some.event', 'a plain string payload');
 
-      expect(auditService.record).toHaveBeenCalledWith('some.event', null, null, 'a plain string payload');
+      expect(auditService.record).toHaveBeenCalledWith(
+        'some.event',
+        null,
+        null,
+        'a plain string payload',
+      );
       expect(piiRedactionService.redactText).not.toHaveBeenCalled();
     });
 
     it('runs the payload through PiiRedactionService before storing it', async () => {
-      piiRedactionService.redactText.mockImplementation((text: string) => text.replace('a@example.com', '[REDACTED]'));
+      piiRedactionService.redactText.mockImplementation((text: string) =>
+        text.replace('a@example.com', '[REDACTED]'),
+      );
 
       await handleEvent('contract.created', { tenantId: 't1', signerEmail: 'a@example.com' });
 

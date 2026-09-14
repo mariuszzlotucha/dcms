@@ -75,7 +75,9 @@ describe('DocuSignEsignatureProvider', () => {
   });
 
   it('throws when DocuSign responds with a non-2xx status', async () => {
-    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 401 }) as unknown as typeof fetch;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: false, status: 401 }) as unknown as typeof fetch;
 
     await expect(
       provider.sendEnvelope({

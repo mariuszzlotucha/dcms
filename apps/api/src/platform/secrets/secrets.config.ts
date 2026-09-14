@@ -6,11 +6,8 @@ export interface SecretsModuleConfig {
   providers?: Record<string, string>;
 }
 
-export interface SecretsModuleAsyncOptions
-  extends Pick<ModuleMetadata, 'imports'> {
-  useFactory: (
-    ...args: any[]
-  ) => Promise<SecretsModuleConfig> | SecretsModuleConfig;
+export interface SecretsModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  useFactory: (...args: any[]) => Promise<SecretsModuleConfig> | SecretsModuleConfig;
   inject?: any[];
 }
 

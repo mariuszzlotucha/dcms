@@ -25,15 +25,11 @@ export class RefreshTokenGuard implements CanActivate {
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const req = context
-      .switchToHttp()
-      .getRequest<Request & { refreshToken?: string }>();
+    const req = context.switchToHttp().getRequest<Request & { refreshToken?: string }>();
 
-    const fromCookie = (req.cookies as Record<string, string> | undefined)
-      ?.refreshToken;
+    const fromCookie = (req.cookies as Record<string, string> | undefined)?.refreshToken;
     const body = req.body as { refreshToken?: unknown } | undefined;
-    const fromBody =
-      typeof body?.refreshToken === 'string' ? body.refreshToken : undefined;
+    const fromBody = typeof body?.refreshToken === 'string' ? body.refreshToken : undefined;
 
     // A cookie-sourced token is exactly the CSRF-forgeable case (a browser
     // attaches cookies to cross-site requests automatically) — CSRF

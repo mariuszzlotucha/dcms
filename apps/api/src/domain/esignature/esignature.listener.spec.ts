@@ -26,7 +26,9 @@ describe('EsignatureListener', () => {
       provider: 'docusign',
       verified: true,
       eventType: 'envelope-declined',
-      payload: { data: { envelopeId: 'ds-1', envelopeSummary: { declinedReason: 'wrong recipient' } } },
+      payload: {
+        data: { envelopeId: 'ds-1', envelopeSummary: { declinedReason: 'wrong recipient' } },
+      },
     });
 
     expect(service.markDeclined).toHaveBeenCalledWith('ds-1', 'wrong recipient');

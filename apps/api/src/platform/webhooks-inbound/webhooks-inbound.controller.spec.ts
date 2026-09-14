@@ -12,7 +12,10 @@ describe('WebhooksInboundController', () => {
   let eventEmitter: { emit: jest.Mock };
   let controller: WebhooksInboundController;
 
-  const buildRequest = (rawBody: Buffer, headers: Record<string, string>): RawBodyRequest<Request> =>
+  const buildRequest = (
+    rawBody: Buffer,
+    headers: Record<string, string>,
+  ): RawBodyRequest<Request> =>
     ({
       rawBody,
       headers,
@@ -40,7 +43,10 @@ describe('WebhooksInboundController', () => {
     const request = buildRequest(rawBody, {});
 
     expect(() => controller.receive('stripe', request)).toThrow(BadRequestException);
-    expect(eventEmitter.emit).not.toHaveBeenCalledWith(PLATFORM_EVENTS.WEBHOOK_RECEIVED, expect.anything());
+    expect(eventEmitter.emit).not.toHaveBeenCalledWith(
+      PLATFORM_EVENTS.WEBHOOK_RECEIVED,
+      expect.anything(),
+    );
     expect(eventEmitter.emit).toHaveBeenCalledWith(
       PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED,
       expect.objectContaining({ reason: expect.stringContaining('stripe') }),
@@ -52,7 +58,10 @@ describe('WebhooksInboundController', () => {
     const request = buildRequest(rawBody, { 'stripe-signature': 't=1,v1=deadbeef' });
 
     expect(() => controller.receive('stripe', request)).toThrow(BadRequestException);
-    expect(eventEmitter.emit).not.toHaveBeenCalledWith(PLATFORM_EVENTS.WEBHOOK_RECEIVED, expect.anything());
+    expect(eventEmitter.emit).not.toHaveBeenCalledWith(
+      PLATFORM_EVENTS.WEBHOOK_RECEIVED,
+      expect.anything(),
+    );
   });
 
   it('accepts and emits WEBHOOK_RECEIVED for a correctly signed payload', () => {
@@ -74,7 +83,11 @@ describe('WebhooksInboundController', () => {
     expect(result).toEqual({ received: true });
     expect(eventEmitter.emit).toHaveBeenCalledWith(
       PLATFORM_EVENTS.WEBHOOK_RECEIVED,
-      expect.objectContaining({ provider: 'stripe', verified: true, eventType: 'checkout.session.completed' }),
+      expect.objectContaining({
+        provider: 'stripe',
+        verified: true,
+        eventType: 'checkout.session.completed',
+      }),
     );
   });
 });

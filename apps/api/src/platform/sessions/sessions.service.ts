@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,10 +9,7 @@ import { JwtPayload } from '../auth/auth.service';
 import { User } from '../auth/entities/user.entity';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
 import { SecretsService } from '../secrets/secrets.service';
-import {
-  SESSIONS_MODULE_CONFIG,
-  SessionsModuleConfig,
-} from './sessions.config';
+import { SESSIONS_MODULE_CONFIG, SessionsModuleConfig } from './sessions.config';
 import { Session } from './entities/session.entity';
 
 export interface IssuedRefreshToken {
@@ -83,11 +75,7 @@ export class SessionsService {
       where: { refreshTokenHash: hashToken(refreshToken) },
     });
 
-    if (
-      !session ||
-      session.revokedAt !== null ||
-      session.expiresAt <= new Date()
-    ) {
+    if (!session || session.revokedAt !== null || session.expiresAt <= new Date()) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
@@ -132,10 +120,7 @@ export class SessionsService {
       return 0;
     }
 
-    await this.sessions.update(
-      { userId, revokedAt: IsNull() },
-      { revokedAt: new Date() },
-    );
+    await this.sessions.update({ userId, revokedAt: IsNull() }, { revokedAt: new Date() });
 
     for (const session of active) {
       this.emitRevoked(userId, session.id);
@@ -182,8 +167,7 @@ export class SessionsService {
     const payload: JwtPayload = { sub: user.id, email: user.email };
     return this.jwtService.sign(payload, {
       secret: this.secrets.getJwtSigningKey(),
-      expiresIn: (this.config.accessTokenExpiresIn ??
-        '15m') as JwtSignOptions['expiresIn'],
+      expiresIn: (this.config.accessTokenExpiresIn ?? '15m') as JwtSignOptions['expiresIn'],
     });
   }
 }

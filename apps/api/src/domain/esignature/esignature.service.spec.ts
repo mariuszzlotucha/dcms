@@ -18,9 +18,16 @@ describe('EsignatureService', () => {
       create: jest.fn((data) => data as SignatureEnvelope),
       save: jest.fn(async (data) => ({ id: 'env-1', ...data }) as SignatureEnvelope),
     };
-    fileStorageService = { getDownloadUrl: jest.fn().mockResolvedValue('https://files.example/signed-url') };
-    usageMeteringService = { checkAndIncrement: jest.fn().mockResolvedValue({ allowed: true, current: 1, limit: 5 }) };
-    docusignProvider = { name: 'docusign', sendEnvelope: jest.fn().mockResolvedValue({ envelopeId: 'ds-envelope-1' }) };
+    fileStorageService = {
+      getDownloadUrl: jest.fn().mockResolvedValue('https://files.example/signed-url'),
+    };
+    usageMeteringService = {
+      checkAndIncrement: jest.fn().mockResolvedValue({ allowed: true, current: 1, limit: 5 }),
+    };
+    docusignProvider = {
+      name: 'docusign',
+      sendEnvelope: jest.fn().mockResolvedValue({ envelopeId: 'ds-envelope-1' }),
+    };
     eventEmitter = { emit: jest.fn() };
 
     originalFetch = global.fetch;
@@ -44,9 +51,18 @@ describe('EsignatureService', () => {
 
   describe('requestSignature', () => {
     it('downloads the file, sends the envelope, persists it, and emits both requested and sent', async () => {
-      const result = await service.requestSignature('t1', 'c1', 'file-1', 'signer@example.com', 'Jane Signer');
+      const result = await service.requestSignature(
+        't1',
+        'c1',
+        'file-1',
+        'signer@example.com',
+        'Jane Signer',
+      );
 
-      expect(usageMeteringService.checkAndIncrement).toHaveBeenCalledWith('t1', 'esignature.request');
+      expect(usageMeteringService.checkAndIncrement).toHaveBeenCalledWith(
+        't1',
+        'esignature.request',
+      );
       expect(fileStorageService.getDownloadUrl).toHaveBeenCalledWith('t1', 'file-1');
       expect(docusignProvider.sendEnvelope).toHaveBeenCalledWith(
         expect.objectContaining({ signerEmail: 'signer@example.com', signerName: 'Jane Signer' }),
@@ -54,7 +70,12 @@ describe('EsignatureService', () => {
       expect(result.id).toBe('env-1');
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'esignature.requested',
-        expect.objectContaining({ contractId: 'c1', tenantId: 't1', envelopeId: 'ds-envelope-1', provider: 'docusign' }),
+        expect.objectContaining({
+          contractId: 'c1',
+          tenantId: 't1',
+          envelopeId: 'ds-envelope-1',
+          provider: 'docusign',
+        }),
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'esignature.sent',
@@ -68,7 +89,11 @@ describe('EsignatureService', () => {
     });
 
     it('rejects once the plan limit for signature requests is exceeded', async () => {
-      usageMeteringService.checkAndIncrement.mockResolvedValue({ allowed: false, current: 5, limit: 5 });
+      usageMeteringService.checkAndIncrement.mockResolvedValue({
+        allowed: false,
+        current: 5,
+        limit: 5,
+      });
 
       await expect(
         service.requestSignature('t1', 'c1', 'file-1', 'signer@example.com', 'Jane Signer'),
@@ -101,19 +126,34 @@ describe('EsignatureService', () => {
 
   describe('markCompleted', () => {
     it('marks a sent envelope completed and emits esignature.completed', async () => {
-      envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'sent' });
+      envelopes.findOne.mockResolvedValue({
+        id: 'env-1',
+        tenantId: 't1',
+        contractId: 'c1',
+        status: 'sent',
+      });
       const completedAt = new Date('2026-01-01T00:00:00Z');
 
       await service.markCompleted('ds-envelope-1', completedAt);
 
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'esignature.completed',
-        expect.objectContaining({ contractId: 'c1', tenantId: 't1', envelopeId: 'ds-envelope-1', completedAt }),
+        expect.objectContaining({
+          contractId: 'c1',
+          tenantId: 't1',
+          envelopeId: 'ds-envelope-1',
+          completedAt,
+        }),
       );
     });
 
     it('ignores a redelivered webhook for an already-terminal envelope', async () => {
-      envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'completed' });
+      envelopes.findOne.mockResolvedValue({
+        id: 'env-1',
+        tenantId: 't1',
+        contractId: 'c1',
+        status: 'completed',
+      });
 
       await service.markCompleted('ds-envelope-1', new Date());
 
@@ -132,7 +172,12 @@ describe('EsignatureService', () => {
 
   describe('markDeclined', () => {
     it('marks a sent envelope declined with a reason and emits esignature.declined', async () => {
-      envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'sent' });
+      envelopes.findOne.mockResolvedValue({
+        id: 'env-1',
+        tenantId: 't1',
+        contractId: 'c1',
+        status: 'sent',
+      });
 
       await service.markDeclined('ds-envelope-1', 'missing signature block');
 
@@ -148,7 +193,12 @@ describe('EsignatureService', () => {
     });
 
     it('ignores a redelivered webhook for an already-terminal envelope', async () => {
-      envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'declined' });
+      envelopes.findOne.mockResolvedValue({
+        id: 'env-1',
+        tenantId: 't1',
+        contractId: 'c1',
+        status: 'declined',
+      });
 
       await service.markDeclined('ds-envelope-1', 'missing signature block');
 
@@ -159,7 +209,12 @@ describe('EsignatureService', () => {
 
   describe('markExpired', () => {
     it('marks a sent envelope expired and emits esignature.expired', async () => {
-      envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'sent' });
+      envelopes.findOne.mockResolvedValue({
+        id: 'env-1',
+        tenantId: 't1',
+        contractId: 'c1',
+        status: 'sent',
+      });
 
       await service.markExpired('ds-envelope-1');
 
@@ -170,7 +225,12 @@ describe('EsignatureService', () => {
     });
 
     it('ignores a redelivered webhook for an already-terminal envelope', async () => {
-      envelopes.findOne.mockResolvedValue({ id: 'env-1', tenantId: 't1', contractId: 'c1', status: 'expired' });
+      envelopes.findOne.mockResolvedValue({
+        id: 'env-1',
+        tenantId: 't1',
+        contractId: 'c1',
+        status: 'expired',
+      });
 
       await service.markExpired('ds-envelope-1');
 

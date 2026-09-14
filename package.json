@@ -12,16 +12,22 @@
         "build": "npm run build -w apps/api && npm run build -w apps/web",
         "test": "npm run test -w apps/api && npm run test -w apps/web",
         "lint": "eslint .",
-        "typecheck": "npm run typecheck -w apps/api && npm run typecheck -w apps/web"
+        "typecheck": "npm run typecheck -w apps/api && npm run typecheck -w apps/web",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
     },
     "devDependencies": {
-        "eslint": "^9.9.0",
-        "eslint-plugin-boundaries": "^7.0.2",
+        "eslint": "^10.10.0",
+        "eslint-plugin-boundaries": "^7.2.0",
+        "prettier": "^3.9.6",
         "typescript": "^5.5.0",
-        "typescript-eslint": "^8.0.0"
+        "typescript-eslint": "^8.70.0"
     },
     "dependencies": {
-        "vite": "8.1.5",
-        "vitest": "4.1.11"
+        "vite": "^8.3.0",
+        "vitest": "^5.0.0"
+    },
+    "overrides": {
+        "multer": "^2.4.0"
     }
 }

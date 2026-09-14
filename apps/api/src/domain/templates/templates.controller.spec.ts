@@ -53,7 +53,10 @@ describe('TemplatesController', () => {
 
     await controller.listTemplates('nda', undefined);
 
-    expect(templatesService.listTemplates).toHaveBeenCalledWith('t1', { category: 'nda', status: undefined });
+    expect(templatesService.listTemplates).toHaveBeenCalledWith('t1', {
+      category: 'nda',
+      status: undefined,
+    });
   });
 
   it('fetches a single template scoped to the resolved tenant', async () => {
@@ -77,7 +80,9 @@ describe('TemplatesController', () => {
 
     await controller.updateTemplate('tmpl-1', { name: 'New Name' }, requestAs('u1'));
 
-    expect(templatesService.updateTemplate).toHaveBeenCalledWith('t1', 'tmpl-1', 'u1', { name: 'New Name' });
+    expect(templatesService.updateTemplate).toHaveBeenCalledWith('t1', 'tmpl-1', 'u1', {
+      name: 'New Name',
+    });
   });
 
   it('lists clauses scoped to the resolved tenant', async () => {
@@ -102,7 +107,9 @@ describe('TemplatesController', () => {
 
     await controller.updateClause('tmpl-1', 'clause-1', { title: 'New' });
 
-    expect(templatesService.updateClause).toHaveBeenCalledWith('t1', 'tmpl-1', 'clause-1', { title: 'New' });
+    expect(templatesService.updateClause).toHaveBeenCalledWith('t1', 'tmpl-1', 'clause-1', {
+      title: 'New',
+    });
   });
 
   it('removes a clause scoped to the resolved tenant', async () => {

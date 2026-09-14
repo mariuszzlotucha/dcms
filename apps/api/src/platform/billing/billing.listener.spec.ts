@@ -47,7 +47,10 @@ describe('BillingListener', () => {
 
       await listener.handleWebhookReceived(event);
 
-      expect(billingService.upsertFromStripeSubscription).toHaveBeenCalledWith(event.payload, false);
+      expect(billingService.upsertFromStripeSubscription).toHaveBeenCalledWith(
+        event.payload,
+        false,
+      );
     },
   );
 

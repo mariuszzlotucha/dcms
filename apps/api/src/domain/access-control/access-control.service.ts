@@ -46,10 +46,12 @@ export class AccessControlService {
 
     const saved = await this.accessGrants.save(grant);
 
-    this.eventEmitter.emit(
-      EVENTS.ACCESS_GRANTED,
-      { contractId, tenantId, userId, permission } satisfies EventPayloadMap[typeof EVENTS.ACCESS_GRANTED],
-    );
+    this.eventEmitter.emit(EVENTS.ACCESS_GRANTED, {
+      contractId,
+      tenantId,
+      userId,
+      permission,
+    } satisfies EventPayloadMap[typeof EVENTS.ACCESS_GRANTED]);
 
     return saved;
   }
@@ -63,10 +65,11 @@ export class AccessControlService {
 
     await this.accessGrants.remove(grant);
 
-    this.eventEmitter.emit(
-      EVENTS.ACCESS_REVOKED,
-      { contractId, tenantId, userId } satisfies EventPayloadMap[typeof EVENTS.ACCESS_REVOKED],
-    );
+    this.eventEmitter.emit(EVENTS.ACCESS_REVOKED, {
+      contractId,
+      tenantId,
+      userId,
+    } satisfies EventPayloadMap[typeof EVENTS.ACCESS_REVOKED]);
   }
 
   async listAccess(tenantId: string, contractId: string): Promise<ContractAccessGrant[]> {
@@ -81,34 +84,42 @@ export class AccessControlService {
     invitedBy: string,
   ): Promise<CollaborationInvite> {
     const invite = await this.invites.save(
-      this.invites.create({ tenantId, contractId, invitedEmail, permission, invitedBy, resolvedAt: null }),
+      this.invites.create({
+        tenantId,
+        contractId,
+        invitedEmail,
+        permission,
+        invitedBy,
+        resolvedAt: null,
+      }),
     );
 
-    this.eventEmitter.emit(
-      EVENTS.COLLABORATION_PARTICIPANT_INVITED,
-      {
-        contractId,
-        tenantId,
-        invitedEmail,
-        invitedBy,
-      } satisfies EventPayloadMap[typeof EVENTS.COLLABORATION_PARTICIPANT_INVITED],
-    );
+    this.eventEmitter.emit(EVENTS.COLLABORATION_PARTICIPANT_INVITED, {
+      contractId,
+      tenantId,
+      invitedEmail,
+      invitedBy,
+    } satisfies EventPayloadMap[typeof EVENTS.COLLABORATION_PARTICIPANT_INVITED]);
 
     return invite;
   }
 
-  async addComment(tenantId: string, contractId: string, authorId: string, body: string): Promise<ContractComment> {
-    const comment = await this.comments.save(this.comments.create({ tenantId, contractId, authorId, body }));
-
-    this.eventEmitter.emit(
-      EVENTS.COLLABORATION_COMMENT_ADDED,
-      {
-        contractId,
-        tenantId,
-        commentId: comment.id,
-        authorId,
-      } satisfies EventPayloadMap[typeof EVENTS.COLLABORATION_COMMENT_ADDED],
+  async addComment(
+    tenantId: string,
+    contractId: string,
+    authorId: string,
+    body: string,
+  ): Promise<ContractComment> {
+    const comment = await this.comments.save(
+      this.comments.create({ tenantId, contractId, authorId, body }),
     );
+
+    this.eventEmitter.emit(EVENTS.COLLABORATION_COMMENT_ADDED, {
+      contractId,
+      tenantId,
+      commentId: comment.id,
+      authorId,
+    } satisfies EventPayloadMap[typeof EVENTS.COLLABORATION_COMMENT_ADDED]);
 
     return comment;
   }
@@ -117,13 +128,20 @@ export class AccessControlService {
     return this.comments.find({ where: { tenantId, contractId }, order: { createdAt: 'ASC' } });
   }
 
-  async startSession(tenantId: string, contractId: string, userId: string): Promise<CollaborationSession> {
-    const session = await this.sessions.save(this.sessions.create({ tenantId, contractId, userId }));
-
-    this.eventEmitter.emit(
-      EVENTS.COLLABORATION_SESSION_STARTED,
-      { contractId, tenantId, userId } satisfies EventPayloadMap[typeof EVENTS.COLLABORATION_SESSION_STARTED],
+  async startSession(
+    tenantId: string,
+    contractId: string,
+    userId: string,
+  ): Promise<CollaborationSession> {
+    const session = await this.sessions.save(
+      this.sessions.create({ tenantId, contractId, userId }),
     );
+
+    this.eventEmitter.emit(EVENTS.COLLABORATION_SESSION_STARTED, {
+      contractId,
+      tenantId,
+      userId,
+    } satisfies EventPayloadMap[typeof EVENTS.COLLABORATION_SESSION_STARTED]);
 
     return session;
   }
@@ -137,7 +155,9 @@ export class AccessControlService {
       return;
     }
 
-    await this.accessPolicies.save(this.accessPolicies.create({ tenantId, defaultPermission: DEFAULT_PERMISSION }));
+    await this.accessPolicies.save(
+      this.accessPolicies.create({ tenantId, defaultPermission: DEFAULT_PERMISSION }),
+    );
   }
 
   // Invoked from AccessControlListener on auth.user.registered — "syncs a
@@ -149,7 +169,13 @@ export class AccessControlService {
     });
 
     for (const invite of pending) {
-      await this.grantAccess(tenantId, invite.contractId, userId, invite.permission, invite.invitedBy);
+      await this.grantAccess(
+        tenantId,
+        invite.contractId,
+        userId,
+        invite.permission,
+        invite.invitedBy,
+      );
       invite.resolvedAt = new Date();
       await this.invites.save(invite);
     }

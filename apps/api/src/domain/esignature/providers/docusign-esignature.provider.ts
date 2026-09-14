@@ -1,7 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { SecretsService } from '@platform/secrets/secrets.service';
 import { ESIGNATURE_MODULE_CONFIG, EsignatureModuleConfig } from '../esignature.config';
-import { EsignatureProvider, SendEnvelopeInput, SendEnvelopeResult } from './esignature-provider.interface';
+import {
+  EsignatureProvider,
+  SendEnvelopeInput,
+  SendEnvelopeResult,
+} from './esignature-provider.interface';
 
 // Deliberately a raw fetch() against DocuSign's REST API rather than the
 // official docusign-esign SDK — nothing else in this repo depends on it,
@@ -41,7 +45,14 @@ export class DocuSignEsignatureProvider implements EsignatureProvider {
             },
           ],
           recipients: {
-            signers: [{ email: input.signerEmail, name: input.signerName, recipientId: '1', routingOrder: '1' }],
+            signers: [
+              {
+                email: input.signerEmail,
+                name: input.signerName,
+                recipientId: '1',
+                routingOrder: '1',
+              },
+            ],
           },
           status: 'sent',
         }),

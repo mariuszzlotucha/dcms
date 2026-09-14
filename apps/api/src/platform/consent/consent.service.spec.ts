@@ -35,7 +35,11 @@ describe('ConsentService', () => {
     };
     eventEmitter = { emit: jest.fn() };
 
-    service = new ConsentService(consentRecords as never, config, eventEmitter as unknown as EventEmitter2);
+    service = new ConsentService(
+      consentRecords as never,
+      config,
+      eventEmitter as unknown as EventEmitter2,
+    );
   });
 
   describe('grant', () => {
@@ -43,7 +47,13 @@ describe('ConsentService', () => {
       await service.grant('u1', 't1', 'terms_of_service');
 
       expect(consentRecords.create).toHaveBeenCalledWith(
-        expect.objectContaining({ userId: 'u1', tenantId: 't1', consentType: 'terms_of_service', version: '2026-01-15', revokedAt: null }),
+        expect.objectContaining({
+          userId: 'u1',
+          tenantId: 't1',
+          consentType: 'terms_of_service',
+          version: '2026-01-15',
+          revokedAt: null,
+        }),
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.CONSENT_GRANTED, {
         userId: 'u1',
@@ -59,7 +69,13 @@ describe('ConsentService', () => {
       await service.revoke('u1', 't1', 'marketing_emails');
 
       expect(consentRecords.create).toHaveBeenCalledWith(
-        expect.objectContaining({ userId: 'u1', tenantId: 't1', consentType: 'marketing_emails', grantedAt: null, revokedAt: expect.any(Date) }),
+        expect.objectContaining({
+          userId: 'u1',
+          tenantId: 't1',
+          consentType: 'marketing_emails',
+          grantedAt: null,
+          revokedAt: expect.any(Date),
+        }),
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(PLATFORM_EVENTS.CONSENT_REVOKED, {
         tenantId: 't1',
@@ -146,7 +162,9 @@ describe('ConsentService', () => {
       await service.findRevokedBefore(new Date('2026-01-01'));
 
       expect(qb.andWhere).toHaveBeenCalledTimes(1);
-      expect(qb.andWhere).toHaveBeenCalledWith('record.revokedAt < :cutoff', { cutoff: new Date('2026-01-01') });
+      expect(qb.andWhere).toHaveBeenCalledWith('record.revokedAt < :cutoff', {
+        cutoff: new Date('2026-01-01'),
+      });
     });
 
     it('adds a tenant filter when a tenantId is given', async () => {

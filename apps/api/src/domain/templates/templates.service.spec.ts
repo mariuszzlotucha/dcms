@@ -36,11 +36,7 @@ describe('TemplatesService', () => {
     };
     eventEmitter = { emit: jest.fn() };
 
-    service = new TemplatesService(
-      templates as never,
-      clauses as never,
-      eventEmitter as never,
-    );
+    service = new TemplatesService(templates as never, clauses as never, eventEmitter as never);
   });
 
   describe('createTemplate', () => {
@@ -52,7 +48,12 @@ describe('TemplatesService', () => {
       });
 
       expect(templates.create).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 't1', createdBy: 'u1', status: 'draft', isPremium: false }),
+        expect.objectContaining({
+          tenantId: 't1',
+          createdBy: 'u1',
+          status: 'draft',
+          isPremium: false,
+        }),
       );
       expect(result.id).toBe('tmpl-1');
       expect(eventEmitter.emit).toHaveBeenCalledWith(
@@ -78,9 +79,9 @@ describe('TemplatesService', () => {
     it('throws NotFound when the template does not belong to the tenant', async () => {
       templates.findOne.mockResolvedValue(null);
 
-      await expect(service.updateTemplate('t1', 'missing', 'u1', { name: 'x' })).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.updateTemplate('t1', 'missing', 'u1', { name: 'x' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
@@ -98,7 +99,9 @@ describe('TemplatesService', () => {
 
       await service.listTemplates('t1', { category: 'nda', status: 'published' });
 
-      expect(templates.find).toHaveBeenCalledWith({ where: { tenantId: 't1', category: 'nda', status: 'published' } });
+      expect(templates.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1', category: 'nda', status: 'published' },
+      });
     });
   });
 
@@ -127,7 +130,9 @@ describe('TemplatesService', () => {
     it('rejects publishing an already-published template', async () => {
       templates.findOne.mockResolvedValue({ id: 'tmpl-1', tenantId: 't1', status: 'published' });
 
-      await expect(service.publishTemplate('t1', 'tmpl-1')).rejects.toBeInstanceOf(BadRequestException);
+      await expect(service.publishTemplate('t1', 'tmpl-1')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
     });
   });
 
@@ -135,7 +140,10 @@ describe('TemplatesService', () => {
     it('adds a clause and emits template.clauseLibraryUpdated', async () => {
       templates.findOne.mockResolvedValue({ id: 'tmpl-1', tenantId: 't1' });
 
-      const result = await service.addClause('t1', 'tmpl-1', { title: 'Confidentiality', body: 'text' });
+      const result = await service.addClause('t1', 'tmpl-1', {
+        title: 'Confidentiality',
+        body: 'text',
+      });
 
       expect(result.id).toBe('clause-1');
       expect(eventEmitter.emit).toHaveBeenCalledWith(
@@ -175,12 +183,19 @@ describe('TemplatesService', () => {
     it('throws NotFound when listing clauses for a template outside the tenant', async () => {
       templates.findOne.mockResolvedValue(null);
 
-      await expect(service.listClauses('t1', 'other-tenant-template')).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.listClauses('t1', 'other-tenant-template')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
     });
 
     it('updates a clause in place and emits template.clauseLibraryUpdated', async () => {
       templates.findOne.mockResolvedValue({ id: 'tmpl-1', tenantId: 't1' });
-      clauses.findOne.mockResolvedValue({ id: 'clause-1', tenantId: 't1', templateId: 'tmpl-1', title: 'Old' });
+      clauses.findOne.mockResolvedValue({
+        id: 'clause-1',
+        tenantId: 't1',
+        templateId: 'tmpl-1',
+        title: 'Old',
+      });
 
       const result = await service.updateClause('t1', 'tmpl-1', 'clause-1', { title: 'New' });
 
@@ -195,9 +210,9 @@ describe('TemplatesService', () => {
       templates.findOne.mockResolvedValue({ id: 'tmpl-1', tenantId: 't1' });
       clauses.findOne.mockResolvedValue(null);
 
-      await expect(service.updateClause('t1', 'tmpl-1', 'missing-clause', { title: 'x' })).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.updateClause('t1', 'tmpl-1', 'missing-clause', { title: 'x' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('removes a clause and emits template.clauseLibraryUpdated', async () => {
@@ -217,7 +232,9 @@ describe('TemplatesService', () => {
       templates.findOne.mockResolvedValue({ id: 'tmpl-1', tenantId: 't1' });
       clauses.findOne.mockResolvedValue(null);
 
-      await expect(service.removeClause('t1', 'tmpl-1', 'missing-clause')).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.removeClause('t1', 'tmpl-1', 'missing-clause')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
     });
   });
 
@@ -232,7 +249,10 @@ describe('TemplatesService', () => {
     });
 
     it('does not re-seed templates that already exist for the tenant', async () => {
-      templates.find.mockResolvedValue([{ name: 'Mutual Non-Disclosure Agreement' }, { name: 'Service Agreement' }]);
+      templates.find.mockResolvedValue([
+        { name: 'Mutual Non-Disclosure Agreement' },
+        { name: 'Service Agreement' },
+      ]);
 
       await service.seedStarterTemplates('t1');
 

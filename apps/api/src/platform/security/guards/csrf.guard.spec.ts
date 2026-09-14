@@ -18,7 +18,10 @@ describe('CsrfGuard', () => {
   beforeEach(() => {
     csrfService = { enabled: true, validateRequest: jest.fn() };
     eventEmitter = { emit: jest.fn() };
-    guard = new CsrfGuard(csrfService as unknown as CsrfService, eventEmitter as unknown as EventEmitter2);
+    guard = new CsrfGuard(
+      csrfService as unknown as CsrfService,
+      eventEmitter as unknown as EventEmitter2,
+    );
   });
 
   it('passes through when csrf is disabled entirely', () => {
@@ -39,12 +42,15 @@ describe('CsrfGuard', () => {
     );
   });
 
-  it.each(['GET', 'HEAD', 'OPTIONS'])('passes through safe method %s without validating', (method) => {
-    const context = buildContext({ cookies: {}, method });
+  it.each(['GET', 'HEAD', 'OPTIONS'])(
+    'passes through safe method %s without validating',
+    (method) => {
+      const context = buildContext({ cookies: {}, method });
 
-    expect(guard.canActivate(context)).toBe(true);
-    expect(csrfService.validateRequest).not.toHaveBeenCalled();
-  });
+      expect(guard.canActivate(context)).toBe(true);
+      expect(csrfService.validateRequest).not.toHaveBeenCalled();
+    },
+  );
 
   it('passes through a state-changing request with a valid CSRF token', () => {
     csrfService.validateRequest.mockReturnValue(true);

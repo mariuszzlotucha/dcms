@@ -18,15 +18,20 @@ export class DeadLetterQueueService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async add(originalEvent: string, payload: unknown, failureReason: string): Promise<DeadLetterEntry> {
+  async add(
+    originalEvent: string,
+    payload: unknown,
+    failureReason: string,
+  ): Promise<DeadLetterEntry> {
     const entry = await this.deadLetterEntries.save(
       this.deadLetterEntries.create({ originalEvent, payload, failureReason, retriedAt: null }),
     );
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.DEAD_LETTER_ADDED,
-      { originalEvent, payload, failureReason } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.DEAD_LETTER_ADDED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.DEAD_LETTER_ADDED, {
+      originalEvent,
+      payload,
+      failureReason,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.DEAD_LETTER_ADDED]);
 
     return entry;
   }

@@ -35,7 +35,10 @@ export class CollaborationController {
   }
 
   @Post('sessions')
-  async startSession(@Param('contractId') contractId: string, @Req() request: Request): Promise<CollaborationSession> {
+  async startSession(
+    @Param('contractId') contractId: string,
+    @Req() request: Request,
+  ): Promise<CollaborationSession> {
     const tenantId = await this.tenantContext.getTenantId();
     const userId = (request.user as { userId: string }).userId;
     return this.accessControlService.startSession(tenantId, contractId, userId);

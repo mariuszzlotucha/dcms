@@ -26,7 +26,10 @@ describe('IdempotencyInterceptor', () => {
     next.handle.mockReturnValue(of('handler-result'));
     const request = { headers: {}, path: '/api/contracts' };
 
-    const result$ = await interceptor.intercept(buildContext(request), next as unknown as CallHandler);
+    const result$ = await interceptor.intercept(
+      buildContext(request),
+      next as unknown as CallHandler,
+    );
 
     expect(await firstValueFrom(result$)).toBe('handler-result');
     expect(idempotencyService.findValidRecord).not.toHaveBeenCalled();
@@ -46,7 +49,10 @@ describe('IdempotencyInterceptor', () => {
     idempotencyService.findValidRecord.mockResolvedValue(stored);
     const request = { headers: { 'idempotency-key': 'key-1' }, path: '/api/contracts' };
 
-    const result$ = await interceptor.intercept(buildContext(request), next as unknown as CallHandler);
+    const result$ = await interceptor.intercept(
+      buildContext(request),
+      next as unknown as CallHandler,
+    );
 
     expect(await firstValueFrom(result$)).toEqual({ id: 'c1' });
     expect(response.status).toHaveBeenCalledWith(201);
@@ -59,9 +65,14 @@ describe('IdempotencyInterceptor', () => {
     response.statusCode = 201;
     const request = { headers: { 'idempotency-key': 'key-1' }, path: '/api/contracts' };
 
-    const result$ = await interceptor.intercept(buildContext(request), next as unknown as CallHandler);
+    const result$ = await interceptor.intercept(
+      buildContext(request),
+      next as unknown as CallHandler,
+    );
     expect(await firstValueFrom(result$)).toEqual({ id: 'c1' });
 
-    expect(idempotencyService.persist).toHaveBeenCalledWith('key-1', '/api/contracts', 201, { id: 'c1' });
+    expect(idempotencyService.persist).toHaveBeenCalledWith('key-1', '/api/contracts', 201, {
+      id: 'c1',
+    });
   });
 });

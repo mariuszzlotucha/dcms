@@ -27,9 +27,13 @@ export class BillingService {
       throw new NotFoundException(`Unknown plan: ${planKey}`);
     }
 
-    const existing = await this.subscriptions.findOne({ where: { tenantId }, order: { updatedAt: 'DESC' } });
+    const existing = await this.subscriptions.findOne({
+      where: { tenantId },
+      order: { updatedAt: 'DESC' },
+    });
     const stripeCustomerId =
-      existing?.stripeCustomerId ?? (await this.stripe.customers.create({ metadata: { tenantId } })).id;
+      existing?.stripeCustomerId ??
+      (await this.stripe.customers.create({ metadata: { tenantId } })).id;
 
     const session = await this.stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -57,12 +61,17 @@ export class BillingService {
       throw new NotFoundException(`Unknown plan: ${planKey}`);
     }
 
-    const subscription = await this.subscriptions.findOne({ where: { tenantId }, order: { updatedAt: 'DESC' } });
+    const subscription = await this.subscriptions.findOne({
+      where: { tenantId },
+      order: { updatedAt: 'DESC' },
+    });
     if (!subscription) {
       throw new NotFoundException('No active subscription for tenant');
     }
 
-    const stripeSubscription = await this.stripe.subscriptions.retrieve(subscription.stripeSubscriptionId);
+    const stripeSubscription = await this.stripe.subscriptions.retrieve(
+      subscription.stripeSubscriptionId,
+    );
     const itemId = stripeSubscription.items.data[0]?.id;
     if (!itemId) {
       throw new Error('Stripe subscription has no line items');
@@ -76,12 +85,19 @@ export class BillingService {
     return this.applyExternalUpdate(subscription);
   }
 
-  async upsertFromStripeSubscription(stripeSubscription: Stripe.Subscription, canceled: boolean): Promise<Subscription> {
+  async upsertFromStripeSubscription(
+    stripeSubscription: Stripe.Subscription,
+    canceled: boolean,
+  ): Promise<Subscription> {
     const stripeCustomerId =
-      typeof stripeSubscription.customer === 'string' ? stripeSubscription.customer : stripeSubscription.customer.id;
+      typeof stripeSubscription.customer === 'string'
+        ? stripeSubscription.customer
+        : stripeSubscription.customer.id;
 
     const record =
-      (await this.subscriptions.findOne({ where: { stripeSubscriptionId: stripeSubscription.id } })) ??
+      (await this.subscriptions.findOne({
+        where: { stripeSubscriptionId: stripeSubscription.id },
+      })) ??
       this.subscriptions.create({
         tenantId: stripeSubscription.metadata?.tenantId ?? '',
         stripeCustomerId,
@@ -104,10 +120,11 @@ export class BillingService {
   private async applyExternalUpdate(record: Subscription): Promise<Subscription> {
     const saved = await this.subscriptions.save(record);
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.BILLING_SUBSCRIPTION_UPDATED,
-      { tenantId: saved.tenantId, plan: saved.plan, status: saved.status } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.BILLING_SUBSCRIPTION_UPDATED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.BILLING_SUBSCRIPTION_UPDATED, {
+      tenantId: saved.tenantId,
+      plan: saved.plan,
+      status: saved.status,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.BILLING_SUBSCRIPTION_UPDATED]);
 
     await this.sendSubscriptionUpdateConfirmation(saved);
 
@@ -125,10 +142,15 @@ export class BillingService {
       return;
     }
 
-    await this.notificationsService.send(subscription.tenantId, customer.email, 'subscription-updated', {
-      planName: this.config.plans[subscription.plan]?.name ?? subscription.plan,
-      status: subscription.status,
-    });
+    await this.notificationsService.send(
+      subscription.tenantId,
+      customer.email,
+      'subscription-updated',
+      {
+        planName: this.config.plans[subscription.plan]?.name ?? subscription.plan,
+        status: subscription.status,
+      },
+    );
   }
 
   private resolvePlanKey(priceId: string | undefined): string | null {
@@ -136,7 +158,9 @@ export class BillingService {
       return null;
     }
 
-    const match = Object.entries(this.config.plans).find(([, plan]) => plan.stripePriceId === priceId);
+    const match = Object.entries(this.config.plans).find(
+      ([, plan]) => plan.stripePriceId === priceId,
+    );
     return match ? match[0] : null;
   }
 }

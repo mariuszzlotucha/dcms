@@ -1,4 +1,12 @@
-import { BadRequestException, Controller, HttpCode, NotFoundException, Param, Post, Req } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { RawBodyRequest } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Request } from 'express';
@@ -22,7 +30,10 @@ export class WebhooksInboundController {
 
   @Post(':provider')
   @HttpCode(200)
-  receive(@Param('provider') providerName: string, @Req() request: RawBodyRequest<Request>): { received: boolean } {
+  receive(
+    @Param('provider') providerName: string,
+    @Req() request: RawBodyRequest<Request>,
+  ): { received: boolean } {
     const provider = WEBHOOK_PROVIDERS[providerName];
 
     if (!provider) {
@@ -41,26 +52,20 @@ export class WebhooksInboundController {
       // — a forged/garbled payload must never reach WEBHOOK_RECEIVED
       // subscribers, and the provider (e.g. Stripe) needs a non-200 to
       // trigger its own retry/alerting for a bad signature.
-      this.eventEmitter.emit(
-        PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED,
-        {
-          reason: `unverified ${provider.name} webhook signature`,
-          path: request.path,
-          ip: request.ip ?? '',
-        } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED],
-      );
+      this.eventEmitter.emit(PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED, {
+        reason: `unverified ${provider.name} webhook signature`,
+        path: request.path,
+        ip: request.ip ?? '',
+      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.SECURITY_REQUEST_REJECTED]);
       throw new BadRequestException('Webhook signature verification failed');
     }
 
-    this.eventEmitter.emit(
-      PLATFORM_EVENTS.WEBHOOK_RECEIVED,
-      {
-        provider: provider.name,
-        verified: result.verified,
-        eventType: result.eventType,
-        payload: result.payload,
-      } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.WEBHOOK_RECEIVED],
-    );
+    this.eventEmitter.emit(PLATFORM_EVENTS.WEBHOOK_RECEIVED, {
+      provider: provider.name,
+      verified: result.verified,
+      eventType: result.eventType,
+      payload: result.payload,
+    } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.WEBHOOK_RECEIVED]);
 
     return { received: true };
   }

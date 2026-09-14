@@ -50,7 +50,10 @@ export class NegotiationApprovalController {
   }
 
   @Post('approve')
-  async grantApproval(@Param('contractId') contractId: string, @Req() request: Request): Promise<ApprovalRequest> {
+  async grantApproval(
+    @Param('contractId') contractId: string,
+    @Req() request: Request,
+  ): Promise<ApprovalRequest> {
     const tenantId = await this.tenantContext.getTenantId();
     const userId = (request.user as { userId: string }).userId;
     return this.negotiationApprovalService.grantApproval(tenantId, contractId, userId);
@@ -77,6 +80,11 @@ export class NegotiationApprovalController {
   ): Promise<void> {
     const tenantId = await this.tenantContext.getTenantId();
     const userId = (request.user as { userId: string }).userId;
-    return this.negotiationApprovalService.requestRevision(tenantId, contractId, userId, dto.comment);
+    return this.negotiationApprovalService.requestRevision(
+      tenantId,
+      contractId,
+      userId,
+      dto.comment,
+    );
   }
 }

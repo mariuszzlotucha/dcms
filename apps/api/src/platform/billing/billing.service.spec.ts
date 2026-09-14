@@ -38,7 +38,11 @@ describe('BillingService', () => {
         create: jest.fn().mockResolvedValue({ id: 'cus_new' }),
         retrieve: jest.fn().mockResolvedValue({ email: 'billing@example.com', deleted: false }),
       },
-      checkout: { sessions: { create: jest.fn().mockResolvedValue({ url: 'https://checkout.stripe.com/session' }) } },
+      checkout: {
+        sessions: {
+          create: jest.fn().mockResolvedValue({ url: 'https://checkout.stripe.com/session' }),
+        },
+      },
       subscriptions: {
         retrieve: jest.fn(),
         update: jest.fn(),
@@ -58,7 +62,9 @@ describe('BillingService', () => {
 
   describe('createCheckoutSession', () => {
     it('throws NotFoundException for an unknown plan', async () => {
-      await expect(service.createCheckoutSession('t1', 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.createCheckoutSession('t1', 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('creates a new Stripe customer when the tenant has none yet', async () => {
@@ -104,7 +110,10 @@ describe('BillingService', () => {
 
       await service.getSubscription('t1');
 
-      expect(subscriptions.findOne).toHaveBeenCalledWith({ where: { tenantId: 't1' }, order: { updatedAt: 'DESC' } });
+      expect(subscriptions.findOne).toHaveBeenCalledWith({
+        where: { tenantId: 't1' },
+        order: { updatedAt: 'DESC' },
+      });
     });
   });
 
@@ -116,14 +125,18 @@ describe('BillingService', () => {
     it('throws NotFoundException when the tenant has no subscription', async () => {
       subscriptions.findOne.mockResolvedValue(null);
 
-      await expect(service.changePlan('t1', 'pro')).rejects.toThrow('No active subscription for tenant');
+      await expect(service.changePlan('t1', 'pro')).rejects.toThrow(
+        'No active subscription for tenant',
+      );
     });
 
     it('throws when the Stripe subscription has no line items', async () => {
       subscriptions.findOne.mockResolvedValue({ stripeSubscriptionId: 'sub_1' } as Subscription);
       stripe.subscriptions.retrieve.mockResolvedValue({ items: { data: [] } });
 
-      await expect(service.changePlan('t1', 'pro')).rejects.toThrow('Stripe subscription has no line items');
+      await expect(service.changePlan('t1', 'pro')).rejects.toThrow(
+        'Stripe subscription has no line items',
+      );
     });
 
     it('updates the Stripe subscription item to the new plan price and saves the local record', async () => {
@@ -150,7 +163,9 @@ describe('BillingService', () => {
   });
 
   describe('upsertFromStripeSubscription', () => {
-    const buildStripeSubscription = (overrides: Partial<Stripe.Subscription> = {}): Stripe.Subscription =>
+    const buildStripeSubscription = (
+      overrides: Partial<Stripe.Subscription> = {},
+    ): Stripe.Subscription =>
       ({
         id: 'sub_1',
         customer: 'cus_1',
@@ -176,7 +191,11 @@ describe('BillingService', () => {
       await service.upsertFromStripeSubscription(stripeSubscription, false);
 
       expect(subscriptions.create).toHaveBeenCalledWith(
-        expect.objectContaining({ tenantId: 't1', stripeSubscriptionId: 'sub_1', stripeCustomerId: 'cus_1' }),
+        expect.objectContaining({
+          tenantId: 't1',
+          stripeSubscriptionId: 'sub_1',
+          stripeCustomerId: 'cus_1',
+        }),
       );
     });
 
@@ -198,7 +217,9 @@ describe('BillingService', () => {
         plan: 'starter',
         status: 'active',
       } as Subscription);
-      const stripeSubscription = buildStripeSubscription({ items: { data: [{ price: { id: 'price_unknown' } }] } } as never);
+      const stripeSubscription = buildStripeSubscription({
+        items: { data: [{ price: { id: 'price_unknown' } }] },
+      } as never);
 
       const result = await service.upsertFromStripeSubscription(stripeSubscription, false);
 
@@ -216,7 +237,9 @@ describe('BillingService', () => {
 
     it('handles a customer object (not just a customer id string)', async () => {
       subscriptions.findOne.mockResolvedValue(null);
-      const stripeSubscription = buildStripeSubscription({ customer: { id: 'cus_object' } as Stripe.Customer });
+      const stripeSubscription = buildStripeSubscription({
+        customer: { id: 'cus_object' } as Stripe.Customer,
+      });
 
       const result = await service.upsertFromStripeSubscription(stripeSubscription, false);
 
@@ -229,10 +252,15 @@ describe('BillingService', () => {
 
       await service.upsertFromStripeSubscription(stripeSubscription, false);
 
-      expect(notificationsService.send).toHaveBeenCalledWith('t1', 'billing@example.com', 'subscription-updated', {
-        planName: 'Pro',
-        status: 'active',
-      });
+      expect(notificationsService.send).toHaveBeenCalledWith(
+        't1',
+        'billing@example.com',
+        'subscription-updated',
+        {
+          planName: 'Pro',
+          status: 'active',
+        },
+      );
     });
 
     it('skips the notification when the Stripe customer has been deleted', async () => {

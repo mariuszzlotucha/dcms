@@ -30,7 +30,12 @@ describe('AnalyticsInsightsListener', () => {
       newStatus: 'in_review',
     });
 
-    expect(service.recordContractStatusChanged).toHaveBeenCalledWith('t1', 'c1', 'draft', 'in_review');
+    expect(service.recordContractStatusChanged).toHaveBeenCalledWith(
+      't1',
+      'c1',
+      'draft',
+      'in_review',
+    );
   });
 
   it('records esignature.completed', async () => {
@@ -45,7 +50,11 @@ describe('AnalyticsInsightsListener', () => {
   });
 
   it('records esignature.expired', async () => {
-    await listener.handleEsignatureExpired({ contractId: 'c1', tenantId: 't1', envelopeId: 'env-1' });
+    await listener.handleEsignatureExpired({
+      contractId: 'c1',
+      tenantId: 't1',
+      envelopeId: 'env-1',
+    });
 
     expect(service.recordEsignatureExpired).toHaveBeenCalledWith('t1');
   });
@@ -62,7 +71,11 @@ describe('AnalyticsInsightsListener', () => {
   });
 
   it('records billing.subscription.updated', async () => {
-    await listener.handleBillingSubscriptionUpdated({ tenantId: 't1', plan: 'pro', status: 'active' });
+    await listener.handleBillingSubscriptionUpdated({
+      tenantId: 't1',
+      plan: 'pro',
+      status: 'active',
+    });
 
     expect(service.recordBillingSubscriptionUpdated).toHaveBeenCalledWith('t1');
   });

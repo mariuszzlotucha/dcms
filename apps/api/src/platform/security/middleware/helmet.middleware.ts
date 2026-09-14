@@ -1,10 +1,7 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import helmet from 'helmet';
 import { NextFunction, Request, Response } from 'express';
-import {
-  SECURITY_MODULE_CONFIG,
-  SecurityModuleConfig,
-} from '../security.config';
+import { SECURITY_MODULE_CONFIG, SecurityModuleConfig } from '../security.config';
 
 type HelmetOptions = Parameters<typeof helmet>[0];
 

@@ -72,7 +72,14 @@ describe('ContractsController', () => {
 
     await controller.uploadVersion('c1', file, requestAs('u1'));
 
-    expect(contractsService.uploadVersion).toHaveBeenCalledWith('t1', 'c1', 'u1', file.buffer, 'a.pdf', 'application/pdf');
+    expect(contractsService.uploadVersion).toHaveBeenCalledWith(
+      't1',
+      'c1',
+      'u1',
+      file.buffer,
+      'a.pdf',
+      'application/pdf',
+    );
   });
 
   it('submits for approval using the authenticated user and resolved tenant', async () => {
@@ -94,7 +101,9 @@ describe('ContractsController', () => {
 
     await controller.updateContract('c1', { name: 'New name' }, requestAs('u1'));
 
-    expect(contractsService.updateContract).toHaveBeenCalledWith('t1', 'c1', 'u1', { name: 'New name' });
+    expect(contractsService.updateContract).toHaveBeenCalledWith('t1', 'c1', 'u1', {
+      name: 'New name',
+    });
   });
 
   it('archives a contract scoped to the resolved tenant', async () => {

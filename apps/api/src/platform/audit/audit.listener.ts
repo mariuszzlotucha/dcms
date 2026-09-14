@@ -43,7 +43,10 @@ export class AuditListener implements OnModuleInit {
     return JSON.parse(this.piiRedactionService.redactText(JSON.stringify(payload)));
   }
 
-  private extractActorAndTenant(payload: unknown): { actorId: string | null; tenantId: string | null } {
+  private extractActorAndTenant(payload: unknown): {
+    actorId: string | null;
+    tenantId: string | null;
+  } {
     if (typeof payload !== 'object' || payload === null) {
       return { actorId: null, tenantId: null };
     }

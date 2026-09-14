@@ -13,13 +13,7 @@ export const templateCategorySchema = z.enum([
 ]);
 export type TemplateCategory = z.infer<typeof templateCategorySchema>;
 
-export const templateFieldTypeSchema = z.enum([
-  'text',
-  'number',
-  'date',
-  'boolean',
-  'select',
-]);
+export const templateFieldTypeSchema = z.enum(['text', 'number', 'date', 'boolean', 'select']);
 export type TemplateFieldType = z.infer<typeof templateFieldTypeSchema>;
 
 export const templateFieldSchema = z.object({

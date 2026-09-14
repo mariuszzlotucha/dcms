@@ -57,7 +57,9 @@ export class AnalyticsInsightsService {
       const existing = await this.negotiationTimings.findOne({ where: { tenantId, contractId } });
 
       if (!existing) {
-        await this.negotiationTimings.save(this.negotiationTimings.create({ tenantId, contractId }));
+        await this.negotiationTimings.save(
+          this.negotiationTimings.create({ tenantId, contractId }),
+        );
       }
     }
 
@@ -84,7 +86,10 @@ export class AnalyticsInsightsService {
   // isn't possible. This records the only real, available proxy: operating
   // scale (active contracts) at the moment the plan changed.
   async recordBillingSubscriptionUpdated(tenantId: string): Promise<void> {
-    const activeContracts = await this.getMetricValue(tenantId, METRICS.contractsByStatus('active'));
+    const activeContracts = await this.getMetricValue(
+      tenantId,
+      METRICS.contractsByStatus('active'),
+    );
     await this.setMetric(tenantId, METRICS.billingActiveContractsAtPlanChange, activeContracts);
   }
 
@@ -94,7 +99,10 @@ export class AnalyticsInsightsService {
   }
 
   async generateReport(tenantId: string, generatedBy: string): Promise<AnalyticsReport> {
-    const advancedEnabled = await this.featureFlagsService.isEnabled(tenantId, ADVANCED_ANALYTICS_FLAG);
+    const advancedEnabled = await this.featureFlagsService.isEnabled(
+      tenantId,
+      ADVANCED_ANALYTICS_FLAG,
+    );
     const tier: AnalyticsReportTier = advancedEnabled ? 'advanced' : 'basic';
 
     const rows = await this.tenantMetrics.find({ where: { tenantId } });
@@ -108,10 +116,10 @@ export class AnalyticsInsightsService {
       this.analyticsReports.create({ tenantId, generatedBy, tier, metrics }),
     );
 
-    this.eventEmitter.emit(
-      EVENTS.ANALYTICS_REPORT_GENERATED,
-      { tenantId, reportId: report.id } satisfies EventPayloadMap[typeof EVENTS.ANALYTICS_REPORT_GENERATED],
-    );
+    this.eventEmitter.emit(EVENTS.ANALYTICS_REPORT_GENERATED, {
+      tenantId,
+      reportId: report.id,
+    } satisfies EventPayloadMap[typeof EVENTS.ANALYTICS_REPORT_GENERATED]);
 
     return report;
   }
@@ -179,9 +187,10 @@ export class AnalyticsInsightsService {
   }
 
   private emitMetricUpdated(tenantId: string, metric: string, value: number): void {
-    this.eventEmitter.emit(
-      EVENTS.ANALYTICS_METRIC_UPDATED,
-      { tenantId, metric, value } satisfies EventPayloadMap[typeof EVENTS.ANALYTICS_METRIC_UPDATED],
-    );
+    this.eventEmitter.emit(EVENTS.ANALYTICS_METRIC_UPDATED, {
+      tenantId,
+      metric,
+      value,
+    } satisfies EventPayloadMap[typeof EVENTS.ANALYTICS_METRIC_UPDATED]);
   }
 }

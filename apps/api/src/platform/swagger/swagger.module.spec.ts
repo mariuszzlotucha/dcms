@@ -11,7 +11,10 @@ jest.mock('@nestjs/swagger', () => ({
     addBearerAuth: jest.fn().mockReturnThis(),
     build: jest.fn().mockReturnValue({ built: true }),
   })),
-  SwaggerModule: { createDocument: jest.fn().mockReturnValue({ document: true }), setup: jest.fn() },
+  SwaggerModule: {
+    createDocument: jest.fn().mockReturnValue({ document: true }),
+    setup: jest.fn(),
+  },
 }));
 
 describe('setupSwagger', () => {
@@ -48,7 +51,9 @@ describe('setupSwagger', () => {
 
     const builderInstance = (DocumentBuilder as jest.Mock).mock.results[0].value;
     expect(builderInstance.setTitle).toHaveBeenCalledWith('DCMS API');
-    expect(builderInstance.setDescription).toHaveBeenCalledWith('Digital Contract Management System');
+    expect(builderInstance.setDescription).toHaveBeenCalledWith(
+      'Digital Contract Management System',
+    );
     expect(builderInstance.setVersion).toHaveBeenCalledWith('1.0');
     expect(builderInstance.addBearerAuth).toHaveBeenCalled();
   });

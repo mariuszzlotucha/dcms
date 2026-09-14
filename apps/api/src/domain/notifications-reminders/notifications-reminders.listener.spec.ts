@@ -19,7 +19,9 @@ describe('NotificationsRemindersListener', () => {
       notifySignatureExpired: jest.fn(),
       notifyRevisionRequested: jest.fn(),
     };
-    listener = new NotificationsRemindersListener(service as unknown as NotificationsRemindersService);
+    listener = new NotificationsRemindersListener(
+      service as unknown as NotificationsRemindersService,
+    );
   });
 
   it('reacts to contract.statusChanged', async () => {
@@ -34,7 +36,11 @@ describe('NotificationsRemindersListener', () => {
   });
 
   it('reacts to approval.requested', async () => {
-    await listener.handleApprovalRequested({ tenantId: 't1', contractId: 'c1', approverId: 'approver-1' });
+    await listener.handleApprovalRequested({
+      tenantId: 't1',
+      contractId: 'c1',
+      approverId: 'approver-1',
+    });
 
     expect(service.scheduleApprovalReminder).toHaveBeenCalledWith('t1', 'c1', 'approver-1');
   });
@@ -47,11 +53,19 @@ describe('NotificationsRemindersListener', () => {
       recipientEmail: 'signer@example.com',
     });
 
-    expect(service.scheduleSignatureReminder).toHaveBeenCalledWith('t1', 'c1', 'signer@example.com');
+    expect(service.scheduleSignatureReminder).toHaveBeenCalledWith(
+      't1',
+      'c1',
+      'signer@example.com',
+    );
   });
 
   it('reacts to esignature.expired', async () => {
-    await listener.handleEsignatureExpired({ tenantId: 't1', contractId: 'c1', envelopeId: 'env-1' });
+    await listener.handleEsignatureExpired({
+      tenantId: 't1',
+      contractId: 'c1',
+      envelopeId: 'env-1',
+    });
 
     expect(service.notifySignatureExpired).toHaveBeenCalledWith('t1', 'c1');
   });

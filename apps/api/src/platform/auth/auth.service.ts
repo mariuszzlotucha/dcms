@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,11 +8,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
 import { SecretsService } from '../secrets/secrets.service';
 import { PasswordPolicyService } from '../password-policy/password-policy.service';
-import {
-  AUTH_MODULE_CONFIG,
-  AuthModuleConfig,
-  OauthProviderName,
-} from './auth.config';
+import { AUTH_MODULE_CONFIG, AuthModuleConfig, OauthProviderName } from './auth.config';
 import { User } from './entities/user.entity';
 
 export interface JwtPayload {
@@ -38,8 +29,7 @@ const PG_UNIQUE_VIOLATION = '23505';
 function isUniqueViolation(error: unknown): boolean {
   return (
     error instanceof QueryFailedError &&
-    (error.driverError as { code?: string } | undefined)?.code ===
-      PG_UNIQUE_VIOLATION
+    (error.driverError as { code?: string } | undefined)?.code === PG_UNIQUE_VIOLATION
   );
 }
 
@@ -90,15 +80,9 @@ export class AuthService {
   // Verified against when the user does not exist, so /auth/login takes
   // the same time either way — otherwise response timing reveals which
   // emails have accounts (user enumeration).
-  private readonly dummyHashPromise = argon2.hash(
-    randomBytes(32).toString('hex'),
-  );
+  private readonly dummyHashPromise = argon2.hash(randomBytes(32).toString('hex'));
 
-  async login(
-    rawEmail: string,
-    password: string,
-    ip: string,
-  ): Promise<AuthTokens> {
+  async login(rawEmail: string, password: string, ip: string): Promise<AuthTokens> {
     const email = normalizeEmail(rawEmail);
     const user = await this.users.findOne({ where: { email } });
 
@@ -155,9 +139,7 @@ export class AuthService {
         reason: `${method}_profile_missing_email`,
         ip,
       } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.AUTH_USER_LOGIN_FAILED]);
-      throw new UnauthorizedException(
-        `${method} account did not provide an email address`,
-      );
+      throw new UnauthorizedException(`${method} account did not provide an email address`);
     }
 
     const email = normalizeEmail(profile.email);
@@ -166,9 +148,7 @@ export class AuthService {
 
     if (!user) {
       try {
-        user = await this.users.save(
-          this.users.create({ email, passwordHash: null }),
-        );
+        user = await this.users.save(this.users.create({ email, passwordHash: null }));
         created = true;
       } catch (error) {
         // Two concurrent callbacks for a brand-new user: the loser of the
@@ -199,10 +179,7 @@ export class AuthService {
     } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.AUTH_USER_REGISTERED]);
   }
 
-  private emitLoggedIn(
-    user: User,
-    method: 'password' | OauthProviderName,
-  ): void {
+  private emitLoggedIn(user: User, method: 'password' | OauthProviderName): void {
     this.eventEmitter.emit(PLATFORM_EVENTS.AUTH_USER_LOGGED_IN, {
       userId: user.id,
       tenantId: user.tenantId ?? '',

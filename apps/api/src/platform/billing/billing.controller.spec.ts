@@ -3,12 +3,20 @@ import { BillingService } from './billing.service';
 import { TenantContextService } from '@platform/tenants/context/tenant-context.service';
 
 describe('BillingController', () => {
-  let billingService: { createCheckoutSession: jest.Mock; getSubscription: jest.Mock; changePlan: jest.Mock };
+  let billingService: {
+    createCheckoutSession: jest.Mock;
+    getSubscription: jest.Mock;
+    changePlan: jest.Mock;
+  };
   let tenantContext: { getTenantId: jest.Mock };
   let controller: BillingController;
 
   beforeEach(() => {
-    billingService = { createCheckoutSession: jest.fn(), getSubscription: jest.fn(), changePlan: jest.fn() };
+    billingService = {
+      createCheckoutSession: jest.fn(),
+      getSubscription: jest.fn(),
+      changePlan: jest.fn(),
+    };
     tenantContext = { getTenantId: jest.fn().mockResolvedValue('t1') };
     controller = new BillingController(
       billingService as unknown as BillingService,

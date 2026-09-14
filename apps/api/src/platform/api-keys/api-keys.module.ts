@@ -1,4 +1,10 @@
-import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+  Provider,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApiKey } from './entities/api-key.entity';
 import { ApiKeyGuard } from './guards/api-key.guard';
@@ -18,7 +24,11 @@ export class ApiKeysModule {
       module: ApiKeysModule,
       imports: [TypeOrmModule.forFeature([ApiKey])],
       controllers: [ApiKeysController],
-      providers: [{ provide: API_KEYS_MODULE_CONFIG, useValue: config }, ApiKeysService, ApiKeyGuard],
+      providers: [
+        { provide: API_KEYS_MODULE_CONFIG, useValue: config },
+        ApiKeysService,
+        ApiKeyGuard,
+      ],
       exports: [ApiKeysService, ApiKeyGuard],
     };
   }

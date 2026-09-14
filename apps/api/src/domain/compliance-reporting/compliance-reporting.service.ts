@@ -22,31 +22,50 @@ export class ComplianceReportingService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async recordEvent(tenantId: string, contractId: string, eventName: string, payload: unknown): Promise<void> {
+  async recordEvent(
+    tenantId: string,
+    contractId: string,
+    eventName: string,
+    payload: unknown,
+  ): Promise<void> {
     await this.trailEntries.save(
-      this.trailEntries.create({ tenantId, contractId, eventName, payload, recordedAt: new Date() }),
+      this.trailEntries.create({
+        tenantId,
+        contractId,
+        eventName,
+        payload,
+        recordedAt: new Date(),
+      }),
     );
   }
 
-  async generateReport(tenantId: string, contractId: string | null, generatedBy: string): Promise<ComplianceReport> {
+  async generateReport(
+    tenantId: string,
+    contractId: string | null,
+    generatedBy: string,
+  ): Promise<ComplianceReport> {
     const entries = await this.trailEntries.find({
       where: contractId ? { tenantId, contractId } : { tenantId },
       order: { recordedAt: 'ASC' },
     });
 
     const report = await this.reports.save(
-      this.reports.create({ tenantId, contractId, generatedBy, entries, exportedFormat: null, exportedAt: null }),
-    );
-
-    this.eventEmitter.emit(
-      EVENTS.COMPLIANCE_REPORT_GENERATED,
-      {
-        reportId: report.id,
+      this.reports.create({
         tenantId,
         contractId,
         generatedBy,
-      } satisfies EventPayloadMap[typeof EVENTS.COMPLIANCE_REPORT_GENERATED],
+        entries,
+        exportedFormat: null,
+        exportedAt: null,
+      }),
     );
+
+    this.eventEmitter.emit(EVENTS.COMPLIANCE_REPORT_GENERATED, {
+      reportId: report.id,
+      tenantId,
+      contractId,
+      generatedBy,
+    } satisfies EventPayloadMap[typeof EVENTS.COMPLIANCE_REPORT_GENERATED]);
 
     return report;
   }
@@ -55,7 +74,11 @@ export class ComplianceReportingService {
   // misrepresent what an auditor receives, and no PDF library is installed
   // yet — real audit-ready rendering (headers, pagination, signatures) is a
   // follow-up, not something to fake here.
-  async exportReport(tenantId: string, reportId: string, format: ComplianceReportFormat): Promise<ComplianceReportExport> {
+  async exportReport(
+    tenantId: string,
+    reportId: string,
+    format: ComplianceReportFormat,
+  ): Promise<ComplianceReportExport> {
     const report = await this.getReport(tenantId, reportId);
 
     if (format === 'pdf') {
@@ -68,10 +91,11 @@ export class ComplianceReportingService {
     report.exportedAt = new Date();
     const saved = await this.reports.save(report);
 
-    this.eventEmitter.emit(
-      EVENTS.COMPLIANCE_REPORT_EXPORTED,
-      { reportId: saved.id, tenantId, format } satisfies EventPayloadMap[typeof EVENTS.COMPLIANCE_REPORT_EXPORTED],
-    );
+    this.eventEmitter.emit(EVENTS.COMPLIANCE_REPORT_EXPORTED, {
+      reportId: saved.id,
+      tenantId,
+      format,
+    } satisfies EventPayloadMap[typeof EVENTS.COMPLIANCE_REPORT_EXPORTED]);
 
     return { report: saved, content };
   }

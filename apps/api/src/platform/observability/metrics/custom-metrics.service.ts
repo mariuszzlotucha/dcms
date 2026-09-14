@@ -6,7 +6,11 @@ export class CustomMetricsService {
   private readonly meter = metrics.getMeter('dcms');
   private readonly counters = new Map<string, Counter>();
 
-  incrementCounter(name: string, value = 1, attributes?: Record<string, string | number | boolean>): void {
+  incrementCounter(
+    name: string,
+    value = 1,
+    attributes?: Record<string, string | number | boolean>,
+  ): void {
     this.getOrCreateCounter(name).add(value, attributes);
   }
 

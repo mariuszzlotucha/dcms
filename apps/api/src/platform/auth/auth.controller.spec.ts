@@ -26,7 +26,10 @@ describe('AuthController', () => {
   it('delegates login to AuthService.login with email, password, and the caller IP', async () => {
     authService.login.mockResolvedValue({ accessToken: 't' });
 
-    const result = await controller.login({ email: 'a@example.com', password: 'Password1' }, '203.0.113.5');
+    const result = await controller.login(
+      { email: 'a@example.com', password: 'Password1' },
+      '203.0.113.5',
+    );
 
     expect(authService.login).toHaveBeenCalledWith('a@example.com', 'Password1', '203.0.113.5');
     expect(result).toEqual({ accessToken: 't' });
@@ -38,7 +41,11 @@ describe('AuthController', () => {
 
     await controller.googleCallback(req, '203.0.113.5');
 
-    expect(authService.oauthLogin).toHaveBeenCalledWith({ email: 'g@example.com' }, 'google', '203.0.113.5');
+    expect(authService.oauthLogin).toHaveBeenCalledWith(
+      { email: 'g@example.com' },
+      'google',
+      '203.0.113.5',
+    );
   });
 
   it('delegates the LinkedIn callback to AuthService.oauthLogin with req.user and the "linkedin" method', async () => {
@@ -47,7 +54,11 @@ describe('AuthController', () => {
 
     await controller.linkedinCallback(req, '203.0.113.5');
 
-    expect(authService.oauthLogin).toHaveBeenCalledWith({ email: 'l@example.com' }, 'linkedin', '203.0.113.5');
+    expect(authService.oauthLogin).toHaveBeenCalledWith(
+      { email: 'l@example.com' },
+      'linkedin',
+      '203.0.113.5',
+    );
   });
 
   it('returns req.user unchanged from /me', () => {

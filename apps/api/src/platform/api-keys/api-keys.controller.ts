@@ -22,7 +22,11 @@ export class ApiKeysController {
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
   async createKey(@Body() body: CreateApiKeyBody) {
-    return this.apiKeysService.createKey(await this.tenantContext.getTenantId(), body.label, body.scopes);
+    return this.apiKeysService.createKey(
+      await this.tenantContext.getTenantId(),
+      body.label,
+      body.scopes,
+    );
   }
 
   @Get()

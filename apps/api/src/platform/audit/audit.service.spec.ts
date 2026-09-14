@@ -4,7 +4,13 @@ import { AuditEntry } from './entities/audit-entry.entity';
 describe('AuditService', () => {
   let auditEntries: { save: jest.Mock; create: jest.Mock; createQueryBuilder: jest.Mock };
   let service: AuditService;
-  let qb: { andWhere: jest.Mock; orderBy: jest.Mock; skip: jest.Mock; take: jest.Mock; getManyAndCount: jest.Mock };
+  let qb: {
+    andWhere: jest.Mock;
+    orderBy: jest.Mock;
+    skip: jest.Mock;
+    take: jest.Mock;
+    getManyAndCount: jest.Mock;
+  };
 
   beforeEach(() => {
     qb = {
@@ -27,7 +33,13 @@ describe('AuditService', () => {
       await service.record('contract.created', 'u1', 't1', { id: 'c1' });
 
       expect(auditEntries.create).toHaveBeenCalledWith(
-        expect.objectContaining({ eventName: 'contract.created', actorId: 'u1', tenantId: 't1', payload: { id: 'c1' }, timestamp: expect.any(Date) }),
+        expect.objectContaining({
+          eventName: 'contract.created',
+          actorId: 'u1',
+          tenantId: 't1',
+          payload: { id: 'c1' },
+          timestamp: expect.any(Date),
+        }),
       );
     });
   });
@@ -49,7 +61,9 @@ describe('AuditService', () => {
       await service.query({ tenantId: 't1', eventName: 'contract.created', from, to });
 
       expect(qb.andWhere).toHaveBeenCalledWith('entry.tenantId = :tenantId', { tenantId: 't1' });
-      expect(qb.andWhere).toHaveBeenCalledWith('entry.eventName = :eventName', { eventName: 'contract.created' });
+      expect(qb.andWhere).toHaveBeenCalledWith('entry.eventName = :eventName', {
+        eventName: 'contract.created',
+      });
       expect(qb.andWhere).toHaveBeenCalledWith('entry.timestamp >= :from', { from });
       expect(qb.andWhere).toHaveBeenCalledWith('entry.timestamp <= :to', { to });
     });

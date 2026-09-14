@@ -5,7 +5,12 @@ import { AnalyticsReport } from './entities/analytics-report.entity';
 
 describe('AnalyticsInsightsService', () => {
   let tenantMetrics: { findOne: jest.Mock; find: jest.Mock; manager: { query: jest.Mock } };
-  let negotiationTimings: { findOne: jest.Mock; create: jest.Mock; save: jest.Mock; remove: jest.Mock };
+  let negotiationTimings: {
+    findOne: jest.Mock;
+    create: jest.Mock;
+    save: jest.Mock;
+    remove: jest.Mock;
+  };
   let analyticsReports: { find: jest.Mock; create: jest.Mock; save: jest.Mock };
   let featureFlagsService: { isEnabled: jest.Mock };
   let eventEmitter: { emit: jest.Mock };
@@ -19,8 +24,9 @@ describe('AnalyticsInsightsService', () => {
     metricStore = new Map();
 
     tenantMetrics = {
-      findOne: jest.fn(async ({ where }: { where: { tenantId: string; metric: string } }) =>
-        metricStore.get(`${where.tenantId}::${where.metric}`) ?? null,
+      findOne: jest.fn(
+        async ({ where }: { where: { tenantId: string; metric: string } }) =>
+          metricStore.get(`${where.tenantId}::${where.metric}`) ?? null,
       ),
       find: jest.fn(async ({ where }: { where: { tenantId: string } }) =>
         [...metricStore.values()].filter((row) => row.tenantId === where.tenantId),
@@ -77,11 +83,19 @@ describe('AnalyticsInsightsService', () => {
 
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'analytics.metricUpdated',
-        expect.objectContaining({ tenantId: 't1', metric: 'contracts.status.draft.count', value: 0 }),
+        expect.objectContaining({
+          tenantId: 't1',
+          metric: 'contracts.status.draft.count',
+          value: 0,
+        }),
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'analytics.metricUpdated',
-        expect.objectContaining({ tenantId: 't1', metric: 'contracts.status.in_review.count', value: 1 }),
+        expect.objectContaining({
+          tenantId: 't1',
+          metric: 'contracts.status.in_review.count',
+          value: 1,
+        }),
       );
     });
 
@@ -90,19 +104,30 @@ describe('AnalyticsInsightsService', () => {
 
       await service.recordContractStatusChanged('t1', 'c1', 'in_review', 'negotiation');
 
-      expect(negotiationTimings.save).toHaveBeenCalledWith(expect.objectContaining({ tenantId: 't1', contractId: 'c1' }));
+      expect(negotiationTimings.save).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantId: 't1', contractId: 'c1' }),
+      );
     });
 
     it('closes the negotiation timing and updates the running average when leaving negotiation', async () => {
       const enteredAt = new Date(Date.now() - 2 * 60 * 60 * 1000); // 2 hours ago
-      negotiationTimings.findOne.mockResolvedValue({ id: 'timing-1', tenantId: 't1', contractId: 'c1', enteredNegotiationAt: enteredAt });
+      negotiationTimings.findOne.mockResolvedValue({
+        id: 'timing-1',
+        tenantId: 't1',
+        contractId: 'c1',
+        enteredNegotiationAt: enteredAt,
+      });
 
       await service.recordContractStatusChanged('t1', 'c1', 'negotiation', 'approved');
 
       expect(negotiationTimings.remove).toHaveBeenCalled();
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'analytics.metricUpdated',
-        expect.objectContaining({ tenantId: 't1', metric: 'negotiation.completed.count', value: 1 }),
+        expect.objectContaining({
+          tenantId: 't1',
+          metric: 'negotiation.completed.count',
+          value: 1,
+        }),
       );
 
       const avgCall = eventEmitter.emit.mock.calls.find(
@@ -160,7 +185,10 @@ describe('AnalyticsInsightsService', () => {
 
       await service.listReports('t1');
 
-      expect(analyticsReports.find).toHaveBeenCalledWith({ where: { tenantId: 't1' }, order: { generatedAt: 'DESC' } });
+      expect(analyticsReports.find).toHaveBeenCalledWith({
+        where: { tenantId: 't1' },
+        order: { generatedAt: 'DESC' },
+      });
     });
   });
 
@@ -172,7 +200,9 @@ describe('AnalyticsInsightsService', () => {
       const dashboard = await service.getDashboard('t1');
 
       expect(dashboard.some((row) => row.metric === 'esignature.completed.count')).toBe(true);
-      expect(dashboard.some((row) => row.metric === 'billing.activeContractsAtPlanChange')).toBe(false);
+      expect(dashboard.some((row) => row.metric === 'billing.activeContractsAtPlanChange')).toBe(
+        false,
+      );
     });
   });
 
@@ -188,7 +218,9 @@ describe('AnalyticsInsightsService', () => {
       expect(analyticsReports.create).toHaveBeenCalledWith(
         expect.objectContaining({
           tier: 'basic',
-          metrics: expect.not.objectContaining({ 'billing.activeContractsAtPlanChange': expect.anything() }),
+          metrics: expect.not.objectContaining({
+            'billing.activeContractsAtPlanChange': expect.anything(),
+          }),
         }),
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(

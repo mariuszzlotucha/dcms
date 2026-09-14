@@ -9,8 +9,7 @@ describe('TenantsController', () => {
   let rbacService: { isMember: jest.Mock };
   let controller: TenantsController;
 
-  const requestAs = (userId: string): Request =>
-    ({ user: { userId } }) as unknown as Request;
+  const requestAs = (userId: string): Request => ({ user: { userId } }) as unknown as Request;
 
   beforeEach(() => {
     tenantsService = { getTenant: jest.fn(), createTenant: jest.fn() };
@@ -35,9 +34,9 @@ describe('TenantsController', () => {
   it('throws NotFound (not Forbidden) when the caller is not a member, so tenant existence is not leaked', async () => {
     rbacService.isMember.mockResolvedValue(false);
 
-    await expect(controller.getTenant('victim-tenant', requestAs('attacker'))).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(
+      controller.getTenant('victim-tenant', requestAs('attacker')),
+    ).rejects.toBeInstanceOf(NotFoundException);
     expect(tenantsService.getTenant).not.toHaveBeenCalled();
   });
 });

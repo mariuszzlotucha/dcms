@@ -3,7 +3,12 @@ import { ComplianceReportingService } from './compliance-reporting.service';
 import { TenantContextService } from '@platform/tenants/context/tenant-context.service';
 
 describe('ComplianceReportingController', () => {
-  let service: { generateReport: jest.Mock; listReports: jest.Mock; getReport: jest.Mock; exportReport: jest.Mock };
+  let service: {
+    generateReport: jest.Mock;
+    listReports: jest.Mock;
+    getReport: jest.Mock;
+    exportReport: jest.Mock;
+  };
   let tenantContext: { getTenantId: jest.Mock };
   let controller: ComplianceReportingController;
 
