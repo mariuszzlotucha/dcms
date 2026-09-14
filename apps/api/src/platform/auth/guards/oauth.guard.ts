@@ -28,7 +28,7 @@ export function OauthGuard(provider: OauthProviderName): Type<CanActivate> {
       super();
     }
 
-    canActivate(context: ExecutionContext) {
+    override canActivate(context: ExecutionContext) {
       if (!this.config.oauth?.[provider]) {
         throw new NotFoundException(`${provider} login is not enabled`);
       }

@@ -30,6 +30,7 @@ export default [
             ]
         },
         rules: {
+            '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
             'boundaries/element-types': ['error', {
                 default: 'disallow',
                 rules: [

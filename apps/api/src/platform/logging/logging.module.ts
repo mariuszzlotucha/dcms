@@ -62,6 +62,8 @@ export class LoggingModule {
         LoggerModule.forRootAsync({
           imports: options.imports,
           inject: options.inject ?? [],
+          // nestjs-pino's own useFactory type requires any[] here.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           useFactory: async (...args: any[]) => {
             const config = await options.useFactory(...args);
             return { pinoHttp: buildPinoHttpOptions(config) };

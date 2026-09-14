@@ -32,7 +32,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from '@platform/scheduler';
 import { AuditModule } from '@platform/audit';
 import { PiiRedactionModule } from '@platform/pii-redaction';
-import { DataRetentionModule, USER_ACCOUNT_QUERIES } from '@platform/data-retention';
+import { DataRetentionModule } from '@platform/data-retention';
 import { PasswordPolicyModule } from '@platform/password-policy';
 
 @Module({
@@ -150,12 +150,15 @@ import { PasswordPolicyModule } from '@platform/password-policy';
     IdempotencyModule.forRoot({ recordTtlHours: 24 }),
     FileStorageModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<AppConfig, true>) => ({
-        bucket: configService.get('S3_BUCKET', { infer: true }),
-        region: configService.get('S3_REGION', { infer: true }),
-        endpoint: configService.get('S3_ENDPOINT', { infer: true }),
-        maxSizeBytes: 25 * 1024 * 1024,
-      }),
+      useFactory: (...args: unknown[]) => {
+        const configService = args[0] as ConfigService<AppConfig, true>;
+        return {
+          bucket: configService.get('S3_BUCKET', { infer: true }),
+          region: configService.get('S3_REGION', { infer: true }),
+          endpoint: configService.get('S3_ENDPOINT', { infer: true }),
+          maxSizeBytes: 25 * 1024 * 1024,
+        };
+      },
     }),
     NotificationsModule.forRoot({
       fromAddress: 'DCMS <noreply@dcms.app>',
@@ -170,14 +173,17 @@ import { PasswordPolicyModule } from '@platform/password-policy';
     WebhooksInboundModule,
     BillingModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<AppConfig, true>) => ({
-        plans: {
-          starter: { stripePriceId: configService.get('STRIPE_PRICE_STARTER', { infer: true }), name: 'Starter' },
-          pro: { stripePriceId: configService.get('STRIPE_PRICE_PRO', { infer: true }), name: 'Pro' },
-        },
-        successUrl: configService.get('BILLING_SUCCESS_URL', { infer: true }),
-        cancelUrl: configService.get('BILLING_CANCEL_URL', { infer: true }),
-      }),
+      useFactory: (...args: unknown[]) => {
+        const configService = args[0] as ConfigService<AppConfig, true>;
+        return {
+          plans: {
+            starter: { stripePriceId: configService.get('STRIPE_PRICE_STARTER', { infer: true }), name: 'Starter' },
+            pro: { stripePriceId: configService.get('STRIPE_PRICE_PRO', { infer: true }), name: 'Pro' },
+          },
+          successUrl: configService.get('BILLING_SUCCESS_URL', { infer: true }),
+          cancelUrl: configService.get('BILLING_CANCEL_URL', { infer: true }),
+        };
+      },
     }),
 
     UsageMeteringModule.forRoot({
@@ -215,16 +221,10 @@ import { PasswordPolicyModule } from '@platform/password-policy';
     PiiRedactionModule.forRoot({
       extraPatterns: [],
     }),
-    DataRetentionModule.forRoot(
-      {
-        inactiveAccountDeletionDays: 365,
-        revokedConsentPurgeDays: 90,
-      },
-      {
-        provide: USER_ACCOUNT_QUERIES,
-        useClass: AuthUserAccountQueries,
-      },
-    ),
+    DataRetentionModule.forRoot({
+      inactiveAccountDeletionDays: 365,
+      revokedConsentPurgeDays: 90,
+    }),
     PasswordPolicyModule.forRoot({
       minLength: 10,
       requireNumber: true,

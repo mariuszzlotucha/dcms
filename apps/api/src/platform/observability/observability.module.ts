@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
@@ -15,7 +15,7 @@ export function initializeObservability(config: ObservabilityModuleConfig): void
   }
 
   const sdk = new NodeSDK({
-    resource: new Resource({ [SemanticResourceAttributes.SERVICE_NAME]: config.serviceName }),
+    resource: resourceFromAttributes({ [SemanticResourceAttributes.SERVICE_NAME]: config.serviceName }),
     traceExporter: new OTLPTraceExporter({ url: `${config.otlpEndpoint}/v1/traces` }),
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({ url: `${config.otlpEndpoint}/v1/metrics` }),

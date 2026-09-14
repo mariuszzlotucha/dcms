@@ -21,10 +21,7 @@ export interface UserAccountQueries {
 // the fact the user was active when it was created.
 @Injectable()
 class AuthUserAccountQueries implements UserAccountQueries {
-  constructor(
-    @InjectRepository(User) private readonly users: Repository<User>,
-    @InjectRepository(Session) private readonly sessions: Repository<Session>,
-  ) {}
+  constructor(@InjectRepository(User) private readonly users: Repository<User>) {}
 
   async findUserIdsInactiveSince(cutoff: Date): Promise<string[]> {
     const rows = await this.users
