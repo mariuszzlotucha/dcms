@@ -19,6 +19,31 @@ describe('DocuSignEsignatureProvider', () => {
     global.fetch = originalFetch;
   });
 
+  it('exposes its provider name', () => {
+    expect(provider.name).toBe('docusign');
+  });
+
+  it('uses the whole document name as the extension when it has no dot', async () => {
+    // String.prototype.split('.').pop() never returns undefined for a
+    // string input, so the `?? 'pdf'` fallback in the source never actually
+    // fires — this documents the real (not the intended) behavior.
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ envelopeId: 'ds-envelope-2' }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await provider.sendEnvelope({
+      signerEmail: 'signer@example.com',
+      signerName: 'Jane Signer',
+      documentName: 'contract-without-extension',
+      fileBuffer: Buffer.from('pdf-bytes'),
+    });
+
+    const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+    expect(body.documents[0].fileExtension).toBe('contract-without-extension');
+  });
+
   it('posts a base64-encoded envelope to the accounts envelopes endpoint with a bearer token', async () => {
     const fetchMock = jest.fn().mockResolvedValue({
       ok: true,
