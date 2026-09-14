@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -143,22 +144,41 @@ export class AnalyticsInsightsService {
     return row?.value ?? 0;
   }
 
+  // Atomic upsert (mirrors usage-metering.service.ts's counter pattern) —
+  // concurrent events for the same tenant+metric (e.g. two status changes
+  // landing close together) must not race a separate read against a
+  // separate write, or one adjustment silently overwrites the other.
+  // GREATEST clamps at 0 inside the same statement, same as the old
+  // Math.max(0, ...) did, just race-free.
   private async adjustMetric(tenantId: string, metric: string, delta: number): Promise<void> {
-    const current = await this.getMetricValue(tenantId, metric);
-    await this.setMetric(tenantId, metric, Math.max(0, current + delta));
+    const result = await this.tenantMetrics.manager.query(
+      `INSERT INTO tenant_metrics (id, "tenantId", metric, value, "updatedAt")
+       VALUES ($1, $2, $3, GREATEST($4, 0), now())
+       ON CONFLICT ("tenantId", metric)
+       DO UPDATE SET value = GREATEST(tenant_metrics.value + $4, 0), "updatedAt" = now()
+       RETURNING value`,
+      [randomUUID(), tenantId, metric, delta],
+    );
+
+    this.emitMetricUpdated(tenantId, metric, Number(result[0].value));
   }
 
+  // Atomic upsert — a plain "set to this absolute value" (used for
+  // point-in-time snapshots and computed aggregates like the negotiation
+  // running average), as opposed to adjustMetric's relative delta.
   private async setMetric(tenantId: string, metric: string, value: number): Promise<void> {
-    let row = await this.tenantMetrics.findOne({ where: { tenantId, metric } });
+    await this.tenantMetrics.manager.query(
+      `INSERT INTO tenant_metrics (id, "tenantId", metric, value, "updatedAt")
+       VALUES ($1, $2, $3, $4, now())
+       ON CONFLICT ("tenantId", metric)
+       DO UPDATE SET value = $4, "updatedAt" = now()`,
+      [randomUUID(), tenantId, metric, value],
+    );
 
-    if (row) {
-      row.value = value;
-    } else {
-      row = this.tenantMetrics.create({ tenantId, metric, value });
-    }
+    this.emitMetricUpdated(tenantId, metric, value);
+  }
 
-    await this.tenantMetrics.save(row);
-
+  private emitMetricUpdated(tenantId: string, metric: string, value: number): void {
     this.eventEmitter.emit(
       EVENTS.ANALYTICS_METRIC_UPDATED,
       { tenantId, metric, value } satisfies EventPayloadMap[typeof EVENTS.ANALYTICS_METRIC_UPDATED],

@@ -4,7 +4,7 @@ import { NegotiationTiming } from './entities/negotiation-timing.entity';
 import { AnalyticsReport } from './entities/analytics-report.entity';
 
 describe('AnalyticsInsightsService', () => {
-  let tenantMetrics: { findOne: jest.Mock; find: jest.Mock; create: jest.Mock; save: jest.Mock };
+  let tenantMetrics: { findOne: jest.Mock; find: jest.Mock; manager: { query: jest.Mock } };
   let negotiationTimings: { findOne: jest.Mock; create: jest.Mock; save: jest.Mock; remove: jest.Mock };
   let analyticsReports: { find: jest.Mock; create: jest.Mock; save: jest.Mock };
   let featureFlagsService: { isEnabled: jest.Mock };
@@ -25,11 +25,28 @@ describe('AnalyticsInsightsService', () => {
       find: jest.fn(async ({ where }: { where: { tenantId: string } }) =>
         [...metricStore.values()].filter((row) => row.tenantId === where.tenantId),
       ),
-      create: jest.fn((data) => ({ id: `metric-${metricStore.size + 1}`, ...data }) as TenantMetric),
-      save: jest.fn(async (row: TenantMetric) => {
-        metricStore.set(`${row.tenantId}::${row.metric}`, row);
-        return row;
-      }),
+      // Mimics the atomic upsert in adjustMetric (GREATEST(...+ delta, 0),
+      // RETURNING value) and setMetric (plain value = $4, no RETURNING)
+      // against the same in-memory table `findOne`/`find` read from.
+      manager: {
+        query: jest.fn(async (sql: string, params: [string, string, string, number]) => {
+          const [id, tenantId, metric, num] = params;
+          const key = `${tenantId}::${metric}`;
+          const existing = metricStore.get(key);
+          const isAdjust = sql.includes('GREATEST');
+          const value = isAdjust ? Math.max((existing?.value ?? 0) + num, 0) : num;
+
+          metricStore.set(key, {
+            id: existing?.id ?? id,
+            tenantId,
+            metric,
+            value,
+            updatedAt: new Date(),
+          } as TenantMetric);
+
+          return isAdjust ? [{ value }] : [];
+        }),
+      },
     };
     negotiationTimings = {
       findOne: jest.fn(),
