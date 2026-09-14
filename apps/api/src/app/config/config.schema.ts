@@ -60,6 +60,16 @@ export const configSchema = z.object({
 
   // Added for pii-redaction's HMAC tokenization key.
   PII_REDACTION_KEY: z.string().optional(),
+
+  // Added for esignature's DocuSign integration. DOCUSIGN_ACCESS_TOKEN is a
+  // pre-provisioned, long-lived token (see DocuSignEsignatureProvider for
+  // why the OAuth/JWT flow itself isn't built here); DOCUSIGN_CONNECT_SECRET
+  // verifies inbound Connect webhook callbacks (see
+  // webhooks-inbound/providers/docusign.provider.ts).
+  DOCUSIGN_ACCESS_TOKEN: z.string().optional(),
+  DOCUSIGN_CONNECT_SECRET: z.string().optional(),
+  DOCUSIGN_ACCOUNT_ID: z.string().optional(),
+  DOCUSIGN_BASE_URI: z.string().url().default('https://demo.docusign.net'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

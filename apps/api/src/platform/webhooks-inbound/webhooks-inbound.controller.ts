@@ -6,9 +6,11 @@ import { SecretsService } from '@platform/secrets/secrets.service';
 import { PLATFORM_EVENTS, PlatformEventPayloadMap } from '../events';
 import { WebhookProvider } from './webhooks-inbound.module';
 import { stripeProvider } from './providers/stripe.provider';
+import { docusignProvider } from './providers/docusign.provider';
 
 const WEBHOOK_PROVIDERS: Record<string, WebhookProvider> = {
   stripe: stripeProvider,
+  docusign: docusignProvider,
 };
 
 @Controller('webhooks-inbound')

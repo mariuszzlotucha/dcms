@@ -35,6 +35,7 @@ import { PiiRedactionModule } from '@platform/pii-redaction';
 import { DataRetentionModule } from '@platform/data-retention';
 import { PasswordPolicyModule } from '@platform/password-policy';
 import { ContractsModule } from '@domain/contracts';
+import { EsignatureModule } from '@domain/esignature';
 import { NegotiationApprovalModule } from '@domain/negotiation-approval';
 import { TemplatesModule } from '@domain/templates';
 
@@ -94,6 +95,8 @@ const CSRF_ENABLED = false;
         });
         const stripeWebhookSecret = configService.get('STRIPE_WEBHOOK_SECRET', { infer: true });
         const piiRedactionKey = configService.get('PII_REDACTION_KEY', { infer: true });  // ← add
+        const docusignAccessToken = configService.get('DOCUSIGN_ACCESS_TOKEN', { infer: true });
+        const docusignConnectSecret = configService.get('DOCUSIGN_CONNECT_SECRET', { infer: true });
 
 
         return {
@@ -113,6 +116,8 @@ const CSRF_ENABLED = false;
             ...(resendKey ? { resend: resendKey } : {}),
             ...(stripeWebhookSecret ? { stripeWebhookSecret } : {}),
             ...(piiRedactionKey ? { piiRedactionKey } : {}),
+            ...(docusignAccessToken ? { docusignAccessToken } : {}),
+            ...(docusignConnectSecret ? { docusignConnectSecret } : {}),
           },
         };
       },
@@ -198,8 +203,8 @@ const CSRF_ENABLED = false;
 
     UsageMeteringModule.forRoot({
       limitsByPlan: {
-        starter: { 'contracts.create': 10 },
-        pro: { 'contracts.create': 200 },
+        starter: { 'contracts.create': 10, 'esignature.request': 5 },
+        pro: { 'contracts.create': 200, 'esignature.request': 100 },
       },
     }),
     FeatureFlagsModule.forRoot({
@@ -245,6 +250,16 @@ const CSRF_ENABLED = false;
     TemplatesModule,
     ContractsModule,
     NegotiationApprovalModule,
+    EsignatureModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (...args: unknown[]) => {
+        const configService = args[0] as ConfigService<AppConfig, true>;
+        return {
+          docusignBaseUri: configService.get('DOCUSIGN_BASE_URI', { infer: true }),
+          docusignAccountId: configService.get('DOCUSIGN_ACCOUNT_ID', { infer: true }) ?? '',
+        };
+      },
+    }),
   ],
 })
 export class AppModule { }
