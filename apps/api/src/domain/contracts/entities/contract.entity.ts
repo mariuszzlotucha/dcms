@@ -12,7 +12,7 @@ export class Contract {
 
   // Opaque reference to templates.Template#id — no relation, see
   // shared/contracts/contract.schema.ts for why.
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   templateId: string | null;
 
   @Column()
