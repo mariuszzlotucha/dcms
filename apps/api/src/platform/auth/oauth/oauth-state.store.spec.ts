@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { OauthStateStore } from './oauth-state.store';
 import { SecretsService } from '@platform/secrets/secrets.service';
 
@@ -8,10 +8,11 @@ describe('OauthStateStore', () => {
   let store: OauthStateStore;
   let res: { cookie: jest.Mock; clearCookie: jest.Mock };
 
-  const buildRequest = (cookies: Record<string, string> = {}) => ({
-    cookies,
-    res: res as unknown as Response,
-  });
+  const buildRequest = (cookies: Record<string, string> = {}): Request =>
+    ({
+      cookies,
+      res: res as unknown as Response,
+    }) as unknown as Request;
 
   beforeEach(() => {
     secrets = { getEncryptionMasterKey: jest.fn().mockReturnValue(masterKey) };
@@ -21,7 +22,7 @@ describe('OauthStateStore', () => {
 
   const storeState = (): { nonce: string; cookieValue: string } => {
     let nonce = '';
-    store.store(buildRequest() as any, (_err, state) => {
+    store.store(buildRequest(), (_err, state) => {
       nonce = state as string;
     });
     const cookieValue = res.cookie.mock.calls[0][1] as string;
@@ -43,7 +44,7 @@ describe('OauthStateStore', () => {
     const { nonce, cookieValue } = storeState();
     const req = buildRequest({ oauth_state: cookieValue });
 
-    store.verify(req as any, nonce, (err, ok) => {
+    store.verify(req, nonce, (err, ok) => {
       expect(err).toBeNull();
       expect(ok).toBe(true);
       expect(res.clearCookie).toHaveBeenCalledWith('oauth_state', { path: '/api/auth' });
@@ -54,7 +55,7 @@ describe('OauthStateStore', () => {
   it('rejects when there is no cookie at all (the CSRF case: attacker-supplied state, no matching cookie)', (done) => {
     const req = buildRequest({});
 
-    store.verify(req as any, 'attacker-supplied-nonce', (err, ok, info) => {
+    store.verify(req, 'attacker-supplied-nonce', (err, ok, info) => {
       expect(err).toBeNull();
       expect(ok).toBe(false);
       expect(info?.message).toMatch(/unable to verify/i);
@@ -66,7 +67,7 @@ describe('OauthStateStore', () => {
     const { cookieValue } = storeState();
     const req = buildRequest({ oauth_state: cookieValue });
 
-    store.verify(req as any, 'a-different-nonce', (err, ok, info) => {
+    store.verify(req, 'a-different-nonce', (err, ok, info) => {
       expect(err).toBeNull();
       expect(ok).toBe(false);
       expect(info?.message).toMatch(/invalid/i);
@@ -80,7 +81,7 @@ describe('OauthStateStore', () => {
     const tampered = `${expiresAt}.tampered-signature`;
     const req = buildRequest({ oauth_state: tampered });
 
-    store.verify(req as any, nonce, (err, ok) => {
+    store.verify(req, nonce, (err, ok) => {
       expect(err).toBeNull();
       expect(ok).toBe(false);
       done();
@@ -93,7 +94,7 @@ describe('OauthStateStore', () => {
     const expired = `${Date.now() - 1000}.${signature}`;
     const req = buildRequest({ oauth_state: expired });
 
-    store.verify(req as any, nonce, (err, ok, info) => {
+    store.verify(req, nonce, (err, ok, info) => {
       expect(err).toBeNull();
       expect(ok).toBe(false);
       expect(info?.message).toMatch(/expired/i);

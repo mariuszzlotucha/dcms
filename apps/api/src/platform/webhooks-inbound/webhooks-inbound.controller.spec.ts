@@ -1,4 +1,5 @@
 import { BadRequestException, NotFoundException, RawBodyRequest } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Request } from 'express';
 import Stripe from 'stripe';
 import { WebhooksInboundController } from './webhooks-inbound.controller';
@@ -24,7 +25,7 @@ describe('WebhooksInboundController', () => {
     eventEmitter = { emit: jest.fn() };
     controller = new WebhooksInboundController(
       secretsService as unknown as SecretsService,
-      eventEmitter as any,
+      eventEmitter as unknown as EventEmitter2,
     );
   });
 
