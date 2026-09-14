@@ -35,6 +35,7 @@ import { PiiRedactionModule } from '@platform/pii-redaction';
 import { DataRetentionModule } from '@platform/data-retention';
 import { PasswordPolicyModule } from '@platform/password-policy';
 import { ContractsModule } from '@domain/contracts';
+import { NegotiationApprovalModule } from '@domain/negotiation-approval';
 import { TemplatesModule } from '@domain/templates';
 
 // Single source of truth for both SecurityModule (which enforces it) and
@@ -243,6 +244,7 @@ const CSRF_ENABLED = false;
     }),
     TemplatesModule,
     ContractsModule,
+    NegotiationApprovalModule,
   ],
 })
 export class AppModule { }
