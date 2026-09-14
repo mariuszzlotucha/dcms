@@ -38,6 +38,7 @@ import { AccessControlModule } from '@domain/access-control';
 import { AnalyticsInsightsModule } from '@domain/analytics-insights';
 import { ContractsModule } from '@domain/contracts';
 import { EsignatureModule } from '@domain/esignature';
+import { IntegrationsModule } from '@domain/integrations';
 import { NegotiationApprovalModule } from '@domain/negotiation-approval';
 import { NotificationsRemindersModule } from '@domain/notifications-reminders';
 import { TemplatesModule } from '@domain/templates';
@@ -266,6 +267,7 @@ const CSRF_ENABLED = false;
     AccessControlModule,
     AnalyticsInsightsModule,
     NotificationsRemindersModule,
+    IntegrationsModule,
   ],
 })
 export class AppModule { }
