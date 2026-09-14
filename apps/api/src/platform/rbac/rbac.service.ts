@@ -40,6 +40,16 @@ export class RbacService {
     return assignment?.role ?? this.config.defaultRole;
   }
 
+  // The authoritative "does this user belong to this tenant at all" check.
+  // Deliberately not derived from getRole()/hasRole(): those fall back to
+  // config.defaultRole when no assignment row exists, which is meant for
+  // ranking a known member's role, not for deciding whether a user may
+  // access a tenant in the first place.
+  async isMember(userId: string, tenantId: string): Promise<boolean> {
+    const assignment = await this.roleAssignments.findOne({ where: { userId, tenantId } });
+    return assignment != null;
+  }
+
   async hasRole(userId: string, tenantId: string, requiredRole: RbacRole): Promise<boolean> {
     const role = await this.getRole(userId, tenantId);
     return RBAC_ROLE_HIERARCHY[role] >= RBAC_ROLE_HIERARCHY[requiredRole];

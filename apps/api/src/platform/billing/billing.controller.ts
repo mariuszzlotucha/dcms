@@ -25,19 +25,20 @@ export class BillingController {
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
   async createCheckoutSession(@Body() body: CreateCheckoutSessionBody): Promise<{ url: string }> {
-    const url = await this.billingService.createCheckoutSession(this.tenantContext.getTenantId(), body.planKey);
+    const tenantId = await this.tenantContext.getTenantId();
+    const url = await this.billingService.createCheckoutSession(tenantId, body.planKey);
     return { url };
   }
 
   @Get('subscription')
-  getSubscription() {
-    return this.billingService.getSubscription(this.tenantContext.getTenantId());
+  async getSubscription() {
+    return this.billingService.getSubscription(await this.tenantContext.getTenantId());
   }
 
   @Post('change-plan')
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
-  changePlan(@Body() body: ChangePlanBody) {
-    return this.billingService.changePlan(this.tenantContext.getTenantId(), body.planKey);
+  async changePlan(@Body() body: ChangePlanBody) {
+    return this.billingService.changePlan(await this.tenantContext.getTenantId(), body.planKey);
   }
 }

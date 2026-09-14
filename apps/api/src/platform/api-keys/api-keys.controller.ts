@@ -21,19 +21,19 @@ export class ApiKeysController {
   @Post()
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
-  createKey(@Body() body: CreateApiKeyBody) {
-    return this.apiKeysService.createKey(this.tenantContext.getTenantId(), body.label, body.scopes);
+  async createKey(@Body() body: CreateApiKeyBody) {
+    return this.apiKeysService.createKey(await this.tenantContext.getTenantId(), body.label, body.scopes);
   }
 
   @Get()
-  listKeys() {
-    return this.apiKeysService.listKeys(this.tenantContext.getTenantId());
+  async listKeys() {
+    return this.apiKeysService.listKeys(await this.tenantContext.getTenantId());
   }
 
   @Delete(':id')
   @Roles('owner', 'admin')
   @UseGuards(RolesGuard)
-  revokeKey(@Param('id') id: string) {
-    return this.apiKeysService.revokeKey(this.tenantContext.getTenantId(), id);
+  async revokeKey(@Param('id') id: string) {
+    return this.apiKeysService.revokeKey(await this.tenantContext.getTenantId(), id);
   }
 }

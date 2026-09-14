@@ -26,7 +26,7 @@ export class TenantThrottlerGuard extends ThrottlerGuard {
   }
 
   protected override async getTracker(req: Record<string, unknown>): Promise<string> {
-    const tenantId = this.tryGetTenantId();
+    const tenantId = await this.tryGetTenantId();
     if (tenantId) {
       return tenantId;
     }
@@ -49,7 +49,7 @@ export class TenantThrottlerGuard extends ThrottlerGuard {
     this.eventEmitter.emit(
       PLATFORM_EVENTS.RATE_LIMIT_EXCEEDED,
       {
-        tenantId: this.tryGetTenantId() ?? '',
+        tenantId: (await this.tryGetTenantId()) ?? '',
         key,
         limit: this.rateLimitConfig.limit,
       } satisfies PlatformEventPayloadMap[typeof PLATFORM_EVENTS.RATE_LIMIT_EXCEEDED],
@@ -58,9 +58,9 @@ export class TenantThrottlerGuard extends ThrottlerGuard {
     return super.throwThrottlingException(context, throttlerLimitDetail);
   }
 
-  private tryGetTenantId(): string | null {
+  private async tryGetTenantId(): Promise<string | null> {
     try {
-      return this.tenantContext.getTenantId();
+      return await this.tenantContext.getTenantId();
     } catch {
       return null;
     }

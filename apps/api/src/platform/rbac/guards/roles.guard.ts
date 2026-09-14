@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RbacRole } from '../rbac.config';
 import { RbacService } from '../rbac.service';
@@ -22,14 +22,28 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const userId = request.user?.userId;
 
-    if (!user?.userId || !user?.tenantId) {
+    if (!userId) {
       throw new UnauthorizedException();
     }
 
+    // Resolved independently of TenantContextService: that service is only
+    // invoked from inside handler bodies, which run after this guard, so it
+    // can't supply the tenant here. RbacService.isMember() stays the single
+    // authoritative membership check either way.
+    const tenantId = request.headers['x-tenant-id'];
+
+    if (!tenantId || Array.isArray(tenantId)) {
+      throw new UnauthorizedException('Missing tenant context');
+    }
+
+    if (!(await this.rbacService.isMember(userId, tenantId))) {
+      throw new ForbiddenException('Not a member of this tenant');
+    }
+
     const checks = await Promise.all(
-      requiredRoles.map((role) => this.rbacService.hasRole(user.userId, user.tenantId, role)),
+      requiredRoles.map((role) => this.rbacService.hasRole(userId, tenantId, role)),
     );
 
     return checks.some(Boolean);
