@@ -4,6 +4,10 @@ export class InitialSchema1789426482881 implements MigrationInterface {
     name = 'InitialSchema1789426482881'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        // Every table's PK uses uuid_generate_v4() (from @PrimaryGeneratedColumn('uuid')),
+        // which lives in this extension — not enabled by default on a fresh Postgres/Neon
+        // database. Must run before the first CREATE TABLE.
+        await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
         await queryRunner.query(`CREATE TABLE "webhook_deliveries" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "subscriptionId" character varying NOT NULL, "eventType" character varying NOT NULL, "payload" jsonb NOT NULL, "statusCode" integer, "attempt" integer NOT NULL, "deliveredAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_535dd409947fb6d8fc6dfc0112a" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "webhook_subscriptions" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "tenantId" character varying NOT NULL, "url" character varying NOT NULL, "secret" character varying NOT NULL, "eventTypes" text array NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "revokedAt" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_bf631ae77d39849d599817fb6f4" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "usage_counters" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "tenantId" character varying NOT NULL, "metric" character varying NOT NULL, "period" character varying NOT NULL, "count" integer NOT NULL DEFAULT '0', CONSTRAINT "PK_fb39db314fa8fc2b6653f2f4e31" PRIMARY KEY ("id"))`);

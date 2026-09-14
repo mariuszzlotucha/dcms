@@ -3,3 +3,6 @@ build
 coverage
 node_modules
 package-lock.json
+
+# TypeORM-generated; reformatting would fight every future migration:generate diff.
+apps/api/src/migrations/*.ts
