@@ -1,5 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PiiRedactionService } from '@platform/pii-redaction/pii-redaction.service';
 import { AuditService } from './audit.module';
 import { AUDIT_MODULE_CONFIG, AuditModuleConfig } from './audit.config';
 
@@ -8,6 +9,7 @@ export class AuditListener implements OnModuleInit {
   constructor(
     private readonly eventEmitter: EventEmitter2,
     private readonly auditService: AuditService,
+    private readonly piiRedactionService: PiiRedactionService,
     @Inject(AUDIT_MODULE_CONFIG)
     private readonly config: AuditModuleConfig,
   ) {}
@@ -26,7 +28,19 @@ export class AuditListener implements OnModuleInit {
     }
 
     const { actorId, tenantId } = this.extractActorAndTenant(payload);
-    await this.auditService.record(eventName, actorId, tenantId, payload);
+    await this.auditService.record(eventName, actorId, tenantId, this.redactPayload(payload));
+  }
+
+  // Payload shapes vary per event, so there's no fixed field list to pass to
+  // redactObject — round-tripping through redactText's regex patterns over
+  // the serialized form catches emails/phones/card numbers wherever they
+  // land, without the audit module needing to know every domain event's shape.
+  private redactPayload(payload: unknown): unknown {
+    if (typeof payload !== 'object' || payload === null) {
+      return payload;
+    }
+
+    return JSON.parse(this.piiRedactionService.redactText(JSON.stringify(payload)));
   }
 
   private extractActorAndTenant(payload: unknown): { actorId: string | null; tenantId: string | null } {

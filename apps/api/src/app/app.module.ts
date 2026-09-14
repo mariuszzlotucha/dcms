@@ -234,6 +234,7 @@ const CSRF_ENABLED = false;
     SchedulerModule.forRoot({
       idempotencyCleanupCron: '0 3 * * *',
       secretsRotationCron: '0 4 1 * *',
+      dataRetentionCleanupCron: '0 2 * * *',
     }),
     AuditModule.forRoot({
       excludedEvents: [],

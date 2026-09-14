@@ -1,5 +1,6 @@
 import { DynamicModule, InjectionToken, Module, OptionalFactoryDependency, Provider } from '@nestjs/common';
 import { SCHEDULER_MODULE_CONFIG, SchedulerModuleConfig } from './scheduler.config';
+import { DataRetentionCleanupJob } from './jobs/data-retention-cleanup.job';
 import { IdempotencyCleanupJob } from './jobs/idempotency-cleanup.job';
 import { SecretsRotationJob } from './jobs/secrets-rotation.job';
 
@@ -15,6 +16,7 @@ export class SchedulerModule {
       module: SchedulerModule,
       providers: [
         { provide: SCHEDULER_MODULE_CONFIG, useValue: config },
+        DataRetentionCleanupJob,
         IdempotencyCleanupJob,
         SecretsRotationJob,
       ],
@@ -30,7 +32,7 @@ export class SchedulerModule {
 
     return {
       module: SchedulerModule,
-      providers: [configProvider, IdempotencyCleanupJob, SecretsRotationJob],
+      providers: [configProvider, DataRetentionCleanupJob, IdempotencyCleanupJob, SecretsRotationJob],
     };
   }
 }

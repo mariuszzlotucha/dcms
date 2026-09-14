@@ -52,6 +52,7 @@ export class DataRetentionModule {
   static forRoot(config: DataRetentionModuleConfig, userAccountQueriesProvider?: Provider): DynamicModule {
     return {
       module: DataRetentionModule,
+      global: true,
       imports: [TypeOrmModule.forFeature([User, Session])],
       providers: [
         { provide: DATA_RETENTION_MODULE_CONFIG, useValue: config },
@@ -71,6 +72,7 @@ export class DataRetentionModule {
 
     return {
       module: DataRetentionModule,
+      global: true,
       imports: [TypeOrmModule.forFeature([User, Session])],
       providers: [
         configProvider,
