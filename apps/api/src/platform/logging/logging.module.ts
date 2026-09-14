@@ -9,7 +9,7 @@ import {
 // Always redacted regardless of config: credentials must never reach logs.
 // req.body.* entries are inert today (pino-http doesn't log bodies by
 // default) but guard the day someone enables body logging.
-const DEFAULT_REDACT_PATHS = [
+export const DEFAULT_REDACT_PATHS = [
   'req.headers.authorization',
   'req.headers.cookie',
   'req.body.password',
@@ -17,7 +17,9 @@ const DEFAULT_REDACT_PATHS = [
 ];
 
 // Builds the pino-http options shared by forRoot and forRootAsync.
-function buildPinoHttpOptions(
+// Exported (not just used internally) so its redaction/request-id logic can
+// be unit-tested directly instead of only through a full DynamicModule compile.
+export function buildPinoHttpOptions(
   config: LoggingModuleConfig,
 ): Params['pinoHttp'] {
   return {

@@ -43,6 +43,14 @@ describe('RolesGuard', () => {
     expect(rbacService.isMember).not.toHaveBeenCalled();
   });
 
+  it('throws Unauthorized when the tenant header is repeated (arrives as an array)', async () => {
+    reflector.getAllAndOverride.mockReturnValue(['admin']);
+    const context = buildContext({ headers: { 'x-tenant-id': ['t1', 't2'] }, user: { userId: 'u1' } });
+
+    await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(rbacService.isMember).not.toHaveBeenCalled();
+  });
+
   it('throws Forbidden when the user is not a member of the claimed tenant, even for the lowest role', async () => {
     reflector.getAllAndOverride.mockReturnValue(['member']);
     rbacService.isMember.mockResolvedValue(false);
