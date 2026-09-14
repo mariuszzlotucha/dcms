@@ -1,4 +1,5 @@
 import { PasswordResetTemplateData, buildPasswordResetTemplate } from './password-reset.template';
+import { ReminderTemplateData, buildReminderTemplate } from './reminder.template';
 import { SubscriptionUpdatedTemplateData, buildSubscriptionUpdatedTemplate } from './subscription-updated.template';
 import { WelcomeTemplateData, buildWelcomeTemplate } from './welcome.template';
 
@@ -6,6 +7,7 @@ export interface NotificationTemplateDataMap {
   welcome: WelcomeTemplateData;
   'password-reset': PasswordResetTemplateData;
   'subscription-updated': SubscriptionUpdatedTemplateData;
+  reminder: ReminderTemplateData;
 }
 
 export type NotificationTemplateName = keyof NotificationTemplateDataMap;
@@ -21,4 +23,5 @@ export const NOTIFICATION_TEMPLATES: {
   welcome: buildWelcomeTemplate,
   'password-reset': buildPasswordResetTemplate,
   'subscription-updated': buildSubscriptionUpdatedTemplate,
+  reminder: buildReminderTemplate,
 };

@@ -77,7 +77,11 @@ export interface DomainEventPayloadMap {
 
     [DOMAIN_EVENTS.REMINDER_SCHEDULED]: { tenantId: string; contractId: string; reminderType: string; scheduledFor: Date };
     [DOMAIN_EVENTS.REMINDER_SENT]: { tenantId: string; contractId: string; reminderType: string };
-    [DOMAIN_EVENTS.NOTIFICATION_DISPATCHED]: { tenantId: string; userId: string; channel: 'email' | 'in-app'; template: string };
+    // `recipient` is a userId (in-app, targeted), an email address (email
+    // channel, e.g. an external signer with no system account), or the
+    // tenantId itself (in-app, tenant-wide — no specific user resolvable
+    // from the triggering event, e.g. a revision request with no assignee).
+    [DOMAIN_EVENTS.NOTIFICATION_DISPATCHED]: { tenantId: string; recipient: string; channel: 'email' | 'in-app'; template: string };
 
     [DOMAIN_EVENTS.INTEGRATION_SYNC_REQUESTED]: { tenantId: string; integration: 'salesforce' | 'hubspot' | 'google-drive' | 'ms365'; contractId: string | null };
     [DOMAIN_EVENTS.INTEGRATION_SYNC_COMPLETED]: { tenantId: string; integration: string; contractId: string | null };

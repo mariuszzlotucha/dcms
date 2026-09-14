@@ -39,6 +39,7 @@ import { AnalyticsInsightsModule } from '@domain/analytics-insights';
 import { ContractsModule } from '@domain/contracts';
 import { EsignatureModule } from '@domain/esignature';
 import { NegotiationApprovalModule } from '@domain/negotiation-approval';
+import { NotificationsRemindersModule } from '@domain/notifications-reminders';
 import { TemplatesModule } from '@domain/templates';
 
 // Single source of truth for both SecurityModule (which enforces it) and
@@ -264,6 +265,7 @@ const CSRF_ENABLED = false;
     }),
     AccessControlModule,
     AnalyticsInsightsModule,
+    NotificationsRemindersModule,
   ],
 })
 export class AppModule { }
